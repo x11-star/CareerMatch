@@ -1,0 +1,362 @@
+[
+  {
+    "id": "net-001",
+    "name": "AI产品经理",
+    "industry": "互联网",
+    "category": "产品类",
+    "sourceCount": 11,
+    "sourceCompanies": [
+      "万兴科技",
+      "懂车帝",
+      "智谱",
+      "泰豪公司",
+      "百度",
+      "群核科技",
+      "迅雷"
+    ],
+    "sourceCities": [
+      "上海",
+      "东莞",
+      "乌鲁木齐",
+      "北京",
+      "南昌",
+      "厦门"
+    ],
+    "sampleLinks": [
+      "https://mp.weixin.qq.com/s/Vi4F3UJefooCjjhKfuFzJw",
+      "https://dcar.jobs.feishu.cn/index/position/list",
+      "https://dcar.jobs.feishu.cn/index/position/list"
+    ],
+    "responsibilities": [
+      "负责AI产品的需求调研、竞品分析及用户研究，输出产品需求文档",
+      "设计AI产品的功能原型、交互流程及算法策略，协同算法工程师落地",
+      "跟踪AI产品上线后的数据表现，通过A/B测试优化模型效果 and 用户体验",
+      "协调设计、开发、测试等团队，推动产品迭代按时交付",
+      "撰写产品白皮书、培训材料，支持市场推广 and 客户沟通"
+    ],
+    "hardSkills": [
+      "熟练使用Axure、Figma等原型设计工具",
+      "掌握SQL、Python基础，能进行数据分析 and 模型评估",
+      "了解机器学习、深度学习基本概念及常见算法",
+      "具备产品数据分析能力，熟悉A/B测试方法论",
+      "熟悉AI产品开发流程，有AI项目落地经验优先"
+    ],
+    "softSkills": [
+      "优秀的逻辑思维 and 问题拆解能力",
+      "跨部门沟通 with 协作能力",
+      "快速学习 and 适应新技术的能力"
+    ],
+    "personalityTags": [
+      "开放性高",
+      "尽责性高",
+      "情绪稳定"
+    ],
+    "salaryRange": [
+      20,
+      45
+    ],
+    "salaryUnit": "万年薪",
+    "developmentPath": "初级AI产品经理（0-2年）→中级AI产品经理（2-5年）→高级AI产品经理（5-8年）→AI产品总监/产品专家（8年以上）",
+    "degreeRequirement": "本科",
+    "typicalMajors": [
+      "计算机科学与技术",
+      "人工智能",
+      "数据科学与大数据技术",
+      "产品设计",
+      "信息管理与信息系统"
+    ],
+    "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+    "examPrepNotes": "重点准备AI基础知识、产品设计案例、数据分析题，关注行业动态 and 竞品分析",
+    "entryDifficulty": "⭐⭐⭐⭐",
+    "soeVsInternetComparison": "不适用",
+    "workStyleDescription": "扁平化管理，跨团队协作频繁，以项目制推进工作，节奏快，注重数据驱动 and 快速迭代"
+  },
+  {
+    "id": "soe-002",
+    "name": "IT/数字化工程师",
+    "industry": "央国企",
+    "category": "工程技术类",
+    "sourceCount": 156,
+    "sourceCompanies": [
+      "EDA国创中心",
+      "GE航空航天",
+      "三一重能",
+      "上汽大乘用车",
+      "上海国际集团",
+      "东北证券",
+      "东莞联通",
+      "东风商用车"
+    ],
+    "sourceCities": [
+      "三亚",
+      "三明",
+      "上海",
+      "上港",
+      "东莞",
+      "中山"
+    ],
+    "sampleLinks": [
+      "邮箱投递:hr_txwxsyb@126.com",
+      "截止时间:2026年7月12日",
+      "个人简历按格式:学校+专业+学历+姓名"
+    ],
+    "responsibilities": [
+      "负责企业IT基础设施（网络、服务器、存储）的日常运维 with 故障排查",
+      "参与数字化项目（如ERP、OA、MES系统）的需求分析、实施 with 优化",
+      "编写系统运维文档、操作手册 and 应急预案，确保知识沉淀",
+      "协助进行数据治理 with 数据分析，支持业务决策",
+      "对接外部供应商，管理IT项目进度 with 交付质量"
+    ],
+    "hardSkills": [
+      "熟悉网络架构（TCP/IP、VLAN、路由协议） and 主流网络设备配置",
+      "掌握至少一种编程语言（如Python、Java）用于自动化脚本开发",
+      "了解数据库管理（SQL Server、MySQL） and 基本SQL查询",
+      "具备云计算基础（如阿里云、华为云） or 虚拟化技术（VMware）知识",
+      "熟悉信息安全基础（防火墙、VPN、等保要求）"
+    ],
+    "softSkills": [
+      "沟通协调能力",
+      "问题分析 with 解决能力",
+      "团队协作 with 跨部门合作"
+    ],
+    "personalityTags": [
+      "尽责性高",
+      "开放性高",
+      "情绪稳定"
+    ],
+    "salaryRange": [
+      12,
+      25
+    ],
+    "salaryUnit": "万年薪",
+    "developmentPath": "初级工程师（1-3年）→中级工程师（3-5年）→高级工程师/技术专家（5-8年）→部门副职/技术总监（8年以上）",
+    "degreeRequirement": "本科",
+    "typicalMajors": [
+      "计算机科学与技术",
+      "软件工程",
+      "信息管理与信息系统",
+      "通信工程",
+      "自动化"
+    ],
+    "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+    "examPrepNotes": "笔试侧重行测、计算机基础、英语；面试关注项目经验、问题解决能力 and 稳定性",
+    "entryDifficulty": "⭐⭐⭐",
+    "soeVsInternetComparison": "央国企更稳定、福利好，但技术迭代慢；互联网节奏快、技术前沿，但压力大、流动性高。",
+    "workStyleDescription": "朝九晚五为主，项目期需加班；团队协作紧密，流程规范，注重文档 with 合规性。"
+  },
+  {
+    "id": "net-003",
+    "name": "UI/UX设计师",
+    "industry": "互联网",
+    "category": "设计类",
+    "sourceCount": 58,
+    "sourceCompanies": [
+      "3M",
+      "Babycare",
+      "DJI大疆AI实习生专项",
+      "FunPlus",
+      "ZENO芝诺机器人",
+      "万兴科技",
+      "中元华电",
+      "中兴通讯"
+    ],
+    "sourceCities": [
+      "上海",
+      "上海市",
+      "东南亚",
+      "东莞",
+      "中东",
+      "中山"
+    ],
+    "sampleLinks": [
+      "https://careers.pddglobalhr.com/campus/grad",
+      "https://app.mokahr.com/campus-recruitment/funplus01/147931#/",
+      "https://app.mokahr.com/social-recruitment/zqxmkw"
+    ],
+    "responsibilities": [
+      "负责移动端 and Web端产品的UI界面设计，输出高保真原型 and 视觉稿",
+      "基于用户研究数据，优化产品交互流程，提升用户体验",
+      "与产品经理 and 开发团队协作，确保设计方案的落地实现",
+      "维护 and 更新设计规范，确保产品设计一致性",
+      "参与用户测试 and A/B测试，根据反馈迭代设计方案"
+    ],
+    "hardSkills": [
+      "精通Figma、Sketch、Adobe XD等设计工具",
+      "熟悉用户研究方法 and 可用性测试流程",
+      "掌握交互设计原则 and 视觉设计规范",
+      "具备基础的前端知识（HTML/CSS）",
+      "熟练使用原型制作工具（如Axure、Principle）"
+    ],
+    "softSkills": [
+      "沟通协作能力",
+      "用户同理心",
+      "逻辑分析能力"
+    ],
+    "personalityTags": [
+      "开放性高",
+      "尽责性高",
+      "宜人性适中"
+    ],
+    "salaryRange": [
+      15,
+      30
+    ],
+    "salaryUnit": "万年薪",
+    "developmentPath": "初级UI/UX设计师（1-3年）→中级设计师（3-5年）→高级设计师（5-8年）→设计专家/设计经理（8年以上）",
+    "degreeRequirement": "本科",
+    "typicalMajors": [
+      "视觉传达设计",
+      "交互设计",
+      "工业设计",
+      "数字媒体艺术",
+      "心理学"
+    ],
+    "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+    "examPrepNotes": "重点准备作品集，展示设计思路 and 用户研究过程；笔试常考界面重设计 and 交互流程图",
+    "entryDifficulty": "⭐⭐⭐⭐",
+    "soeVsInternetComparison": "不适用",
+    "workStyleDescription": "项目制协作，与产品、开发紧密配合，日常使用敏捷开发流程，注重设计评审 with 迭代反馈"
+  },
+  {
+    "id": "net-004",
+    "name": "产品经理",
+    "industry": "互联网",
+    "category": "产品类",
+    "sourceCount": 84,
+    "sourceCompanies": [
+      "3M",
+      "Babycare",
+      "ComeFor",
+      "DeepSeek",
+      "Joyin",
+      "OBSBOT寻影",
+      "Shopee领航实习计划",
+      "TikTok Shop"
+    ],
+    "sourceCities": [
+      "上海",
+      "东莞",
+      "乌鲁木齐",
+      "九江",
+      "佛山",
+      "全国各地"
+    ],
+    "sampleLinks": [
+      "https://mp.weixin.qq.com/s/ZRCh0l8XPVjiW9m_qiSt1Q",
+      "https://app.mokahr.com/social-recruitment/zqxmkw",
+      "https://campus.jd.com"
+    ],
+    "responsibilities": [
+      "负责产品需求调研 with 分析，撰写PRD文档并组织评审",
+      "设计产品原型及交互流程，输出高保真原型图",
+      "协调研发、设计、测试团队推进产品迭代，确保按时上线",
+      "跟踪产品上线数据，通过A/B测试优化功能体验",
+      "定期输出竞品分析报告，提炼差异化策略"
+    ],
+    "hardSkills": [
+      "熟练使用Axure/Figma/Sketch等原型设计工具",
+      "掌握SQL基础，能独立提取并分析用户行为数据",
+      "熟悉敏捷开发流程，能使用Jira/Teambition管理项目",
+      "具备用户研究能力，能设计问卷并执行可用性测试",
+      "了解产品运营基础，能制定功能推广方案"
+    ],
+    "softSkills": [
+      "跨部门沟通协调能力",
+      "逻辑分析 with 问题拆解能力",
+      "用户同理心 with 场景洞察力"
+    ],
+    "personalityTags": [
+      "开放性高",
+      "尽责性高",
+      "情绪稳定"
+    ],
+    "salaryRange": [
+      15,
+      30
+    ],
+    "salaryUnit": "万年薪",
+    "developmentPath": "产品助理（0-1年）→初级产品经理（1-3年）→中级产品经理（3-5年）→高级产品经理/产品专家（5-8年）→产品总监/产品VP（8年以上）",
+    "degreeRequirement": "本科",
+    "typicalMajors": [
+      "计算机科学与技术",
+      "信息管理与信息系统",
+      "心理学（用户研究方向）"
+    ],
+    "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+    "examPrepNotes": "重点准备产品设计案例、数据分析题 and 群面；提前熟悉公司产品线，模拟PRD评审场景",
+    "entryDifficulty": "⭐⭐⭐⭐",
+    "soeVsInternetComparison": "不适用",
+    "workStyleDescription": "扁平化协作，以项目组为单位快速迭代；日常需频繁与研发、设计、运营沟通，节奏快，结果导向"
+  },
+  {
+    "id": "soe-005",
+    "name": "人力资源岗",
+    "industry": "央国企",
+    "category": "综合管理类",
+    "sourceCount": 52,
+    "sourceCompanies": [
+      "三门核电",
+      "上海外服福建公司",
+      "东方航空",
+      "中信建投证券",
+      "中国一汽",
+      "中国五矿",
+      "中国工商银行总行本部",
+      "中国气象局"
+    ],
+    "sourceCities": [
+      "三亚",
+      "上海",
+      "上海市",
+      "东莞",
+      "保定",
+      "全国"
+    ],
+    "sampleLinks": [
+      "https://mp.weixin.qq.com/s/r3Ka0e-EK-jyFBPXfnrESw",
+      "https://wecruit.hotjob.cn/SU62f37858bef57c29ead8adab/pb/interns.html",
+      "https://mp.weixin.qq.com/s/Emi4FJ1yo1RGOMaBNaP6lA"
+    ],
+    "responsibilities": [
+      "负责员工入职、转正、调动、离职等手续办理 with 档案管理",
+      "协助制定并执行年度招聘计划，包括简历筛选、面试安排 with 录用审批",
+      "参与员工培训需求调研，组织 and 跟进培训项目实施 with 效果评估",
+      "维护员工关系，处理劳动纠纷 with 员工投诉，组织企业文化活动",
+      "协助完成薪酬核算、社保公积金缴纳 with 个税申报等日常事务"
+    ],
+    "hardSkills": [
+      "熟悉劳动法、劳动合同法 and 社保公积金政策",
+      "掌握招聘渠道管理 and 面试技巧",
+      "熟练使用Excel进行数据统计 with 分析",
+      "具备薪酬核算 with 个税计算能力",
+      "了解培训体系搭建 with 效果评估方法"
+    ],
+    "softSkills": [
+      "沟通协调能力",
+      "组织策划能力",
+      "问题解决能力"
+    ],
+    "personalityTags": [
+      "尽责性高",
+      "情绪稳定",
+      "宜人性高"
+    ],
+    "salaryRange": [
+      10,
+      18
+    ],
+    "salaryUnit": "万年薪",
+    "developmentPath": "初级专员（1-3年）→中级主管（3-5年）→高级经理（5-8年）→部门副职/专家（8年以上）",
+    "degreeRequirement": "本科",
+    "typicalMajors": [
+      "人力资源管理",
+      "劳动与社会保障",
+      "工商管理"
+    ],
+    "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+    "examPrepNotes": "重点复习劳动法规、人力资源六大模块、公文写作 with 行测；面试准备结构化问题 and 企业背景",
+    "entryDifficulty": "⭐⭐⭐",
+    "soeVsInternetComparison": "央国企更重流程合规 with 稳定性，晋升周期长；互联网节奏快、注重创新，薪资浮动大，但福利保障相对弱",
+    "workStyleDescription": "以事务性工作为主，需与多部门协作，节奏稳定但注重流程合规，团队氛围严谨务实"
+  }
+]

@@ -1,0 +1,109 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "name": { "type": "string" },
+        "school": { "type": "string" },
+        "major": { "type": "string" },
+        "graduationYear": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Resume": {
+      "title": "Resume",
+      "description": "User's parsed resume details",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "school": { "type": "string" },
+        "major": { "type": "string" },
+        "graduationYear": { "type": "string" },
+        "skills": { "type": "array" },
+        "internships": { "type": "array" },
+        "projects": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["userId", "name", "school", "major", "graduationYear"]
+    },
+    "Assessment": {
+      "title": "Assessment",
+      "description": "User's personality assessment results",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "scores": { "type": "object" },
+        "personalityType": { "type": "string" },
+        "hollandCode": { "type": "string" },
+        "description": { "type": "string" },
+        "industryFit": { "type": "object" },
+        "completedAt": { "type": "string" }
+      },
+      "required": ["userId", "scores", "personalityType", "completedAt"]
+    },
+    "Position": {
+      "title": "Position",
+      "description": "Career position details",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "industry": { "type": "string" },
+        "category": { "type": "string" },
+        "responsibilities": { "type": "array" },
+        "hardSkills": { "type": "array" },
+        "softSkills": { "type": "array" },
+        "personalityTags": { "type": "array" },
+        "salaryRange": { "type": "array" },
+        "salaryUnit": { "type": "string" },
+        "developmentPath": { "type": "string" },
+        "degreeRequirement": { "type": "string" },
+        "typicalMajors": { "type": "array" },
+        "recruitmentTimeline": { "type": "string" },
+        "examPrepNotes": { "type": "string" },
+        "entryDifficulty": { "type": "string" },
+        "workStyleDescription": { "type": "string" }
+      },
+      "required": ["id", "name", "industry", "category"]
+    },
+    "Favorite": {
+      "title": "Favorite",
+      "description": "User's favorited positions",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "positionId": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "positionId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Users collection"
+    },
+    "/resumes/{resumeId}": {
+      "schema": "Resume",
+      "description": "Resumes collection"
+    },
+    "/assessments/{assessmentId}": {
+      "schema": "Assessment",
+      "description": "Assessments collection"
+    },
+    "/positions/{positionId}": {
+      "schema": "Position",
+      "description": "Positions collection"
+    },
+    "/favorites/{favoriteId}": {
+      "schema": "Favorite",
+      "description": "Favorites collection"
+    }
+  }
+}

@@ -1,20 +1,146 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# 名企校招岗位匹配与职业规划系统 (AI Career Matcher)
 
-# Run and deploy your AI Studio app
+本系统是一款专为高校毕业生、求职者设计的 **AI 驱动的名企校招岗位匹配与职业规划系统**。系统通过科学的双轨测评体系、高精度的简历解析引擎以及犀利务实的 AI 岗位诊断，帮助求职者认清自身软硬实力，提供定制化的校招求职路线。
 
-This contains everything you need to run your app locally.
+---
 
-View your app in AI Studio: https://ai.studio/apps/b1193192-9f35-4204-9ab8-76a49ca36250
+## 🌟 核心功能亮点
 
-## Run Locally
+1. **📊 大五人格 & 霍兰德双轨职业测评**
+   - **分阶段沉浸式答题**：将 40 道精选题拆分为日常习惯、情绪抗压、团队协同、深层驱力 4 大真实场景，减少答题疲劳。
+   - **多维雷达图与性格解读**：基于大五人格理论计算各维度百分位雷达分，结合霍兰德职业兴趣代码（RIASEC），全方位剖析您的工作风格、核心优势及发展建议。
 
-**Prerequisites:**  Node.js
+2. **📄 AI 智能简历深度解析（支持多格式）**
+   - **格式支持**：支持上传 `.pdf`（电子版）、`.docx`（Word）简历文件，或直接粘贴简历文本。
+   - **高精度解析**：后端集成 `pdf-parse` 与 `mammoth` 提取简历文本，结合大模型进行结构化数据清洗，输出姓名、学历、技能、实习经历、项目沉淀、求职意向及 AI 推断方向。
 
+3. **🎯 双擎岗位智能匹配与求职诊断（拒绝水分）**
+   - **去通胀化评分**：真实、直白、不客套。针对无相关实习、专业跨度极大（如人文社科竞聘航天飞行器设计）的候选人，系统会硬性扣分，真实揭示初筛淘汰率。
+   - **名企岗位库**：内置覆盖“央国企”与“互联网大厂”的多样校招岗位模型，将候选人的简历硬性条件（专业、技术栈、实习）与大五人格软性特质进行交叉分析。
+   - **求职导师犀利诊断**：一针见血地指出简历硬伤，并提供极其务实的补救建议或转投策略。
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+4. **💬 AI 专属岗位顾问实时 Q&A**
+   - 针对每一个特定岗位，配备了专属的 AI 校招顾问（大厂/国企 HR 专家口吻）。
+   - 候选人可就岗位备考重点、面试真题、薪资福利、晋升通道及日常生态等进行 1 选 1 深度咨询，获取极具干货的备战方案。
+
+---
+
+## 🛠️ 技术栈
+
+- **前端 (Frontend)**: React 18, Vite, TypeScript, Tailwind CSS, Recharts (动态雷达图/柱状图), Framer Motion (页面转场与卡片动效), Lucide Icons (高质感矢量图标).
+- **后端 (Backend)**: Node.js, Express (整合 Vite 中间件热重载开发模式), esbuild (高效生产环境服务打包), `mammoth` (Word 解析), `pdf-parse` (PDF 提取).
+- **云端服务**: Firebase Auth & Firestore (用于用户鉴权与数据的持久化存储，并提供极佳的离线/游客 LocalStorage 兜底方案).
+
+---
+
+## 🚀 脱离 Google AI Studio：本地运行与独立部署指南
+
+如果您希望在本地独立运行此项目，或者将其部署到您自己的服务器/云平台上，可以按照以下步骤操作：
+
+### 1. 导出项目源码
+在 Google AI Studio 界面中，点击右上角设置菜单（齿轮图标），选择 **"Export to GitHub"** 或 **"Export as ZIP"**，将项目完整的代码包下载到您的本地。
+
+### 2. 本地环境初始化
+确保您的本地电脑已安装 **Node.js**（推荐 v18 或更高版本）。
+打开终端（Terminal）进入项目根目录，运行以下命令安装全部依赖：
+```bash
+npm install
+```
+
+### 3. 配置环境变量
+在项目根目录下，您会发现一个 `.env.example` 文件。请在本地复制并重命名为 `.env`：
+```bash
+cp .env.example .env
+```
+用编辑器打开 `.env` 文件，根据您的需求配置 API Key：
+```env
+# 核心大模型配置（以下二选一或同时配置均可）
+DEEPSEEK_API_KEY=your_deepseek_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
+```
+
+> 💡 **双擎 AI 调用设计机制（重要）**：
+> - **优先 DeepSeek**：系统后端在处理“简历解析”和“求职岗位匹配”时，会首先检查 `.env` 中是否配置了 `DEEPSEEK_API_KEY`。如果配置，则采用 DeepSeek-Chat 极速模型进行处理，国内调用延迟更低。
+> - **无缝降级 Gemini**：如果未配置 DeepSeek 密钥，或者 DeepSeek 接口遇到网络/额度报错，系统会自动降级调用 `GEMINI_API_KEY`（使用高性能的 `gemini-3.5-flash`）。
+> - **本地完美兜底（Rule-Based Fallback）**：如果两个 AI 密钥均未配置，后端依然内置了高度复杂的**本地规则匹配算法**。它可以自动对简历的专业、实习、技术栈与岗位 JD 进行多维度的关键词映射与匹配得分计算，并输出专业真实的中文匹配报告，**确保应用在离线/无 Key 状态下绝不崩溃，依然完美可用！**
+
+### 4. 运行与构建命令
+
+- **本地开发模式**：
+  ```bash
+  npm run dev
+  ```
+  该命令会同时启动 Vite 前端热更新服务以及 Express 后端 API 服务，默认运行在端口 `3000`（浏览器打开 `http://localhost:3000` 即可）。
+
+- **生产打包构建**：
+  ```bash
+  npm run build
+  ```
+  本命令将把前端打包进 `dist/`，同时使用 `esbuild` 将后端 `server.ts` 及其相对依赖打包进 `dist/server.cjs`（单文件 CJS 格式，完美避开了 ES Module 运行时复杂的相对路径路径校验）。
+
+- **生产启动运行**：
+  ```bash
+  npm run start
+  ```
+  直接运行打包编译好的生产服务（监听 `3000` 端口）。
+
+---
+
+## 🇨🇳 中国大陆开发者求职落地方案 (网络/梯子与环境问题)
+
+由于本系统集成了先进的 AI 大模型，中国大陆求职者在本地测试和独立部署时通常关心网络代理及“挂梯子”问题，请参考以下落地解决方案：
+
+### 1. 免翻墙！首选 DeepSeek 引擎直连
+- **无需挂梯子**：DeepSeek（深度求求）作为国内的大模型服务商，其 API 节点在国内**可以直接连接**，无需任何梯子或代理，并且响应速度极快、成本极低。
+- **推荐做法**：如果您在大陆本地运行，请将大模型切换为 **DeepSeek**（在 `.env` 中配置 `DEEPSEEK_API_KEY` 即可）。此时，不仅本地运行完全不卡顿，未来的公网部署也变得极其简单。
+
+### 2. 使用 Gemini 引擎时的本地网络代理配置
+如果您想在大陆本地调用 Gemini API，因为谷歌服务的网络限制，您的后端必须通过代理进行请求。以下是配置方案：
+- **终端代理注入**：在启动 `npm run dev` 之前，在本地终端执行以下命令将您的科学上网工具（Clash, v2ray 等）代理端口暴露给 Node 进程（以代理端口 `7890` 为例）：
+  - **macOS / Linux**：
+    ```bash
+    export http_proxy=http://127.0.0.1:7890
+    export https_proxy=http://127.0.0.1:7890
+    npm run dev
+    ```
+  - **Windows (CMD)**：
+    ```cmd
+    set http_proxy=http://127.0.0.1:7890
+    set https_proxy=http://127.0.0.1:7890
+    npm run dev
+    ```
+  - **Windows (PowerShell)**：
+    ```powershell
+    $env:http_proxy="http://127.0.0.1:7890"
+    $env:https_proxy="http://127.0.0.1:7890"
+    npm run dev
+    ```
+
+### 3. 公网免梯子部署方案（无需本地挂着梯子访问）
+如果您希望做出一个“**点开链接就能直接使用**”的固定网站，且**不需要**您自己电脑开着梯子或保持开机，可以选择将服务部署到**海外免费/廉价的云原生托管平台**：
+- **推荐托管平台**：
+  1. **Zeabur** (支持中国大陆直连域名，对 Node.js 全栈支持极好)
+  2. **Railway** 或 **Render**
+  3. **Vercel** (可用于全栈，但需要绑定自定义不被墙的域名以供大陆直接打开)
+- **原理**：这些托管平台由于服务器机房在海外（如新加坡、日本、美国），它们在运行您的后端代码时，**可以无障碍、高速度地直连谷歌的 Gemini API 和 DeepSeek API**。您的用户即使在国内裸连您的网站（只要网站域名未被墙），也能通过服务端的代理无缝、快速地体验到所有 AI 功能，**您作为开发者无需挂载任何本地代理！**
+
+---
+
+## 🗄️ 关于 Firebase 数据库与鉴权的落地适配
+
+在 Google AI Studio 中，项目默认集成了 Firebase 数据库用于实现“用户登录、多设备云端同步简历与测评结果”。对于独立落地，您有两种选择：
+
+1. **零成本——完全离线游客模式**：
+   - 我们的代码对**离线游客态**进行了 100% 的完美兼容。如果用户未登录（或者 Firebase 网络不通），系统所有的功能依然**完全可用**，用户的简历、测评结果会自动在本地浏览器的 `localStorage` 中持久化保存，绝不丢失。
+   - 如果您只想开发一个单机版或者演示用的工具，甚至**无需去配置或替换任何 Firebase 信息**，直接运行或部署即可。
+
+2. **替换为您自己的免费 Firebase 实例**：
+   - 如果您希望支持多账号管理：您可以访问 [Firebase Console](https://console.firebase.google.com/)，免费创建一个您自己的 Firebase 项目。
+   - 开启 **Authentication** (支持邮箱或匿名登录) 与 **Cloud Firestore**。
+   - 将您的项目 Web SDK 配置替换到本地源码的 `src/lib/firebase.ts` 中对应的 `firebaseConfig` 常量即可。
+
+---
+
+## 📄 许可证
+
+本项目完全属于开源测试项目。您可以自由地修改、二次开发并在本地或云端进行非商业用途的求职演示。祝各位同学拿到心仪的校招 Offer！

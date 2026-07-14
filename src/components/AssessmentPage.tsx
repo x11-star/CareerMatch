@@ -134,8 +134,16 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
     );
   }
 
-  // Determine if it is a "Work Preference" type of question (simulating question 25-30 warning)
-  const isWorkPreferenceQuestion = currentIndex >= 10;
+  // Stages Definition
+  const stages = [
+    { title: '日常习惯', hint: '本阶段聚焦于您的日常生活习惯、工作规划条理与细节品质。', activeBg: 'bg-blue-600', activeText: 'text-blue-700', activeBorder: 'border-blue-600', lightBg: 'bg-blue-50/50', circleBg: 'bg-blue-600 border-blue-600' },
+    { title: '情绪抗压', hint: '本阶段评估您在面对突发危机、压力、否定或批评时的心理弹性与自控调节力。', activeBg: 'bg-indigo-600', activeText: 'text-indigo-700', activeBorder: 'border-indigo-600', lightBg: 'bg-indigo-50/50', circleBg: 'bg-indigo-600 border-indigo-600' },
+    { title: '团队协同', hint: '本阶段分析您在团队协作、冲突解决、信任建立以及人际社交中的核心风格。', activeBg: 'bg-purple-600', activeText: 'text-purple-700', activeBorder: 'border-purple-600', lightBg: 'bg-purple-50/50', circleBg: 'bg-purple-600 border-purple-600' },
+    { title: '深层驱力', hint: '本阶段旨在挖掘您的认知深度、对未知变化的接受度以及底层的职场价值主张。', activeBg: 'bg-emerald-600', activeText: 'text-emerald-700', activeBorder: 'border-emerald-600', lightBg: 'bg-emerald-50/50', circleBg: 'bg-emerald-600 border-emerald-600' },
+  ];
+
+  const currentStageIndex = Math.min(3, Math.floor(currentIndex / 10));
+  const currentStage = stages[currentStageIndex];
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
@@ -152,25 +160,40 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
         </div>
       </div>
 
-      {/* Progress Bar */}
-      <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-10 border border-slate-200/50">
-        <div
-          className="h-full bg-linear-to-r from-blue-600 to-indigo-600 transition-all duration-300 rounded-full"
-          style={{ width: `${progressPercent}%` }}
-        />
+      {/* Modern Stage Indicators */}
+      <div className="grid grid-cols-4 gap-2 mb-6">
+        {stages.map((stage, sIdx) => {
+          const isActive = currentStageIndex === sIdx;
+          const isCompleted = currentStageIndex > sIdx;
+          return (
+            <div key={sIdx} className="flex flex-col gap-1.5">
+              <div className="h-1 rounded-full overflow-hidden bg-slate-100 border border-slate-200/20">
+                <div
+                  className={`h-full transition-all duration-300 ${stage.activeBg}`}
+                  style={{ width: isActive ? `${((currentIndex % 10) + 1) * 10}%` : isCompleted ? '100%' : '0%' }}
+                />
+              </div>
+              <span className={`text-[11px] font-medium text-center truncate transition-colors duration-200 ${isActive ? `${stage.activeText} font-bold` : isCompleted ? 'text-slate-500' : 'text-slate-400'}`}>
+                {stage.title}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Dynamic Title Hint */}
-      {isWorkPreferenceQuestion && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-purple-50 text-purple-700 border border-purple-100 px-4 py-2 rounded-xl text-xs font-semibold mb-6 flex items-center gap-1.5"
-        >
-          <Star className="w-3.5 h-3.5 fill-purple-300" />
-          工作偏好提示：接下来的题目将聚焦于您在实际工作协作环境中的期望！
-        </motion.div>
-      )}
+      {/* Dynamic Stage Hint */}
+      <motion.div
+        key={currentStageIndex}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-slate-50 text-slate-600 border border-slate-100 px-4 py-3 rounded-xl text-xs font-medium mb-6 flex items-start gap-2.5 shadow-2xs"
+      >
+        <Star className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+        <div>
+          <span className="font-bold text-slate-800 mr-1">【{currentStage.title}】</span>
+          {currentStage.hint}
+        </div>
+      </motion.div>
 
       {/* Question Card */}
       <div className="bg-white rounded-2xl border border-slate-200 p-8 sm:p-10 shadow-xs mb-8 min-h-48 flex flex-col justify-between">
@@ -200,13 +223,13 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
               onClick={() => handleSelectOption(opt.value)}
               className={`w-full text-left p-4 rounded-xl border text-sm font-semibold transition-all duration-150 cursor-pointer ${
                 isSelected
-                  ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-xs scale-101'
+                  ? `${currentStage.activeBorder} ${currentStage.lightBg} ${currentStage.activeText} shadow-xs scale-101`
                   : `border-slate-200 bg-white text-slate-700 ${opt.color}`
               }`}
             >
               <div className="flex items-center gap-3">
                 <span className={`w-5 h-5 rounded-full border flex items-center justify-center text-xs font-mono transition-colors ${
-                  isSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 text-slate-400'
+                  isSelected ? `${currentStage.activeBg} border-transparent text-white` : 'border-slate-300 text-slate-400'
                 }`}>
                   {opt.value}
                 </span>

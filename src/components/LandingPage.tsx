@@ -1,12 +1,93 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowRight, FileText, BrainCircuit, Target, Landmark, Laptop, CheckCircle, Award, Users } from 'lucide-react';
+import { Position } from '../types';
 
 interface LandingPageProps {
   onNavigate: (view: string) => void;
+  positions?: Position[];
 }
 
-export default function LandingPage({ onNavigate }: LandingPageProps) {
+export default function LandingPage({ onNavigate, positions = [] }: LandingPageProps) {
+  // Filter positions
+  const soePositions = React.useMemo(() => {
+    return positions.filter(p => p.type === 'state-owned');
+  }, [positions]);
+
+  const internetPositions = React.useMemo(() => {
+    return positions.filter(p => p.type === 'internet');
+  }, [positions]);
+
+  const soeCount = soePositions.length || 35;
+  const internetCount = internetPositions.length || 311;
+
+  // Generate 4 diverse and flexible bullets for state-owned
+  const soeBullets = React.useMemo(() => {
+    if (soePositions.length === 0) {
+      return [
+        '国家电网 · 电力系统分析专责',
+        '中国电信 · 5G网络规划与研发岗',
+        '中国工商银行 · 金融科技管培生',
+        '中国建筑 · 大型交建及勘测规划'
+      ];
+    }
+    const bullets: string[] = [];
+    const seenCos = new Set<string>();
+    const seenTitles = new Set<string>();
+    for (const p of soePositions) {
+      const coShort = p.company.replace(/\s*(有限公司|集团|股份有限公司|科技|技术)\s*/g, '').trim();
+      const titleShort = p.title.replace(/(高级|初级|资深|助理|研发|平台|核心|储备)/g, '').trim();
+      if (!seenCos.has(coShort) && !seenTitles.has(titleShort) && bullets.length < 4) {
+        seenCos.add(coShort);
+        seenTitles.add(titleShort);
+        bullets.push(`${coShort} · ${p.title}`);
+      }
+    }
+    if (bullets.length < 4) {
+      for (const p of soePositions) {
+        const coShort = p.company.replace(/\s*(有限公司|集团|股份有限公司|科技|技术)\s*/g, '').trim();
+        if (!seenCos.has(coShort) && bullets.length < 4) {
+          seenCos.add(coShort);
+          bullets.push(`${coShort} · ${p.title}`);
+        }
+      }
+    }
+    return bullets;
+  }, [soePositions]);
+
+  // Generate 4 diverse and flexible bullets for internet
+  const internetBullets = React.useMemo(() => {
+    if (internetPositions.length === 0) {
+      return [
+        '字节跳动 · 核心后端/算法研发',
+        '腾讯科技 · 社交/游戏数据分析师',
+        '美团 · 零售与本地生活产品经理',
+        '小红书 · 内容社区运营与企划'
+      ];
+    }
+    const bullets: string[] = [];
+    const seenCos = new Set<string>();
+    const seenTitles = new Set<string>();
+    for (const p of internetPositions) {
+      const coShort = p.company.replace(/\s*(有限公司|集团|股份有限公司|科技|技术)\s*/g, '').trim();
+      const titleShort = p.title.replace(/(高级|初级|资深|助理|研发|平台|核心|储备)/g, '').trim();
+      if (!seenCos.has(coShort) && !seenTitles.has(titleShort) && bullets.length < 4) {
+        seenCos.add(coShort);
+        seenTitles.add(titleShort);
+        bullets.push(`${coShort} · ${p.title}`);
+      }
+    }
+    if (bullets.length < 4) {
+      for (const p of internetPositions) {
+        const coShort = p.company.replace(/\s*(有限公司|集团|股份有限公司|科技|技术)\s*/g, '').trim();
+        if (!seenCos.has(coShort) && bullets.length < 4) {
+          seenCos.add(coShort);
+          bullets.push(`${coShort} · ${p.title}`);
+        }
+      }
+    }
+    return bullets;
+  }, [internetPositions]);
   return (
     <div className="bg-slate-50 min-h-[calc(100vh-4rem)] flex flex-col justify-between">
       {/* Hero Section */}
@@ -167,14 +248,15 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                   精选国家电网、中国移动、中建集团、四大行及大型事业单位核心业务岗。聚焦电力系统、网络通信、金融科技、综合管理等高含金量科室。
                 </p>
                 <div className="grid grid-cols-2 gap-3 text-xs text-slate-700 mb-8 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <div className="flex items-center gap-2">🔹 国家电网·中石油</div>
-                  <div className="flex items-center gap-2">🔹 中国移动·中国电信</div>
-                  <div className="flex items-center gap-2">🔹 各大国有银行·招商银行</div>
-                  <div className="flex items-center gap-2">🔹 大型交建及勘测规划院</div>
+                  {soeBullets.map((bullet, i) => (
+                    <div key={i} className="flex items-center gap-2 truncate" title={bullet}>
+                      🔹 {bullet}
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="flex justify-between items-center pt-4 border-t border-slate-100">
-                <span className="text-xs text-purple-700 font-semibold bg-purple-100/70 px-2.5 py-1 rounded-full">已拆解 16 个核心岗位</span>
+                <span className="text-xs text-purple-700 font-semibold bg-purple-100/70 px-2.5 py-1 rounded-full">已拆解 {soeCount} 个核心岗位</span>
                 <button onClick={() => onNavigate('browser')} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1 cursor-pointer">
                   前往探索岗位库 <ArrowRight className="w-3.5 h-3.5" />
                 </button>
@@ -197,14 +279,15 @@ export default function LandingPage({ onNavigate }: LandingPageProps) {
                   对接字节跳动、腾讯、阿里巴巴、美团、小红书等头部平台。拆解后端开发、算法工程、数据分析、产品经理及 UI/UX 设计等全栈体系。
                 </p>
                 <div className="grid grid-cols-2 gap-3 text-xs text-slate-700 mb-8 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <div className="flex items-center gap-2">🔸 字节跳动·核心后端</div>
-                  <div className="flex items-center gap-2">🔸 腾讯·社交/游戏数据</div>
-                  <div className="flex items-center gap-2">🔸 美团·零售产品方法论</div>
-                  <div className="flex items-center gap-2">🔸 小红书·内容社区与设计</div>
+                  {internetBullets.map((bullet, i) => (
+                    <div key={i} className="flex items-center gap-2 truncate" title={bullet}>
+                      🔸 {bullet}
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="flex justify-between items-center pt-4 border-t border-slate-100">
-                <span className="text-xs text-blue-700 font-semibold bg-blue-100/70 px-2.5 py-1 rounded-full">已拆解 17 个核心岗位</span>
+                <span className="text-xs text-blue-700 font-semibold bg-blue-100/70 px-2.5 py-1 rounded-full">已拆解 {internetCount} 个核心岗位</span>
                 <button onClick={() => onNavigate('browser')} className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1 cursor-pointer">
                   前往探索岗位库 <ArrowRight className="w-3.5 h-3.5" />
                 </button>

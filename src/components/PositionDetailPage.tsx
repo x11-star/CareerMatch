@@ -1,54 +1,90 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Heart, Share2, FileDown, ShieldCheck, Sparkles, MapPin, DollarSign, Star, Send, Bot, User, CheckCircle2, AlertCircle } from 'lucide-react';
-import { Position } from '../types';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, Heart, Share2, FileDown, ShieldCheck, Sparkles, MapPin, DollarSign, Star, CheckCircle2, AlertCircle, RotateCw } from 'lucide-react';
+import { Position, ResumeData, PersonalityResult } from '../types';
 
 interface PositionDetailPageProps {
   position: Position;
   onBack: () => void;
   onOpenModal: (modalType: 'download' | 'share' | null) => void;
+  resumeData?: ResumeData;
+  personalityResult?: PersonalityResult | null;
 }
 
-export default function PositionDetailPage({ position, onBack, onOpenModal }: PositionDetailPageProps) {
+export default function PositionDetailPage({ position, onBack, onOpenModal, resumeData, personalityResult }: PositionDetailPageProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isAiAnalysisOpen, setIsAiAnalysisOpen] = useState(true);
-  const [chatMessages, setChatMessages] = useState<Array<{ sender: 'ai' | 'user'; text: string }>>([
-    {
-      sender: 'ai',
-      text: `你好！我是「精准职达」的职业导师 AI。关于 ${position.company} 的「${position.title}」岗位，你有什么想了解的吗？无论是备考教材、工作日常节奏、还是福利细节，我都能帮你解答。`
-    }
-  ]);
-  const [inputValue, setInputValue] = useState('');
 
-  const preLoadedQuestions = [
-    '笔试考试推荐看哪些书？',
-    '3-5年的真实成长路径和薪资？',
-    '国企和互联网同类岗的体验差异？'
-  ];
+  const [matchResult, setMatchResult] = useState<{
+    resumeMatch: number;
+    personalityMatch: number;
+    overallMatch: number;
+    resumeMatchExplanation: string;
+    personalityMatchExplanation: string;
+    whyExcellent: string;
+  } | null>(null);
+  const [isLoadingMatch, setIsLoadingMatch] = useState(false);
+  const [matchError, setMatchError] = useState('');
 
-  const handleSendMessage = (text: string) => {
-    if (!text.trim()) return;
-
-    // Add User Message
-    const updatedMessages = [...chatMessages, { sender: 'user', text }];
-    setChatMessages(updatedMessages);
-    setInputValue('');
-
-    // Simulate AI response
-    setTimeout(() => {
-      let aiResponseText = '';
-      if (text.includes('书') || text.includes('笔试') || text.includes('准备')) {
-        aiResponseText = `对于【${position.title}】的笔试：\n1. 推荐教材：国家电网考试大纲推荐教材，重点复习《电力系统分析》、《高电压技术》、《继电保护》等理论。\n2. 题型：包括综合单选（行测）和专业客观题。建议提前3个月刷往年真题。`;
-      } else if (text.includes('3-5') || text.includes('薪') || text.includes('发展') || text.includes('路径')) {
-        aiResponseText = `在这个岗位：\n- 见习期（第1年）：基本年薪约 12-15万。\n- 3-5年（升为专责/中级）：年薪会稳步提升到 18-30万，并在公积金和年金上有大幅增加。\n- 发展上：作为国有单位骨干，3-5年是独立带项目/专责的爆发期。`;
-      } else if (text.includes('差异') || text.includes('互联网') || text.includes('对比')) {
-        aiResponseText = `【${position.company}】属于大型央国企。相比于互联网后端开发的高起薪，本岗位最大的优势在于：\n1. 极高的稳定性与极低的中年转行焦虑，六险二金福利全面。\n2. 节奏相比于大厂更严谨有序，极少有恶性加班，更注重流程合规与长期坚守。`;
-      } else {
-        aiResponseText = `【${position.title}】是一个技术门槛很高且十分核心的岗位。根据你的简历背景，你在计算机、算法和系统重构方面的优势可以很好地迁移到该岗位的数字化/电气智能化规划中。关于这个岗位的具体面试真题，您也可以查看页面中的“如何准备”版块。`;
+  useEffect(() => {
+    let active = true;
+    async function fetchMatch() {
+      setIsLoadingMatch(true);
+      setMatchError('');
+      
+      const cacheKey = `match_${position.id}_${resumeData?.name || 'guest'}`;
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (active) {
+            setMatchResult(parsed);
+            setIsLoadingMatch(false);
+          }
+          return;
+        } catch (e) {
+          console.warn("Failed to parse cached match, re-fetching:", e);
+        }
       }
 
-      setChatMessages((prev) => [...prev, { sender: 'ai', text: aiResponseText }]);
-    }, 800);
-  };
+      try {
+        const response = await fetch('/api/match-position', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            resumeData,
+            personalityResult,
+            position,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP 错误 ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (active) {
+          setMatchResult(data);
+          sessionStorage.setItem(cacheKey, JSON.stringify(data));
+        }
+      } catch (err: any) {
+        console.error("Failed to run AI match:", err);
+        if (active) {
+          setMatchError(err.message || '获取AI相性匹配评估失败');
+        }
+      } finally {
+        if (active) {
+          setIsLoadingMatch(false);
+        }
+      }
+    }
+
+    fetchMatch();
+    return () => {
+      active = false;
+    };
+  }, [position.id, resumeData, personalityResult]);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -106,7 +142,13 @@ export default function PositionDetailPage({ position, onBack, onOpenModal }: Po
           </div>
           <div className="bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 text-center shrink-0">
             <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider block">综合匹配度</span>
-            <span className="text-3xl font-black font-display text-blue-600">{position.overallMatch}%</span>
+            <span className="text-3xl font-black font-display text-blue-600">
+              {isLoadingMatch ? (
+                <span className="animate-pulse">...</span>
+              ) : (
+                `${matchResult?.overallMatch ?? position.overallMatch}%`
+              )}
+            </span>
           </div>
         </div>
 
@@ -132,26 +174,44 @@ export default function PositionDetailPage({ position, onBack, onOpenModal }: Po
           <div className="border border-slate-100 bg-slate-50/50 rounded-2xl p-4">
             <div className="flex justify-between text-xs font-bold text-slate-700 mb-2">
               <span>📄 简历技能硬匹配</span>
-              <span className="text-blue-600">{position.resumeMatch}%</span>
+              <span className="text-blue-600">
+                {isLoadingMatch ? '...' : `${matchResult?.resumeMatch ?? position.resumeMatch}%`}
+              </span>
             </div>
             <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-600 rounded-full" style={{ width: `${position.resumeMatch}%` }} />
+              <div 
+                className="h-full bg-blue-600 rounded-full transition-all duration-500" 
+                style={{ width: `${isLoadingMatch ? 30 : (matchResult?.resumeMatch ?? position.resumeMatch)}%` }} 
+              />
             </div>
-            <p className="text-[10px] text-slate-400 mt-2">
-              基于您的清华大学计算机专业、实习技能（Python/React/SQL等）与国企IT要求的契合度评估。
+            <p className="text-[10px] text-slate-400 mt-2 min-h-[40px]">
+              {isLoadingMatch ? (
+                <span className="flex items-center gap-1 animate-pulse"><RotateCw className="w-3 h-3 animate-spin text-blue-500" /> AI正在深度计算简历与岗位适配度...</span>
+              ) : (
+                matchResult?.resumeMatchExplanation ?? `基于您的${resumeData?.school || '清华大学计算机专业'}、实习及技术栈与该岗位的硬性技术适配契合度评估。`
+              )}
             </p>
           </div>
 
           <div className="border border-slate-100 bg-slate-50/50 rounded-2xl p-4">
             <div className="flex justify-between text-xs font-bold text-slate-700 mb-2">
               <span>🧠 职业性格软匹配</span>
-              <span className="text-emerald-600">{position.personalityMatch}%</span>
+              <span className="text-emerald-600">
+                {isLoadingMatch ? '...' : `${matchResult?.personalityMatch ?? position.personalityMatch}%`}
+              </span>
             </div>
             <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-              <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${position.personalityMatch}%` }} />
+              <div 
+                className="h-full bg-emerald-600 rounded-full transition-all duration-500" 
+                style={{ width: `${isLoadingMatch ? 30 : (matchResult?.personalityMatch ?? position.personalityMatch)}%` }} 
+              />
             </div>
-            <p className="text-[10px] text-slate-400 mt-2">
-              您的“尽责稳定型”大五人格与该岗位对于合规性、抗压稳定性及长期坚守的要求完美重合。
+            <p className="text-[10px] text-slate-400 mt-2 min-h-[40px]">
+              {isLoadingMatch ? (
+                <span className="flex items-center gap-1 animate-pulse"><RotateCw className="w-3 h-3 animate-spin text-emerald-500" /> AI正在比对性格特质与企业文化...</span>
+              ) : (
+                matchResult?.personalityMatchExplanation ?? `您的“${personalityResult?.typeTitle || '尽责稳定型'}”大五性格模型与该岗位特质的重合契合度评估。`
+              )}
             </p>
           </div>
         </div>
@@ -170,9 +230,17 @@ export default function PositionDetailPage({ position, onBack, onOpenModal }: Po
           </button>
 
           {isAiAnalysisOpen && (
-            <div className="mt-3 bg-blue-50/40 border border-blue-100/50 rounded-xl p-4 text-xs text-slate-600 leading-relaxed">
-              您在大型科技公司（字节跳动、腾讯）有过扎实的项目技术累积，对高吞吐服务和大数据有系统概念。
-              同时在性格测试上展现出极其优异的【高责任心、高稳定性】，这种品质在大型国有单位具有无法被替代的极高价值：相比于流失率大的候选人，电网更倾向于培养有长期技术信念、对秩序有崇高追求的骨干。
+            <div className="mt-3 bg-blue-50/40 border border-blue-100/50 rounded-xl p-4 text-xs text-slate-600 leading-relaxed min-h-[60px] flex items-center">
+              {isLoadingMatch ? (
+                <div className="flex items-center gap-2 text-blue-600 font-bold animate-pulse py-2">
+                  <RotateCw className="w-4 h-4 animate-spin text-blue-600" />
+                  <span>精准双引擎 AI 正在深度生成您的专属岗位分析报告...</span>
+                </div>
+              ) : (
+                matchResult?.whyExcellent ?? (
+                  `您有扎实的项目技术累积，对岗位核心概念有良好理解。同时在性格测试上展现出优异特征，这种品质在目标单位中能转化为优秀的长期坚守与业务突破价值。`
+                )
+              )}
             </div>
           )}
         </div>
@@ -312,77 +380,6 @@ export default function PositionDetailPage({ position, onBack, onOpenModal }: Po
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* AI tutor bubble (Ask AI Section) */}
-      <div className="bg-linear-to-b from-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-8 shadow-lg">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="p-1.5 bg-blue-600 rounded-lg text-white">
-            <Bot className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-base font-bold font-display">💬 智能导师在线答疑</h3>
-            <p className="text-[11px] text-slate-400">实时解析关于该岗位备考及上岸的疑难问题</p>
-          </div>
-        </div>
-
-        {/* Chat window */}
-        <div className="bg-slate-800/50 border border-slate-800 rounded-2xl p-4 min-h-48 max-h-72 overflow-y-auto mb-4 space-y-4 text-xs">
-          {chatMessages.map((msg, i) => (
-            <div key={i} className={`flex gap-2.5 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
-              {msg.sender === 'ai' && (
-                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
-                  <Bot className="w-3.5 h-3.5" />
-                </div>
-              )}
-              <div className={`p-3 rounded-2xl max-w-[80%] whitespace-pre-line leading-relaxed ${
-                msg.sender === 'user' 
-                  ? 'bg-blue-600 text-white rounded-tr-none' 
-                  : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700/50'
-              }`}>
-                {msg.text}
-              </div>
-              {msg.sender === 'user' && (
-                <div className="w-6 h-6 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold shrink-0">
-                  张
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Pre-loaded suggestions */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {preLoadedQuestions.map((q, i) => (
-            <button
-              key={i}
-              onClick={() => handleSendMessage(q)}
-              className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[10px] font-semibold border border-slate-700 transition-colors cursor-pointer"
-            >
-              {q}
-            </button>
-          ))}
-        </div>
-
-        {/* Input box */}
-        <div className="flex gap-2">
-          <input
-            id="ai-chat-input"
-            type="text"
-            placeholder={`提问关于这个岗位的任何问题...`}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage(inputValue)}
-            className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
-          />
-          <button
-            id="ai-send-btn"
-            onClick={() => handleSendMessage(inputValue)}
-            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-xl text-white transition-colors flex items-center justify-center cursor-pointer"
-          >
-            <Send className="w-4 h-4" />
-          </button>
         </div>
       </div>
     </div>

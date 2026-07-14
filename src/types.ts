@@ -4,6 +4,10 @@ export interface Position {
   company: string;
   city: string;
   type: 'state-owned' | 'internet'; // 央国企 vs 互联网
+  industry?: string; // e.g. "互联网", "央国企", "AI/科技", etc.
+  category?: string; // e.g. "技术类", "产品类", etc.
+  subIndustry?: string; // e.g. "电商与本地生活", "大模型与NLP", etc.
+  subCategory?: string; // e.g. "开发 (Java/C++/Go/前端)", "算法与人工智能", etc.
   overallMatch: number; // e.g., 92
   resumeMatch: number; // e.g., 85
   personalityMatch: number; // e.g., 95

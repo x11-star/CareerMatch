@@ -14,8 +14,26 @@ import { MOCK_POSITIONS } from '../data';
 
 // 1. Position operations
 export async function seedPositionsToFirestore(): Promise<void> {
-  for (const pos of MOCK_POSITIONS) {
-    await setDoc(doc(db, 'positions', pos.id), pos);
+  try {
+    const colRef = collection(db, 'positions');
+    const snapshot = await getDocs(colRef);
+    
+    // Clear old positions
+    if (!snapshot.empty) {
+      console.log(`Clearing ${snapshot.size} old positions from Firestore...`);
+      const deletePromises = snapshot.docs.map((d) => deleteDoc(d.ref));
+      await Promise.all(deletePromises);
+    }
+
+    // Seed new positions
+    console.log(`Seeding ${MOCK_POSITIONS.length} new positions into Firestore...`);
+    for (const pos of MOCK_POSITIONS) {
+      await setDoc(doc(db, 'positions', pos.id), pos);
+    }
+    console.log('Seeding completed successfully!');
+  } catch (error) {
+    console.error('Error seeding positions to Firestore:', error);
+    throw error;
   }
 }
 
@@ -24,8 +42,11 @@ export async function getPositions(): Promise<Position[]> {
     const colRef = collection(db, 'positions');
     const snapshot = await getDocs(colRef);
     
-    if (snapshot.empty || snapshot.size < MOCK_POSITIONS.length) {
-      console.log(`Firestore has ${snapshot.empty ? 0 : snapshot.size} positions, but code has ${MOCK_POSITIONS.length}. Seeding initial/missing positions in Firestore...`);
+    // Check if database contains old schema IDs (e.g., 'net-0001' or 'soe-0027' instead of 'pos-')
+    const hasOldSchema = !snapshot.empty && snapshot.docs.some(d => !d.id.startsWith('pos-'));
+    
+    if (snapshot.empty || snapshot.size !== MOCK_POSITIONS.length || hasOldSchema) {
+      console.log(`Firestore has stale or missing positions. Re-seeding new positions in Firestore...`);
       await seedPositionsToFirestore();
       return MOCK_POSITIONS;
     }
@@ -34,6 +55,8 @@ export async function getPositions(): Promise<Position[]> {
     snapshot.forEach((doc) => {
       positions.push(doc.data() as Position);
     });
+    // Sort positions by ID to keep consistent display
+    positions.sort((a, b) => a.id.localeCompare(b.id));
     return positions;
   } catch (error) {
     console.error('Error fetching positions from Firestore, falling back to mock:', error);

@@ -36,12 +36,17 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
     setFileName(displayName);
     setCurrentState('B_UPLOADING');
 
+    let progressInterval: any = null;
+
     try {
       let currentProgress = 10;
-      const progressInterval = setInterval(() => {
-        currentProgress = Math.min(currentProgress + 15, 90);
-        setUploadProgress(currentProgress);
-      }, 100);
+      progressInterval = setInterval(() => {
+        // 采用缓动（Ease-out）效果让进度条优雅地逼近 90%
+        const remaining = 92 - currentProgress;
+        const increment = Math.max(0.5, remaining * 0.12);
+        currentProgress = Math.min(currentProgress + increment, 90);
+        setUploadProgress(Math.round(currentProgress));
+      }, 120);
 
       const response = await fetch('/api/parse-resume', {
         method: 'POST',
@@ -56,7 +61,10 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
         }),
       });
 
-      clearInterval(progressInterval);
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
       setUploadProgress(100);
 
       if (!response.ok) {
@@ -74,6 +82,10 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
       }, 500);
 
     } catch (err: any) {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
       console.error("API parse failed:", err);
       setApiParseError(err.message || '解析失败，请检查网络或API配置');
       setCurrentState('A_IDLE');
@@ -255,6 +267,9 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
 
   useEffect(() => {
     if (currentState === 'B_UPLOADING') {
+      // 如果正在进行真实的 AI 解析，不要运行此模拟上传进度的 interval
+      if (isApiParsing) return;
+
       const interval = setInterval(() => {
         setUploadProgress((prev) => {
           if (prev >= 100) {
@@ -270,7 +285,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
       }, 150);
       return () => clearInterval(interval);
     }
-  }, [currentState]);
+  }, [currentState, isApiParsing]);
 
   useEffect(() => {
     if (currentState === 'C_PARSING') {

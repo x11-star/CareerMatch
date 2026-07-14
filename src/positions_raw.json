@@ -1,0 +1,1917 @@
+{
+  "_meta": {
+    "version": "2.0",
+    "generatedAt": "2026-07-11 21:27:35",
+    "totalPositions": 346,
+    "fullyEnriched": 346,
+    "partialEnriched": 0,
+    "enrichFailed": 0,
+    "source": "【职计划】校招&实习汇总表（持续更新中）.xlsx (全部8个Sheet)",
+    "sourceRows": 4289,
+    "classifierModel": "deepseek-chat",
+    "enricherModel": "deepseek-chat",
+    "byIndustry": {
+      "通用": 116,
+      "AI/科技": 26,
+      "互联网": 78,
+      "央国企": 27,
+      "金融/咨询": 35,
+      "半导体/硬件": 54,
+      "快消/零售": 5,
+      "生物医药": 1,
+      "其他": 4
+    },
+    "byCategory": {
+      "职能类": 19,
+      "技术类": 146,
+      "产品类": 22,
+      "市场/销售类": 33,
+      "工程技术类": 43,
+      "运营类": 19,
+      "金融财务类": 28,
+      "数据/战略类": 7,
+      "科研类": 8,
+      "供应链类": 9,
+      "设计类": 8,
+      "法务合规类": 4
+    }
+  },
+  "positions": [
+    {
+      "name": "管培生",
+      "industry": "通用",
+      "category": "职能类",
+      "responsibilities": [
+        "参与公司各部门轮岗，完成轮岗部门分配的日常事务性工作",
+        "协助部门主管进行数据整理、报告撰写和会议纪要整理",
+        "参与跨部门项目协调，跟进项目进度并反馈问题",
+        "根据轮岗表现，参与制定业务优化建议方案",
+        "完成公司安排的培训课程 and 考核任务"
+      ],
+      "hardSkills": [
+        "办公软件（Excel、PPT、Word）高级应用",
+        "基础数据分析能力（SQL或Python）",
+        "项目管理工具（如Jira、Trello）使用",
+        "英语六级或同等水平",
+        "行业基础知识（如金融、零售、科技等）"
+      ],
+      "softSkills": [
+        "快速学习能力",
+        "沟通协调能力",
+        "抗压与适应能力"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "外向性高",
+        "情绪稳定"
+      ],
+      "salaryRange": [
+        10,
+        20
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "管理学",
+        "经济学",
+        "市场营销",
+        "理工科"
+      ],
+      "developmentPath": "管培生(0-2年)→部门专员(2-4年)→部门主管(4-6年)→部门经理/总监",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点准备行测、逻辑推理和案例分析，了解公司业务和文化",
+      "entryDifficulty": "⭐⭐⭐⭐",
+      "workStyleDescription": "轮岗制，快速接触不同部门，团队氛围活跃，导师带教，考核压力较大",
+      "soeVsInternetComparison": "央国企管培生更注重轮岗全面性和稳定性，互联网管培生更偏向业务实战和快速晋升",
+      "id": "net-0001",
+      "sourceCount": 165,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "软件研发与敏捷项目管培生助理胶水工程师 助理交付工程师",
+        "“菁鲤计划”培训生",
+        "龙潮生计划:企划方向营运方向人资方向 招商方向",
+        "管理培训生",
+        "采购管培生",
+        "U培生",
+        "集团管培生",
+        "跨境电商运营管培生",
+        "商务管培生",
+        "集团战略管培生",
+        "管理培训生 (通用方向",
+        "管理培训生实习生",
+        "业务管培生",
+        "市场管培生",
+        "产品研发管培生",
+        "卓越领头人计划(兽医育种营养环保智能研发职能类) 储备干部计划",
+        "零售管理培训生",
+        "管培生岗位:技术",
+        "鲸英领袖生:硕士及以上学历(2027届",
+        "总部管培生所属企业校招岗位港澳台",
+        "管培生"
+      ]
+    },
+    {
+      "name": "算法工程师",
+      "industry": "AI/科技",
+      "category": "技术类",
+      "responsibilities": [
+        "设计并实现机器学习/深度学习模型，解决业务中的预测、分类、推荐等问题",
+        "对海量数据进行清洗、特征工程和模型训练调优",
+        "将算法模型部署到生产环境，并监控模型效果与稳定性",
+        "参与算法技术调研 and 论文复现，推动新技术落地",
+        "编写算法设计文档 and 技术报告，与工程团队协作"
+      ],
+      "hardSkills": [
+        "Python编程（Pandas、NumPy、Scikit-learn）",
+        "深度学习框架（TensorFlow/PyTorch）",
+        "数据结构与算法基础",
+        "数学基础（线性代数、概率统计、微积分）",
+        "Linux系统操作 and Shell脚本"
+      ],
+      "softSkills": [
+        "逻辑分析与问题拆解能力",
+        "团队协作与沟通能力",
+        "持续学习与自驱力"
+      ],
+      "personalityTags": [
+        "开放性高",
+        "尽责性高",
+        "情绪稳定"
+      ],
+      "salaryRange": [
+        25,
+        50
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "硕士",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "数学与应用数学",
+        "统计学",
+        "人工智能"
+      ],
+      "developmentPath": "初级算法工程师(0-2年)→中级算法工程师(2-5年)→高级算法工程师(5-8年)→算法专家/技术总监",
+      "recruitmentTimeline": "8月网申→9月笔试→10月面试→11月offer",
+      "examPrepNotes": "重点刷LeetCode and 机器学习面试题，准备项目经历 and 论文复现",
+      "entryDifficulty": "⭐⭐⭐⭐⭐",
+      "workStyleDescription": "技术驱动，团队扁平，项目节奏快，经常需要与产品 and 工程沟通，注重创新",
+      "soeVsInternetComparison": "互联网算法工程师更注重业务效果 and 快速迭代，央国企算法更偏向稳定性 and 合规性",
+      "id": "net-0002",
+      "sourceCount": 123,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "算法开发 人工智能开发 Java开发 Web前端开发 UI",
+        "算法岗",
+        "算法研发岗",
+        "算法实习生",
+        "算法工程师",
+        "多模态大模型算法工程师",
+        "算法类",
+        "算法架构工程师"
+      ]
+    },
+    {
+      "name": "软件开发工程师",
+      "industry": "通用",
+      "category": "技术类",
+      "responsibilities": [
+        "编写Java/Python/Go后端接口代码，并编写单元测试 and 集成测试",
+        "参与系统架构设计，完成模块功能开发 and 代码评审",
+        "修复线上Bug，优化系统性能 and 稳定性",
+        "编写技术文档，包括接口文档、部署文档 and 设计文档",
+        "与产品、测试、运维等团队协作，确保项目按时交付"
+      ],
+      "hardSkills": [
+        "至少一门编程语言（Java/Python/Go/C++）",
+        "数据库（MySQL/PostgreSQL） and SQL优化",
+        "版本控制工具（Git）",
+        "常用框架（Spring Boot/Django/Flask）",
+        "Linux基本操作 and 部署"
+      ],
+      "softSkills": [
+        "问题解决能力",
+        "团队协作能力",
+        "时间管理能力"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        15,
+        35
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "软件工程",
+        "信息管理与信息系统",
+        "通信工程"
+      ],
+      "developmentPath": "初级开发工程师(0-2年)→中级开发工程师(2-5年)→高级开发工程师(5-8年)→技术经理/架构师",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点刷算法题 and 项目经验，准备系统设计面试",
+      "entryDifficulty": "⭐⭐⭐⭐",
+      "workStyleDescription": "敏捷开发，每日站会，代码评审，团队协作紧密，加班视项目情况",
+      "soeVsInternetComparison": "互联网软件开发更注重快速迭代 and 代码质量，央国企更注重稳定性 and 文档规范",
+      "id": "net-0003",
+      "sourceCount": 114,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "软件开发",
+        "软件工程师",
+        "软件开发岗",
+        "软件开发工程师"
+      ]
+    },
+    {
+      "name": "测试工程师",
+      "industry": "通用",
+      "category": "技术类",
+      "responsibilities": [
+        "根据产品需求编写测试用例，执行功能测试、回归测试 and 性能测试",
+        "使用自动化测试框架（如Selenium、Appium）编写 and 维护自动化脚本",
+        "提交Bug并跟踪修复进度，输出测试报告",
+        "参与需求评审，从测试角度提出质量改进建议",
+        "搭建 and 维护测试环境，管理测试数据"
+      ],
+      "hardSkills": [
+        "测试理论 and 方法（黑盒、白盒、边界值分析）",
+        "自动化测试工具（Selenium/Postman/JMeter）",
+        "至少一门编程语言（Python/Java）",
+        "SQL查询 and 数据库操作",
+        "Linux基本命令"
+      ],
+      "softSkills": [
+        "细心与耐心",
+        "沟通与协调能力",
+        "逻辑分析能力"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        12,
+        28
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "软件工程",
+        "信息管理与信息系统",
+        "通信工程"
+      ],
+      "developmentPath": "初级测试工程师(0-2年)→中级测试工程师(2-5年)→高级测试工程师(5-8年)→测试经理/质量总监",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点准备测试用例设计方法 and 自动化测试工具使用",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "与开发紧密协作，工作节奏相对稳定，注重细节 and 流程，加班较少",
+      "soeVsInternetComparison": "互联网测试更强调自动化 and 持续集成，央国企测试更注重手工测试 and 文档规范",
+      "id": "net-0004",
+      "sourceCount": 103,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "测试类（计算机",
+        "测试工程师",
+        "软件测试",
+        "软件测试工程师"
+      ]
+    },
+    {
+      "name": "产品经理",
+      "industry": "通用",
+      "category": "产品类",
+      "responsibilities": [
+        "进行用户调研 and 竞品分析，收集并整理产品需求",
+        "撰写产品需求文档（PRD），绘制产品原型 and 流程图",
+        "协调开发、设计、测试等团队，推动产品功能上线",
+        "跟踪产品上线后的数据表现，提出优化迭代方案",
+        "参与产品规划，制定产品路线图"
+      ],
+      "hardSkills": [
+        "产品原型工具（Axure/Figma/Sketch）",
+        "数据分析工具（SQL/Excel/Tableau）",
+        "项目管理工具（Jira/Confluence）",
+        "用户研究方法（问卷、访谈、可用性测试）",
+        "基础技术理解（API、前后端交互）"
+      ],
+      "softSkills": [
+        "沟通与表达能力",
+        "逻辑思维与问题分析能力",
+        "跨部门协调能力"
+      ],
+      "personalityTags": [
+        "开放性高",
+        "外向性高",
+        "尽责性高"
+      ],
+      "salaryRange": [
+        15,
+        35
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "心理学",
+        "市场营销",
+        "工业设计"
+      ],
+      "developmentPath": "助理产品经理(0-2年)→产品经理(2-5年)→高级产品经理(5-8年)→产品总监/产品VP",
+      "recruitmentTimeline": "8月网申→9月笔试→10月面试→11月offer",
+      "examPrepNotes": "重点准备产品案例分析 and 逻辑题，展示用户思维 and 数据驱动能力",
+      "entryDifficulty": "⭐⭐⭐⭐",
+      "workStyleDescription": "跨团队沟通频繁，工作节奏快，需要快速决策，注重用户体验 and 数据",
+      "soeVsInternetComparison": "互联网产品经理更注重用户增长 and 商业变现，央国企产品更注重流程合规 and 稳定性",
+      "id": "net-0005",
+      "sourceCount": 96,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "产品岗",
+        "产品策划",
+        "互联网产品实习生",
+        "产品策划类",
+        "产品经理",
+        "产品管培生"
+      ]
+    },
+    {
+      "name": "市场营销",
+      "industry": "通用",
+      "category": "市场/销售类",
+      "responsibilities": [
+        "制定市场推广计划，策划线上线下营销活动",
+        "撰写营销文案、宣传物料 and 社交媒体内容",
+        "分析市场数据 and 用户行为，优化营销策略",
+        "管理社交媒体账号，提升品牌曝光 and 用户互动",
+        "对接外部媒体 and 合作伙伴，执行联合营销项目"
+      ],
+      "hardSkills": [
+        "营销工具（Google Analytics/百度统计/CRM系统）",
+        "内容创作（文案、图片、视频剪辑）",
+        "数据分析（Excel/SQL）",
+        "社交媒体运营（微信、微博、抖音等）",
+        "基础广告投放（SEM/SEO/信息流）"
+      ],
+      "softSkills": [
+        "创意与策划能力",
+        "沟通与谈判能力",
+        "团队协作能力"
+      ],
+      "personalityTags": [
+        "外向性高",
+        "开放性高",
+        "情绪稳定"
+      ],
+      "salaryRange": [
+        10,
+        25
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "市场营销",
+        "广告学",
+        "传播学",
+        "工商管理"
+      ],
+      "developmentPath": "市场专员(0-2年)→市场主管(2-5年)→市场经理(5-8年)→市场总监",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点准备营销案例分析 and 创意方案，展示对行业趋势的理解",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "创意驱动，团队年轻活跃，经常需要头脑风暴，活动期加班较多",
+      "soeVsInternetComparison": "互联网市场营销更注重数据驱动 and ROI，央国企市场营销更注重品牌形象 and 合规",
+      "id": "net-0006",
+      "sourceCount": 88,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "市场营销",
+        "市场类",
+        "营销类",
+        "市场营销）"
+      ]
+    },
+    {
+      "name": "AI算法工程师",
+      "industry": "AI/科技",
+      "category": "技术类",
+      "responsibilities": [
+        "研发 and 优化深度学习模型，应用于图像识别、自然语言处理或推荐系统",
+        "处理大规模数据集，进行数据清洗、标注 and 增强",
+        "部署模型到云端或边缘设备，并监控推理性能",
+        "跟踪前沿AI技术，进行实验复现 and 技术预研",
+        "编写算法文档，与工程团队协作完成产品化"
+      ],
+      "hardSkills": [
+        "深度学习框架（PyTorch/TensorFlow）",
+        "计算机视觉或NLP相关算法（CNN/RNN/Transformer）",
+        "Python编程 and 数据处理（Pandas/NumPy）",
+        "模型优化技术（量化、剪枝、蒸馏）",
+        "分布式训练 and GPU编程（CUDA）"
+      ],
+      "softSkills": [
+        "科研阅读与复现能力",
+        "逻辑推理与问题解决能力",
+        "团队协作与沟通能力"
+      ],
+      "personalityTags": [
+        "开放性高",
+        "尽责性高",
+        "情绪稳定"
+      ],
+      "salaryRange": [
+        30,
+        60
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "硕士",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "人工智能",
+        "数学与应用数学",
+        "自动化"
+      ],
+      "developmentPath": "初级AI算法工程师(0-2年)→中级AI算法工程师(2-5年)→高级AI算法工程师(5-8年)→AI专家/技术总监",
+      "recruitmentTimeline": "8月网申→9月笔试→10月面试→11月offer",
+      "examPrepNotes": "重点准备深度学习理论 and 项目经验，刷LeetCode and 论文复现",
+      "entryDifficulty": "⭐⭐⭐⭐⭐",
+      "workStyleDescription": "研究驱动，团队技术氛围浓厚，项目周期较长，注重创新 and 论文产出",
+      "soeVsInternetComparison": "互联网AI算法更注重业务落地 and 效果，央国企AI算法更偏向安全合规 and 稳定性",
+      "id": "net-0007",
+      "sourceCount": 71,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "AI算法工程师 大数据算法工程师",
+        "机器视觉算法工程师决策规划算法工程师",
+        "AI算法工程师",
+        "红外智能检测算法工程师",
+        "AI 算法",
+        "AI加速算法工程师",
+        "Al算法）",
+        "AI算法",
+        "AI应用",
+        "重建与生成算法 Al Infra 数据Infra 机器人本体系统",
+        "图像算法工程师机器人三维建模算法工程师",
+        "运动控制算法工程师红外图像算法工程师",
+        "AI 算法工程师"
+      ]
+    },
+    {
+      "name": "项目管理",
+      "industry": "通用",
+      "category": "职能类",
+      "responsibilities": [
+        "制定项目计划，明确里程碑 and 交付物，跟踪项目进度",
+        "协调跨部门资源，解决项目中的风险 and 问题",
+        "组织项目会议，撰写会议纪要 and 项目报告",
+        "管理项目预算 and 成本，确保项目在预算内完成",
+        "推动项目流程优化，提升团队协作效率"
+      ],
+      "hardSkills": [
+        "项目管理工具（Jira/MS Project/Asana）",
+        "项目管理方法论（PMP/敏捷/Scrum）",
+        "数据分析（Excel/SQL）",
+        "风险管理与问题解决框架",
+        "基础技术理解（软件开发流程）"
+      ],
+      "softSkills": [
+        "沟通与协调能力",
+        "领导力与影响力",
+        "时间管理与多任务处理能力"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        12,
+        28
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "管理学",
+        "工程管理",
+        "计算机科学与技术",
+        "工商管理"
+      ],
+      "developmentPath": "项目助理(0-2年)→项目经理(2-5年)→高级项目经理(5-8年)→项目总监/PMO负责人",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点准备项目管理案例 and 情景题，了解敏捷 and PMP知识",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "沟通驱动，日常与多部门协作，工作节奏中等，注重计划 and 执行力",
+      "soeVsInternetComparison": "互联网项目管理更注重敏捷 and 快速响应，央国企项目管理更注重流程 and 合规",
+      "id": "net-0008",
+      "sourceCount": 70,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "项目管理",
+        "项目工程师"
+      ]
+    },
+    {
+      "name": "工艺工程师",
+      "industry": "通用",
+      "category": "工程技术类",
+      "responsibilities": [
+        "制定 and 优化产品生产流程，编写标准作业指导书（SOP）",
+        "分析生产过程中的良率数据，提出并实施工艺改进方案",
+        "主导新产线或新设备的工艺验证与调试，确保量产稳定性",
+        "处理现场工艺异常问题，协同质量、设备部门进行根因分析",
+        "参与新产品的试产阶段，评估工艺可行性并输出工艺参数"
+      ],
+      "hardSkills": [
+        "熟悉精益生产或六西格玛（DMAIC）方法论",
+        "掌握AutoCAD或SolidWorks等制图软件",
+        "具备SPC（统计过程控制）数据分析能力",
+        "了解ISO9001或IATF16949质量管理体系",
+        "熟练使用Minitab或JMP进行工艺数据分析"
+      ],
+      "softSkills": [
+        "跨部门沟通协调能力",
+        "问题分析与系统性解决能力",
+        "细致严谨的工作态度"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        8,
+        18
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "机械工程",
+        "材料科学与工程",
+        "化学工程与工艺",
+        "工业工程"
+      ],
+      "developmentPath": "工艺助理工程师(0-2年)→工艺工程师(2-5年)→高级工艺工程师(5-8年)→工艺经理/技术专家",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点复习机械制图、材料力学、质量管理基础，准备案例分析题",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "日常在产线办公室 and 车间之间切换，需穿无尘服，团队协作紧密，节奏中等偏快",
+      "soeVsInternetComparison": "央国企工艺岗更注重流程规范与稳定性，互联网无直接对应岗位，偏重自动化制造",
+      "id": "net-0009",
+      "sourceCount": 64,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "工艺设计岗",
+        "工艺工程师",
+        "工艺技术"
+      ]
+    },
+    {
+      "name": "人力资源",
+      "industry": "通用",
+      "category": "职能类",
+      "responsibilities": [
+        "执行招聘全流程，包括职位发布、简历筛选、面试安排及录用沟通",
+        "维护员工人事档案，办理入离职、转正、调岗等手续",
+        "组织员工培训活动，跟踪培训效果并汇总反馈",
+        "协助绩效考核数据的收集与整理，推动绩效面谈落地",
+        "解答员工关于薪酬福利、考勤制度的日常咨询"
+      ],
+      "hardSkills": [
+        "熟悉劳动法及劳动合同法相关条款",
+        "掌握招聘平台（如智联、猎聘、Boss直聘）操作技巧",
+        "熟练使用Excel进行人事数据统计（VLOOKUP、透视表）",
+        "了解薪酬核算基础（社保公积金基数、个税计算）",
+        "具备HRIS系统（如SAP SuccessFactors）使用经验"
+      ],
+      "softSkills": [
+        "亲和力与沟通表达能力",
+        "保密意识与职业道德",
+        "多任务处理与时间管理能力"
+      ],
+      "personalityTags": [
+        "宜人性高",
+        "情绪稳定",
+        "尽责性高"
+      ],
+      "salaryRange": [
+        8,
+        15
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "人力资源管理",
+        "工商管理",
+        "心理学",
+        "劳动与社会保障"
+      ],
+      "developmentPath": "HR助理(0-2年)→HR专员(2-4年)→HR主管(4-6年)→HR经理/HRBP",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "复习劳动法核心条款、招聘面试技巧，准备情景模拟题",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "办公室工作为主，需频繁与各部门沟通，氛围友好但事务琐碎，需耐心细致",
+      "soeVsInternetComparison": "央国企HR更侧侧重合规与稳定，互联网HR更强调招聘效率 and 雇主品牌创新",
+      "id": "net-0010",
+      "sourceCount": 50,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "人力资源",
+        "人力资源岗"
+      ]
+    },
+    {
+      "name": "硬件工程师",
+      "industry": "通用",
+      "category": "技术类",
+      "responsibilities": [
+        "根据产品需求设计电路原理图，并完成PCB布局布线",
+        "进行硬件电路调试，使用示波器、万用表等仪器排查信号完整性问题",
+        "编写硬件测试用例，执行功能测试、EMC测试及可靠性测试",
+        "与软件、结构团队协作，解决硬件与固件、外壳的接口匹配问题",
+        "维护BOM清单，跟进元器件选型、验证及替代料评估"
+      ],
+      "hardSkills": [
+        "精通Altium Designer或Cadence等EDA工具",
+        "掌握模拟电路与数字电路设计基础",
+        "熟悉常用通信协议（I2C、SPI、UART、USB）",
+        "具备信号完整性（SI） and 电源完整性（PI）分析能力",
+        "了解EMC/EMI设计规范及整改方法"
+      ],
+      "softSkills": [
+        "逻辑分析与故障排查能力",
+        "跨团队协作与沟通能力",
+        "文档编写与知识沉淀习惯"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "开放性高",
+        "情绪稳定"
+      ],
+      "salaryRange": [
+        12,
+        30
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "电子信息工程",
+        "通信工程",
+        "自动化",
+        "微电子科学与工程"
+      ],
+      "developmentPath": "硬件助理工程师(0-2年)→硬件工程师(2-5年)→高级硬件工程师(5-8年)→硬件经理/技术专家",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点复习模电数电、电路分析，准备硬件调试案例分析",
+      "entryDifficulty": "⭐⭐⭐⭐",
+      "workStyleDescription": "实验室 and 办公室混合工作，需动手焊接 and 调试，团队技术氛围浓厚，项目节奏紧凑",
+      "soeVsInternetComparison": "央国企硬件更偏军工或工业级，互联网硬件（如智能硬件）更注重快速迭代 and 成本控制",
+      "id": "net-0011",
+      "sourceCount": 49,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "硬件工程师",
+        "硬件开发"
+      ]
+    },
+    {
+      "name": "后端开发工程师",
+      "industry": "互联网",
+      "category": "技术类",
+      "responsibilities": [
+        "编写Java或Go后端接口，实现业务逻辑并编写单元测试",
+        "设计数据库表结构，编写高效SQL并优化慢查询",
+        "参与系统架构设计，拆分微服务模块并维护API文档",
+        "排查线上故障，修复Bug并编写事故复盘报告",
+        "参与代码评审，确保代码质量 and 规范一致性"
+      ],
+      "hardSkills": [
+        "精通Java或Go语言，熟悉Spring Boot/Spring Cloud框架",
+        "掌握MySQL或PostgreSQL，具备索引优化 and 分库分表经验",
+        "熟悉Redis、Kafka等中间件的使用 and 原理",
+        "了解Docker and Kubernetes容器化部署",
+        "具备RESTful API设计规范知识"
+      ],
+      "softSkills": [
+        "逻辑思维与问题拆解能力",
+        "团队协作与知识分享意识",
+        "抗压能力与快速学习能力"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "开放性高",
+        "情绪稳定"
+      ],
+      "salaryRange": [
+        20,
+        45
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "软件工程",
+        "信息与计算科学",
+        "通信工程"
+      ],
+      "developmentPath": "初级后端工程师(0-2年)→中级后端工程师(2-5年)→高级后端工程师(5-8年)→技术Leader/架构师",
+      "recruitmentTimeline": "3月网申→4月笔试→5月面试→6月offer",
+      "examPrepNotes": "刷LeetCode高频题，复习Java并发 and JVM，准备系统设计题",
+      "entryDifficulty": "⭐⭐⭐⭐⭐",
+      "workStyleDescription": "敏捷开发模式，每日站会，代码驱动，团队年轻化，加班较常见但技术成长快",
+      "soeVsInternetComparison": "不适用",
+      "id": "net-0012",
+      "sourceCount": 49,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "前后端开发",
+        "后端开发岗",
+        "后台开发工程师",
+        "服务端研发工程师",
+        "后端开发",
+        "后端工程师",
+        "后端开发工程师"
+      ]
+    },
+    {
+      "name": "新媒体/内容运营",
+      "industry": "通用",
+      "category": "运营类",
+      "responsibilities": [
+        "策划并撰写微信公众号、微博、抖音等平台的原创内容",
+        "制定月度内容日历，结合热点事件进行选题 and 排期",
+        "监控各平台数据（阅读量、互动率、转化率），输出周报并提出优化建议",
+        "运营粉丝社群，策划线上活动提升用户活跃度 and 粘性",
+        "对接设计、视频团队，完成图文排版 and 短视频剪辑"
+      ],
+      "hardSkills": [
+        "熟练使用微信公众号后台及排版工具（秀米、135编辑器）",
+        "掌握基础视频剪辑（剪映、Premiere） and 图片处理（Photoshop）",
+        "熟悉主流平台算法（抖音、小红书、B站） and 运营规则",
+        "具备数据分析能力，能使用Excel或百度统计进行效果评估",
+        "了解SEO and SEM基础概念"
+      ],
+      "softSkills": [
+        "创意策划与文案撰写能力",
+        "热点敏感度与快速反应能力",
+        "沟通协调与项目管理能力"
+      ],
+      "personalityTags": [
+        "开放性高",
+        "外向性高",
+        "尽责性高"
+      ],
+      "salaryRange": [
+        8,
+        20
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "新闻传播学",
+        "广告学",
+        "传播学",
+        "汉语言文学"
+      ],
+      "developmentPath": "新媒体助理(0-1年)→新媒体专员(1-3年)→新媒体主管(3-5年)→运营经理/内容总监",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "准备个人作品集（文案、视频），复习新媒体营销案例 and 数据分析基础",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "创意驱动，需随时关注热点，团队年轻活泼，工作节奏快，常有线上协作",
+      "soeVsInternetComparison": "央国企新媒体更偏品牌宣传 and 合规，互联网新媒体更注重流量增长 and 用户转化",
+      "id": "net-0013",
+      "sourceCount": 47,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "新媒体运营",
+        "产品运营"
+      ]
+    },
+    {
+      "name": "电气工程师",
+      "industry": "通用",
+      "category": "工程技术类",
+      "responsibilities": [
+        "设计电气原理图，绘制电气柜布局图 and 接线图",
+        "编写PLC程序（西门子、三菱等），完成自动化设备调试",
+        "现场排查电气故障，维修变频器、伺服驱动器等设备",
+        "制定电气设备维护计划，定期检查并记录运行状态",
+        "参与项目电气方案评审，确保符合国家电气安全标准"
+      ],
+      "hardSkills": [
+        "精通PLC编程（西门子S7-1200/1500或三菱FX系列）",
+        "熟练使用EPLAN或AutoCAD Electrical进行电气设计",
+        "掌握变频器、伺服电机、传感器等选型 and 应用",
+        "熟悉电气安全规范（IEC 60204、GB 50054）",
+        "具备SCADA或组态软件（如WinCC）使用经验"
+      ],
+      "softSkills": [
+        "现场动手与故障诊断能力",
+        "项目协调与沟通能力",
+        "安全意识 and 责任心"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        8,
+        18
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "电气工程及其自动化",
+        "自动化",
+        "机械电子工程",
+        "电力系统及其自动化"
+      ],
+      "developmentPath": "电气助理工程师(0-2年)→电气工程师(2-5年)→高级电气工程师(5-8年)→电气经理/技术总监",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "复习电路原理、电机拖动、PLC编程基础，准备电气故障排查案例",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "办公室设计图纸与现场调试各占一半，需出差到项目现场，团队协作紧密",
+      "soeVsInternetComparison": "央国企电气更偏重工业与电力系统，互联网无直接对应岗位，偏数据中心基础设施",
+      "id": "net-0014",
+      "sourceCount": 40,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "电气工程师"
+      ]
+    },
+    {
+      "name": "技术支持工程师",
+      "industry": "互联网",
+      "category": "技术类",
+      "responsibilities": [
+        "通过工单、电话或在线渠道解答客户技术问题，提供解决方案",
+        "复现客户报障场景，定位Bug并提交给开发团队修复",
+        "编写技术知识库文档 and FAQ，提升自助服务效率",
+        "参与客户系统部署 and 升级，协助完成环境配置验证",
+        "定期分析支持数据，输出产品改进建议报告"
+      ],
+      "hardSkills": [
+        "熟悉Linux系统操作 and 常用命令（grep、awk、sed）",
+        "掌握SQL查询语言，能进行数据库基础排查",
+        "了解网络协议（TCP/IP、HTTP/HTTPS） and 抓包工具（Wireshark）",
+        "具备至少一种编程语言基础（Python、Shell）",
+        "熟悉云计算基础（AWS、阿里云等）概念"
+      ],
+      "softSkills": [
+        "客户服务意识与耐心",
+        "问题分析与逻辑表达能力",
+        "抗压与多任务处理能力"
+      ],
+      "personalityTags": [
+        "情绪稳定",
+        "宜人性高",
+        "尽责性高"
+      ],
+      "salaryRange": [
+        12,
+        25
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "网络工程",
+        "通信工程",
+        "信息管理与信息系统"
+      ],
+      "developmentPath": "初级技术支持(0-2年)→中级技术支持(2-4年)→高级技术支持(4-6年)→技术专家/支持经理",
+      "recruitmentTimeline": "3月网申→4月笔试→5月面试→6月offer",
+      "examPrepNotes": "复习Linux基础命令、网络协议，准备客户沟通情景模拟",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "工单驱动，需轮班支持，团队氛围务实，注重问题闭环，沟通频率高",
+      "soeVsInternetComparison": "不适用",
+      "id": "net-0015",
+      "sourceCount": 40,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "技术支持岗",
+        "技术服务工程师",
+        "AWS亚马逊云科技中国区技术支持工程师",
+        "术支持工程师",
+        "技术支持工程师"
+      ]
+    },
+    {
+      "name": "财务专员",
+      "industry": "通用",
+      "category": "金融财务类",
+      "responsibilities": [
+        "审核原始凭证，编制记账凭证并登记总账 and 明细账",
+        "按月完成纳税申报（增值税、企业所得税等），维护税务合规",
+        "编制月度财务报表（资产负债表、利润表、现金流量表）",
+        "协助年度审计，提供审计所需资料并配合现场盘点",
+        "管理应收账款 and 应付账款，跟踪账龄并催收逾期款项"
+      ],
+      "hardSkills": [
+        "熟悉会计准则（CAS/IFRS） and 税法基础",
+        "熟练使用财务软件（用友、金蝶、SAP FI模块）",
+        "精通Excel高级功能（数据透视表、VLOOKUP、宏）",
+        "具备初级会计职称或CPA在考",
+        "了解财务内控流程 and 风险点"
+      ],
+      "softSkills": [
+        "细致严谨与数字敏感度",
+        "保密意识与职业道德",
+        "沟通协调与时间管理能力"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        8,
+        15
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "会计学",
+        "财务管理",
+        "审计学",
+        "金融学"
+      ],
+      "developmentPath": "财务助理(0-2年)→财务专员(2-4年)→财务主管(4-6年)→财务经理/财务总监",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "复习会计准则、税法计算题，准备会计分录 and 报表分析案例",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "办公室工作为主，月末结账期加班较多，团队氛围严谨，注重准确性 and 时效性",
+      "soeVsInternetComparison": "央国企财务更偏合规与预算管理，互联网财务更注重业务支持 and 财务分析",
+      "id": "net-0016",
+      "sourceCount": 37,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "财务类",
+        "财务实习生",
+        "财务专员"
+      ]
+    },
+    {
+      "name": "嵌入式软件工程师",
+      "industry": "通用",
+      "category": "技术类",
+      "responsibilities": [
+        "编写嵌入式系统底层驱动代码，如UART、SPI、I2C等外设驱动",
+        "基于RTOS（如FreeRTOS）进行任务调度 and 中断管理开发",
+        "调试硬件与软件联调问题，使用示波器、逻辑分析仪定位故障",
+        "编写单元测试用例，确保代码覆盖率 and 稳定性",
+        "参与产品需求评审，输出技术方案文档"
+      ],
+      "hardSkills": [
+        "精通C/C++编程语言",
+        "熟悉ARM Cortex-M系列微控制器（如STM32）",
+        "掌握RTOS（FreeRTOS/uCOS）开发经验",
+        "熟练使用Keil/IAR等IDE及调试工具",
+        "了解硬件原理图阅读 and 基本电路知识"
+      ],
+      "softSkills": [
+        "逻辑分析能力",
+        "团队协作与沟通",
+        "问题解决与抗压能力"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "开放性高"
+      ],
+      "salaryRange": [
+        12,
+        25
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "电子信息工程",
+        "计算机科学与技术",
+        "自动化",
+        "通信工程"
+      ],
+      "developmentPath": "初级嵌入式工程师(0-2年)→中级嵌入式工程师(2-5年)→高级嵌入式工程师(5-8年)→技术专家/架构师",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点复习C语言指针、内存管理、RTOS调度原理，刷LeetCode中等题",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "项目制开发，与硬件工程师紧密协作，日常使用示波器 and 逻辑分析仪调试，团队氛围偏技术导向，加班视项目周期而定",
+      "soeVsInternetComparison": "央国企偏稳定但技术栈更新慢，互联网节奏快、项目迭代频繁，薪资更高但加班多",
+      "id": "net-0017",
+      "sourceCount": 36,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "嵌入式软件工程师"
+      ]
+    },
+    {
+      "name": "大模型算法工程师",
+      "industry": "AI/科技",
+      "category": "技术类",
+      "responsibilities": [
+        "设计 and 训练大规模语言模型（如GPT、LLaMA系列），优化模型性能",
+        "构建 and 清洗海量文本数据集，进行数据增强 and 预处理",
+        "实现模型微调（SFT、RLHF） and 推理加速（量化、蒸馏）",
+        "编写模型部署代码，集成到业务系统中并监控线上效果",
+        "跟踪前沿论文，复现并改进最新算法"
+      ],
+      "hardSkills": [
+        "精通Python and PyTorch/TensorFlow框架",
+        "熟悉Transformer架构及注意力机制原理",
+        "掌握分布式训练（DeepSpeed/Megatron）经验",
+        "了解模型量化（GPTQ/AWQ） and 推理优化（vLLM）",
+        "有NLP/CV顶会论文或开源项目贡献优先"
+      ],
+      "softSkills": [
+        "快速学习能力",
+        "创新思维",
+        "团队协作与知识分享"
+      ],
+      "personalityTags": [
+        "开放性高",
+        "尽责性高",
+        "外向性高"
+      ],
+      "salaryRange": [
+        30,
+        60
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "硕士",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "人工智能",
+        "数学与应用数学",
+        "统计学"
+      ],
+      "developmentPath": "算法工程师(0-2年)→高级算法工程师(2-5年)→算法专家(5-8年)→首席科学家/技术总监",
+      "recruitmentTimeline": "8月网申→9月笔试→10月面试→11月offer",
+      "examPrepNotes": "重点复习Transformer、BERT、GPT原理，手撕注意力机制代码，准备项目经历 and 论文复现",
+      "entryDifficulty": "⭐⭐⭐⭐⭐",
+      "workStyleDescription": "研究型团队，日常阅读论文、实验调参、代码开发，使用A100/H100集群，氛围开放但竞争激烈，加班常态化",
+      "soeVsInternetComparison": "不适用",
+      "id": "net-0018",
+      "sourceCount": 36,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "大模型类",
+        "大模型算法工程师",
+        "大模型算法岗",
+        "大模型算法"
+      ]
+    },
+    {
+      "name": "数据分析师",
+      "industry": "通用",
+      "category": "数据/战略类",
+      "responsibilities": [
+        "从数据库提取业务数据，使用SQL进行清洗、聚合 and 分析",
+        "制作可视化报表（Tableau/Power BI），向业务方呈现洞察",
+        "设计A/B实验方案，评估产品功能上线效果",
+        "撰写数据分析报告，提出业务优化建议",
+        "搭建数据指标体系，监控核心业务KPI变化"
+      ],
+      "hardSkills": [
+        "精通SQL（复杂查询、窗口函数）",
+        "熟练使用Python（Pandas、NumPy）进行数据处理",
+        "掌握Tableau/Power BI等可视化工具",
+        "了解统计学基础（假设检验、回归分析）",
+        "熟悉Excel高级功能（透视表、VBA）"
+      ],
+      "softSkills": [
+        "逻辑思维与结构化表达",
+        "业务理解与沟通能力",
+        "细节导向与耐心"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        12,
+        25
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "统计学",
+        "数学与应用数学",
+        "经济学",
+        "信息管理与信息系统"
+      ],
+      "developmentPath": "数据分析师(0-2年)→高级数据分析师(2-5年)→数据科学家/数据产品经理(5-8年)→数据总监",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点复习SQL窗口函数、Python数据处理库、统计学基础，准备业务分析案例",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "与产品、运营、市场等部门频繁沟通，日常写SQL and 做PPT，团队氛围偏业务导向，工作节奏中等",
+      "soeVsInternetComparison": "央国企偏报表制作 and 合规，互联网更注重增长分析 and 实验驱动，薪资 and 成长速度更快",
+      "id": "net-0019",
+      "sourceCount": 36,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "开发实习生(AI方向)数据分析岗实习生",
+        "数据分析师",
+        "数据分析"
+      ]
+    },
+    {
+      "name": "人力资源专员",
+      "industry": "通用",
+      "category": "职能类",
+      "responsibilities": [
+        "发布招聘信息，筛选简历并安排面试流程",
+        "办理员工入职、转正、离职等手续，维护人事档案",
+        "组织员工培训活动，跟进培训效果评估",
+        "核算员工考勤 and 薪资，处理社保公积金缴纳",
+        "参与员工关系活动策划，提升团队凝聚力"
+      ],
+      "hardSkills": [
+        "熟悉劳动法及社保公积金政策",
+        "熟练使用HR系统（如SAP、PeopleSoft）",
+        "掌握Excel数据处理（VLOOKUP、数据透视表）",
+        "了解招聘渠道管理（猎聘、Boss直聘）",
+        "有HR相关证书（如人力资源管理师）优先"
+      ],
+      "softSkills": [
+        "沟通协调能力",
+        "同理心与服务意识",
+        "细致与保密意识"
+      ],
+      "personalityTags": [
+        "宜人性高",
+        "尽责性高",
+        "情绪稳定"
+      ],
+      "salaryRange": [
+        8,
+        15
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "人力资源管理",
+        "工商管理",
+        "心理学",
+        "劳动与社会保障"
+      ],
+      "developmentPath": "人力资源专员(0-2年)→人力资源主管(2-5年)→人力资源经理(5-8年)→HR总监",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点复习人力资源管理六大模块、劳动法条款，准备情景面试案例",
+      "entryDifficulty": "⭐⭐",
+      "workStyleDescription": "办公室工作为主，日常处理文档 and 沟通协调，团队氛围友好，工作节奏稳定，少有加班",
+      "soeVsInternetComparison": "央国企偏行政事务 and 合规，互联网更注重招聘效率 and 雇主品牌，薪资略高但压力更大",
+      "id": "net-0020",
+      "sourceCount": 36,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "人力资源管理",
+        "人力资源专员",
+        "人力......",
+        "HR实习生"
+      ]
+    },
+    {
+      "name": "结构工程师",
+      "industry": "通用",
+      "category": "工程技术类",
+      "responsibilities": [
+        "使用CAD软件（如SolidWorks、Pro/E）进行产品结构设计",
+        "进行有限元分析（FEA），验证结构强度 and 可靠性",
+        "输出工程图纸 and BOM表，与供应商沟通制造工艺",
+        "参与样机试制，跟踪测试结果并优化设计",
+        "编写结构设计文档 and 测试报告"
+      ],
+      "hardSkills": [
+        "精通SolidWorks/Pro/E/CATIA等3D建模软件",
+        "掌握有限元分析（ANSYS/Abaqus）",
+        "熟悉材料力学 and 机械设计原理",
+        "了解模具制造 and 注塑工艺",
+        "有公差分析 and DFM经验优先"
+      ],
+      "softSkills": [
+        "空间想象与工程思维",
+        "跨部门协作能力",
+        "问题解决与动手能力"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "开放性高"
+      ],
+      "salaryRange": [
+        10,
+        20
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "机械设计制造及其自动化",
+        "材料成型及控制工程",
+        "车辆工程",
+        "工程力学"
+      ],
+      "developmentPath": "助理结构工程师(0-2年)→结构工程师(2-5年)→高级结构工程师(5-8年)→结构经理/技术专家",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点复习材料力学、机械设计基础，练习3D建模软件操作，准备项目案例",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "与硬件、工艺、采购团队协作，日常使用CAD软件 and 实验室测试，团队偏工程文化，加班视项目节点而定",
+      "soeVsInternetComparison": "央国企偏重制造 and 合规，互联网/消费电子行业节奏更快、创新要求高，薪资略高",
+      "id": "net-0021",
+      "sourceCount": 35,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "结构工程师"
+      ]
+    },
+    {
+      "name": "安全工程师",
+      "industry": "通用",
+      "category": "技术类",
+      "responsibilities": [
+        "进行渗透测试 and 漏洞扫描，发现系统安全风险",
+        "编写安全策略 and 防护方案，部署防火墙、WAF等设备",
+        "响应安全事件，进行日志分析 and 溯源取证",
+        "参与安全审计 and 合规检查，确保符合ISO27001等标准",
+        "开发安全工具或脚本，自动化安全检测流程"
+      ],
+      "hardSkills": [
+        "精通网络协议（TCP/IP、HTTP） and 常见攻击原理",
+        "熟练使用渗透测试工具（Burp Suite、Metasploit、Nmap）",
+        "掌握至少一门编程语言（Python/Go）用于安全开发",
+        "了解安全合规标准（等保2.0、GDPR）",
+        "有CISP/CISSP/OSCP等证书优先"
+      ],
+      "softSkills": [
+        "逻辑分析与推理能力",
+        "持续学习与好奇心",
+        "团队协作与报告撰写"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "开放性高",
+        "情绪稳定"
+      ],
+      "salaryRange": [
+        15,
+        30
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "网络空间安全",
+        "信息安全",
+        "计算机科学与技术",
+        "通信工程"
+      ],
+      "developmentPath": "安全工程师(0-2年)→高级安全工程师(2-5年)→安全专家(5-8年)→安全总监/CSO",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点复习OWASP Top 10、渗透测试流程，刷CTF题目，准备实战案例",
+      "entryDifficulty": "⭐⭐⭐⭐",
+      "workStyleDescription": "红蓝对抗演练、日常监控 and 应急响应，团队偏技术极客文化，加班视安全事件频率",
+      "soeVsInternetComparison": "央国企偏合规 and 防守，互联网更注重攻防实战 and 漏洞奖励，薪资 and 成长空间更大",
+      "id": "net-0022",
+      "sourceCount": 35,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "安全方向",
+        "安全工程师",
+        "安全技术",
+        "安全实习生"
+      ]
+    },
+    {
+      "name": "财务会计岗",
+      "industry": "通用",
+      "category": "金融财务类",
+      "responsibilities": [
+        "审核原始凭证，编制记账凭证 and 财务报表",
+        "进行月度/季度/年度结账，处理应收应付账款",
+        "申报增值税、企业所得税等税务事项",
+        "参与预算编制 and 成本控制分析",
+        "配合内外部审计，提供财务资料"
+      ],
+      "hardSkills": [
+        "精通会计准则（企业会计准则）",
+        "熟练使用财务软件（用友、金蝶、SAP）",
+        "掌握Excel高级功能（VLOOKUP、数据透视表）",
+        "了解税务法规 and 纳税申报流程",
+        "有初级/中级会计职称或CPA优先"
+      ],
+      "softSkills": [
+        "细致与准确性",
+        "逻辑思维与数据分析",
+        "沟通与保密意识"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        8,
+        15
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "会计学",
+        "财务管理",
+        "审计学",
+        "金融学"
+      ],
+      "developmentPath": "会计助理(0-2年)→会计/财务专员(2-5年)→财务主管(5-8年)→财务经理/CFO",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点复习会计准则、税法基础，练习会计分录 and 报表编制",
+      "entryDifficulty": "⭐⭐",
+      "workStyleDescription": "办公室工作，日常处理凭证 and 报表，团队氛围严谨，工作节奏稳定，月末年末加班较多",
+      "soeVsInternetComparison": "央国企偏核算 and 合规，互联网财务更注重业务分析 and 财务BP，薪资略高但节奏更快",
+      "id": "net-0023",
+      "sourceCount": 34,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "财务会计岗",
+        "财务岗",
+        "财务管理岗"
+      ]
+    },
+    {
+      "name": "C++开发工程师",
+      "industry": "通用",
+      "category": "技术类",
+      "responsibilities": [
+        "使用C++开发高性能后端服务或客户端应用",
+        "设计 and 实现数据结构与算法，优化代码性能",
+        "编写单元测试 and 集成测试，保证代码质量",
+        "参与系统架构设计，编写技术文档",
+        "排查 and 修复线上bug，进行代码审查"
+      ],
+      "hardSkills": [
+        "精通C++11/14/17标准，熟悉STL and Boost库",
+        "掌握多线程编程 and 并发控制（锁、原子操作）",
+        "熟悉网络编程（Socket、HTTP协议）",
+        "了解设计模式 and 常见架构",
+        "有Linux环境开发经验优先"
+      ],
+      "softSkills": [
+        "逻辑思维与抽象能力",
+        "问题分析与解决能力",
+        "团队协作与代码规范"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "开放性高",
+        "情绪稳定"
+      ],
+      "salaryRange": [
+        15,
+        30
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "软件工程",
+        "电子信息工程",
+        "通信工程"
+      ],
+      "developmentPath": "初级C++工程师(0-2年)→中级C++工程师(2-5年)→高级C++工程师(5-8年)→技术专家/架构师",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "重点复习C++内存管理、多线程、STL源码，刷LeetCode hard题，准备系统设计",
+      "entryDifficulty": "⭐⭐⭐⭐",
+      "workStyleDescription": "项目制开发，与产品、测试紧密协作，日常写代码 and 调试，团队偏技术文化，加班视项目周期",
+      "soeVsInternetComparison": "央国企偏稳定但技术栈较旧，互联网更注重性能优化 and 新技术，薪资 and 成长速度更快",
+      "id": "net-0024",
+      "sourceCount": 33,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "C++开发工程师",
+        "C++"
+      ]
+    },
+    {
+      "name": "测试开发工程师",
+      "industry": "通用",
+      "category": "技术类",
+      "responsibilities": [
+        "编写自动化测试脚本（如Python/Java）覆盖核心业务接口 and UI功能",
+        "设计并执行测试用例，记录缺陷并跟踪修复进度",
+        "搭建 and 维护持续集成（CI/CD）流水线中的测试环境",
+        "参与代码评审，从测试角度提出代码可测性改进建议",
+        "分析测试数据，输出质量报告并推动产品迭代优化"
+      ],
+      "hardSkills": [
+        "Python或Java编程语言",
+        "Selenium/Appium等自动化测试框架",
+        "Linux操作系统 and Shell脚本",
+        "SQL数据库查询 and 测试数据构造",
+        "JMeter或LoadRunner性能测试工具"
+      ],
+      "softSkills": [
+        "细致严谨的问题分析能力",
+        "跨团队沟通协作能力",
+        "逻辑思维 and 系统性思考"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "开放性高"
+      ],
+      "salaryRange": [
+        15,
+        35
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "软件工程",
+        "信息管理与信息系统",
+        "自动化"
+      ],
+      "developmentPath": "初级测试开发工程师(0-2年)→中级测试开发工程师(2-5年)→高级测试开发工程师(5-8年)→测试架构师/测试经理",
+      "recruitmentTimeline": "3月网申→4月笔试→4-5月面试→5月offer",
+      "examPrepNotes": "重点复习编程基础、测试理论、数据库 and 网络协议，刷LeetCode简单题 and 测试设计题",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "以项目制为主，与开发、产品紧密协作，日常使用Jira等工具管理任务，节奏较快但可远程办公",
+      "soeVsInternetComparison": "不适用",
+      "id": "net-0025",
+      "sourceCount": 32,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "测试开发工程师实习......",
+        "测试开发工程师",
+        "测试开发类"
+      ]
+    },
+    {
+      "name": "机械设计工程师",
+      "industry": "通用",
+      "category": "工程技术类",
+      "responsibilities": [
+        "根据产品需求完成机械结构的三维建模 and 二维工程图绘制",
+        "使用有限元分析软件对关键部件进行静力学 and 动力学仿真",
+        "设计零部件加工工艺，跟进样机试制并解决装配问题",
+        "编写设计文档、BOM表 and 测试规范",
+        "参与设计评审，优化结构以降低成本 and 提升可靠性"
+      ],
+      "hardSkills": [
+        "SolidWorks或CATIA三维设计软件",
+        "ANSYS或Abaqus有限元分析",
+        "机械制图标准 and 公差配合知识",
+        "材料力学 and 机械原理基础",
+        "GD&T几何公差标注"
+      ],
+      "softSkills": [
+        "动手能力 and 问题解决能力",
+        "团队协作与沟通能力",
+        "时间管理 and 多任务处理"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        10,
+        25
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "机械设计制造及其自动化",
+        "机械工程",
+        "车辆工程",
+        "材料成型及控制工程"
+      ],
+      "developmentPath": "助理机械设计工程师(0-2年)→机械设计工程师(2-5年)→高级机械设计工程师(5-8年)→技术专家/设计主管",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "复习机械设计基础、材料力学、公差配合，练习三维软件建模 and 工程图绘制",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "以项目节点驱动，多在办公室 and 实验室工作，需与工艺、采购等部门频繁沟通，加班视项目进度而定",
+      "soeVsInternetComparison": "不适用",
+      "id": "net-0026",
+      "sourceCount": 32,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "机械设计",
+        "机械设计工程师",
+        "机械设计岗",
+        "机械设计制......"
+      ]
+    },
+    {
+      "name": "空间飞行器系统工程师",
+      "industry": "央国企",
+      "category": "工程技术类",
+      "responsibilities": [
+        "参与卫星或空间飞行器总体方案设计，协调各分系统技术接口",
+        "编写系统级技术文档，包括任务需求分析、系统架构 and 接口控制文件",
+        "组织系统级仿真验证，评估飞行器在轨性能 and 可靠性",
+        "跟踪研制进度，协调解决研制过程中的技术问题",
+        "参与地面测试 and 发射任务，确保系统满足任务要求"
+      ],
+      "hardSkills": [
+        "航天系统工程方法论",
+        "轨道力学 and 飞行器动力学基础",
+        "MATLAB/Simulink系统仿真",
+        "技术文档编写 and 项目管理工具",
+        "熟悉航天产品研制流程 and 标准"
+      ],
+      "softSkills": [
+        "系统性思维 and 全局观",
+        "跨部门协调 and 沟通能力",
+        "严谨细致的工作态度"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "开放性高"
+      ],
+      "salaryRange": [
+        12,
+        20
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "硕士",
+      "typicalMajors": [
+        "飞行器设计与工程",
+        "航天工程",
+        "力学",
+        "控制科学与工程"
+      ],
+      "developmentPath": "助理系统工程师(0-3年)→系统工程师(3-6年)→高级系统工程师(6-10年)→副总设计师/总师",
+      "recruitmentTimeline": "9月网申→10月统一笔试→11月面试→12月offer",
+      "examPrepNotes": "重点复习航天基础知识、系统工程原理、力学 and 控制理论，关注航天行业动态",
+      "entryDifficulty": "⭐⭐⭐⭐",
+      "workStyleDescription": "以型号项目为核心，团队协作紧密，工作环境严谨规范，需适应保密要求 and 阶段性高强度加班",
+      "soeVsInternetComparison": "央国企更注重流程规范 and 保密性，晋升偏体制内职级；互联网无直接对应岗位",
+      "id": "soe-0027",
+      "sourceCount": 32,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "空间飞行器系统",
+        "空间飞行器卫星",
+        "空间飞行器载荷",
+        "空间飞行器机械与力学",
+        "空间飞行器控制",
+        "空间飞行器电气",
+        "空间飞行器软件",
+        "空间......"
+      ]
+    },
+    {
+      "name": "游戏策划",
+      "industry": "互联网",
+      "category": "产品类",
+      "responsibilities": [
+        "设计游戏核心玩法、系统规则 and 数值平衡，撰写策划文档",
+        "与美术、程序、测试团队协作，跟进功能开发并验收效果",
+        "分析玩家数据 and 反馈，调整游戏体验 and 商业化设计",
+        "制作游戏原型或配置表，验证玩法可行性",
+        "参与竞品分析，输出创新玩法 and 优化建议"
+      ],
+      "hardSkills": [
+        "游戏设计文档撰写能力",
+        "Excel数值建模 and 公式设计",
+        "Unity或Unreal引擎基础操作",
+        "数据分析工具（如Tableau、SQL）",
+        "Axure或Figma原型设计"
+      ],
+      "softSkills": [
+        "创意 and 想象力",
+        "逻辑分析 and 数据驱动思维",
+        "团队协作与沟通能力"
+      ],
+      "personalityTags": [
+        "开放性高",
+        "外向性高",
+        "尽责性高"
+      ],
+      "salaryRange": [
+        15,
+        35
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "数字媒体技术",
+        "计算机科学与技术",
+        "心理学",
+        "数学与应用数学"
+      ],
+      "developmentPath": "初级策划(0-2年)→中级策划(2-4年)→高级策划(4-6年)→主策划/制作人",
+      "recruitmentTimeline": "3月网申→4月笔试→4-5月面试→5月offer",
+      "examPrepNotes": "准备游戏拆解分析报告，熟悉主流游戏数值 and 系统设计，练习逻辑题 and 创意题",
+      "entryDifficulty": "⭐⭐⭐⭐",
+      "workStyleDescription": "扁平化团队，日常与美术、程序频繁沟通，工作氛围活跃，项目期加班较多，鼓励创意表达",
+      "soeVsInternetComparison": "不适用",
+      "id": "net-0028",
+      "sourceCount": 31,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "游戏策划",
+        "暑期训练营:策划美术创意制作",
+        "游戏策划类"
+      ]
+    },
+    {
+      "name": "工程造价",
+      "industry": "央国企",
+      "category": "工程技术类",
+      "responsibilities": [
+        "根据施工图纸 and 定额编制工程预算 and 结算文件",
+        "参与招标文件编制，审核投标报价 and 合同条款",
+        "跟踪项目成本，分析偏差并提出控制措施",
+        "审核工程变更 and 签证，计算造价调整",
+        "整理造价资料，建立 and 维护成本数据库"
+      ],
+      "hardSkills": [
+        "广联达或斯维尔造价软件",
+        "工程定额 and 清单计价规范",
+        "CAD图纸识读 and 算量",
+        "Excel高级函数 and 数据透视表",
+        "合同法及招投标法规基础"
+      ],
+      "softSkills": [
+        "细致耐心 and 数字敏感度",
+        "沟通协调 and 谈判能力",
+        "时间管理 and 抗压能力"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        8,
+        15
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "工程造价",
+        "工程管理",
+        "土木工程",
+        "建筑环境与能源应用工程"
+      ],
+      "developmentPath": "造价员(0-3年)→造价工程师(3-6年)→高级造价工程师(6-10年)→造价部门主管/项目经理",
+      "recruitmentTimeline": "9月网申→10月统一笔试→11月面试→12月offer",
+      "examPrepNotes": "复习工程计量与计价、定额应用、合同法，练习广联达软件操作 and 案例计算",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "以项目周期为节奏，多在办公室工作，需与施工、监理、审计多方沟通，工作稳定但重复性较高",
+      "soeVsInternetComparison": "央国企注重资质 and 流程，晋升稳定；互联网无直接对应岗位",
+      "id": "soe-0029",
+      "sourceCount": 30,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "工程造价"
+      ]
+    },
+    {
+      "name": "机械工程师",
+      "industry": "通用",
+      "category": "工程技术类",
+      "responsibilities": [
+        "负责机械设备或产线的设计、选型 and 安装调试",
+        "编写设备操作规程 and 维护保养计划",
+        "解决生产现场机械故障，提出改进方案",
+        "参与新设备的技术评估 and 采购验收",
+        "绘制机械图纸并管理技术文档"
+      ],
+      "hardSkills": [
+        "AutoCAD and SolidWorks绘图软件",
+        "机械原理 and 机械设计基础",
+        "液压与气动系统知识",
+        "设备故障诊断 and 维修技能",
+        "PLC基础编程（如西门子、三菱）"
+      ],
+      "softSkills": [
+        "动手实践能力",
+        "问题分析 and 解决能力",
+        "团队协作 and 沟通能力"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        8,
+        20
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "机械设计制造及其自动化",
+        "机械工程",
+        "车辆工程",
+        "过程装备与控制工程"
+      ],
+      "developmentPath": "助理机械工程师(0-2年)→机械工程师(2-5年)→高级机械工程师(5-8年)→技术主管/设备经理",
+      "recruitmentTimeline": "9月网申→10月笔试→11月面试→12月offer",
+      "examPrepNotes": "复习机械设计、材料力学、液压气动，练习CAD and SolidWorks操作",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "办公室与车间结合，需现场处理设备问题，工作节奏视生产计划而定，制造业氛围偏传统",
+      "soeVsInternetComparison": "不适用",
+      "id": "net-0030",
+      "sourceCount": 29,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "机械工程师"
+      ]
+    },
+    {
+      "name": "销售工程师",
+      "industry": "通用",
+      "category": "市场/销售类",
+      "responsibilities": [
+        "开发新客户，维护老客户关系，完成销售指标",
+        "了解客户技术需求，提供产品方案 and 报价",
+        "组织技术交流 and 产品演示，推动项目落地",
+        "跟踪合同执行，协调交付 and 售后服务",
+        "收集市场信息 and 竞品动态，反馈给产品团队"
+      ],
+      "hardSkills": [
+        "客户关系管理（CRM）系统使用",
+        "产品技术知识（根据行业不同）",
+        "商务谈判 and 合同撰写能力",
+        "PPT演示 and 方案制作",
+        "数据分析（销售漏斗 and 业绩报表）"
+      ],
+      "softSkills": [
+        "沟通表达 and 说服力",
+        "抗压 and 结果导向",
+        "人际敏感度 and 情商"
+      ],
+      "personalityTags": [
+        "外向性高",
+        "情绪稳定",
+        "宜人性高"
+      ],
+      "salaryRange": [
+        10,
+        30
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "市场营销",
+        "机械工程",
+        "电子信息工程",
+        "工商管理"
+      ],
+      "developmentPath": "销售工程师(0-2年)→高级销售工程师(2-5年)→区域销售经理(5-8年)→销售总监",
+      "recruitmentTimeline": "3月网申→4月面试→5月offer",
+      "examPrepNotes": "准备行业产品知识，练习销售案例分析 and 情景模拟，了解客户关系管理基础",
+      "entryDifficulty": "⭐⭐⭐",
+      "workStyleDescription": "频繁出差拜访客户，工作时间灵活但压力大，团队氛围以业绩为导向，需自我驱动",
+      "soeVsInternetComparison": "不适用",
+      "id": "net-0031",
+      "sourceCount": 29,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "销售岗",
+        "销售工程师"
+      ]
+    },
+    {
+      "name": "研发工程师",
+      "industry": "通用",
+      "category": "技术类",
+      "responsibilities": [
+        "根据产品需求进行技术方案设计 and 核心模块开发",
+        "编写高质量代码并完成单元测试 and 集成测试",
+        "参与技术评审，优化系统性能 and 可扩展性",
+        "跟踪前沿技术，推动技术创新 and 落地",
+        "撰写技术文档，指导初级工程师"
+      ],
+      "hardSkills": [
+        "Java/C++/Python等主流编程语言",
+        "数据结构与算法",
+        "数据库设计（MySQL/PostgreSQL）",
+        "分布式系统基础（如微服务、消息队列）",
+        "版本控制工具（Git） and CI/CD流程"
+      ],
+      "softSkills": [
+        "逻辑思维与抽象能力",
+        "学习能力 and 好奇心",
+        "团队协作 and 知识分享"
+      ],
+      "personalityTags": [
+        "开放性高",
+        "尽责性高",
+        "情绪稳定"
+      ],
+      "salaryRange": [
+        15,
+        40
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "软件工程",
+        "电子信息工程",
+        "数学与应用数学"
+      ],
+      "developmentPath": "初级研发工程师(0-2年)→中级研发工程师(2-5年)→高级研发工程师(5-8年)→技术专家/架构师",
+      "recruitmentTimeline": "3月网申→4月笔试→4-5月面试→5月offer",
+      "examPrepNotes": "重点刷LeetCode算法题，复习操作系统、网络 and 数据库基础，准备系统设计题",
+      "entryDifficulty": "⭐⭐⭐⭐",
+      "workStyleDescription": "以敏捷开发模式为主，团队协作紧密，日常使用Jira and Git，节奏较快但鼓励技术钻研",
+      "soeVsInternetComparison": "不适用",
+      "id": "net-0032",
+      "sourceCount": 28,
+      "sourceCompanies": [],
+      "sourceCities": [],
+      "aliases": [
+        "研发工程师"
+      ]
+    },
+    {
+      "name": "前端开发工程师",
+      "industry": "互联网",
+      "category": "技术类",
+      "responsibilities": [
+        "使用React/Vue框架开发Web应用前端页面，并编写单元测试",
+        "与后端工程师协作，通过RESTful API实现数据交互 and 页面渲染",
+        "优化页面加载性能，如代码分割、懒加载 and 缓存策略",
+        "参与前端组件库的搭建 and 维护，提升团队开发效率",
+        "修复线上Bug，处理浏览器兼容性问题"
+      ],
+      "hardSkills": [
+        "精通HTML/CSS/JavaScript",
+        "熟练使用React或Vue框架",
+        "熟悉TypeScript",
+        "掌握Webpack/Vite等构建工具",
+        "了解Node.js and 前端工程化"
+      ],
+      "softSkills": [
+        "团队协作能力",
+        "问题解决能力",
+        "沟通表达能力"
+      ],
+      "personalityTags": [
+        "尽责性高",
+        "开放性高",
+        "情绪稳定"
+      ],
+      "salaryRange": [
+        20,
+        45
+      ],
+      "salaryUnit": "万年薪",
+      "degreeRequirement": "本科",
+      "typicalMajors": [
+        "计算机科学与技术",
+        "软件工程",
+        "信息工程",
+        "数字媒体技术"
+      ],
+      "developmentPath": "初级前端工程师(0-2年)→中级前端工程师(2-5年)→高级前端工程师(5-8年)→前端架构师/技术经理",
+      "recruitmentTimeline": "3月网申→4月笔试→4-5月面试→5-6月offer",
+      "examPrepNotes": "重点刷LeetCode算法题，熟悉前端框架源码 and 浏览器渲染原理，准备项目经验深度问答",
+      "entryDifficulty": "⭐⭐⭐⭐",
+      "workStyleDescription": "扁平化管理，团队氛围活跃，日常使用Git协作，每周站会同步进度，鼓励技术分享 and 创新",
+      "soeVsInternetComparison": "不适用",
+      "id": "net-033"
+    }
+  ]
+}

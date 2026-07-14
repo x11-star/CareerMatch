@@ -3,30 +3,25 @@ import { PersonalityResult } from '../types';
 export function calculatePersonalityResult(answers: Record<number, number>): PersonalityResult {
   const getVal = (id: number) => answers[id] || 3;
 
-  // 1. Conscientiousness (C) - Q2, Q7, Q12, Q15
-  // Max = 20, Min = 4
-  const cSum = getVal(2) + getVal(7) + getVal(12) + getVal(15);
-  const cScore = Math.round(((cSum - 4) / 16) * 60 + 40); // Map to 40 - 100
+  // 1. Conscientiousness (C) - 8 items: Q2, Q7, Q12, Q15, Q22, Q27(reversed), Q32, Q37(reversed)
+  const cSum = getVal(2) + getVal(7) + getVal(12) + getVal(15) + getVal(22) + (6 - getVal(27)) + getVal(32) + (6 - getVal(37));
+  const cScore = Math.round(((cSum - 8) / 32) * 60 + 40); // Map to 40 - 100
 
-  // 2. Emotional Stability (S) - Q8, (6 - Q3), (6 - Q13)
-  // Max = 15, Min = 3
-  const sSum = getVal(8) + (6 - getVal(3)) + (6 - getVal(13));
-  const sScore = Math.round(((sSum - 3) / 12) * 60 + 40);
+  // 2. Emotional Stability (S) - 8 items: Q3(reversed), Q8, Q13(reversed), Q20, Q23(reversed), Q28, Q33(reversed), Q38
+  const sSum = (6 - getVal(3)) + getVal(8) + (6 - getVal(13)) + getVal(20) + (6 - getVal(23)) + getVal(28) + (6 - getVal(33)) + getVal(38);
+  const sScore = Math.round(((sSum - 8) / 32) * 60 + 40);
 
-  // 3. Agreeableness (A) - Q5, Q10
-  // Max = 10, Min = 2
-  const aSum = getVal(5) + getVal(10);
-  const aScore = Math.round(((aSum - 2) / 8) * 60 + 40);
+  // 3. Agreeableness (A) - 8 items: Q5, Q10, Q18, Q19, Q24(reversed), Q29, Q34, Q39(reversed)
+  const aSum = getVal(5) + getVal(10) + getVal(18) + getVal(19) + (6 - getVal(24)) + getVal(29) + getVal(34) + (6 - getVal(39));
+  const aScore = Math.round(((aSum - 8) / 32) * 60 + 40);
 
-  // 4. Openness (O) - Q1, Q6, Q11
-  // Max = 15, Min = 3
-  const oSum = getVal(1) + getVal(6) + getVal(11);
-  const oScore = Math.round(((oSum - 3) / 12) * 60 + 40);
+  // 4. Openness (O) - 8 items: Q1, Q6, Q11, Q16, Q21, Q26(reversed), Q31, Q36
+  const oSum = getVal(1) + getVal(6) + getVal(11) + getVal(16) + getVal(21) + (6 - getVal(26)) + getVal(31) + getVal(36);
+  const oScore = Math.round(((oSum - 8) / 32) * 60 + 40);
 
-  // 5. Extraversion (E) - Q4, Q14, (6 - Q9)
-  // Max = 15, Min = 3
-  const eSum = getVal(4) + getVal(14) + (6 - getVal(9));
-  const eScore = Math.round(((eSum - 3) / 12) * 60 + 40);
+  // 5. Extraversion (E) - 8 items: Q4, Q9(reversed), Q14, Q17, Q25(reversed), Q30, Q35, Q40
+  const eSum = getVal(4) + (6 - getVal(9)) + getVal(14) + getVal(17) + (6 - getVal(25)) + getVal(30) + getVal(35) + getVal(40);
+  const eScore = Math.round(((eSum - 8) / 32) * 60 + 40);
 
   // Decide Personality Type Title
   let typeTitle = '均衡发展型 (Balanced Core)';

@@ -27,9 +27,10 @@
 
 ## 🛠️ 技术栈
 
-- **前端 (Frontend)**: React 18, Vite, TypeScript, Tailwind CSS, Recharts (动态雷达图/柱状图), Framer Motion (页面转场与卡片动效), Lucide Icons (高质感矢量图标).
+- **前端 (Frontend)**: React 19, Vite, TypeScript, Tailwind CSS, Recharts (动态雷达图/柱状图), Framer Motion (页面转场与卡片动效), Lucide Icons (高质感矢量图标).
 - **后端 (Backend)**: Node.js, Express (整合 Vite 中间件热重载开发模式), esbuild (高效生产环境服务打包), `mammoth` (Word 解析), `pdf-parse` (PDF 提取).
-- **云端服务**: Firebase Auth & Firestore (用于用户鉴权与数据的持久化存储，并提供极佳的离线/游客 LocalStorage 兜底方案).
+- **AI 服务**: 智谱 AI（主引擎） + DeepSeek（兜底），通过后端 Provider 模块统一调用。
+- **云端服务**: Firebase Auth & Firestore 仍用于当前阶段的用户鉴权与持久化存储，后续上线预备版会迁移到 PostgreSQL。
 
 ---
 
@@ -54,15 +55,16 @@ cp .env.example .env
 ```
 用编辑器打开 `.env` 文件，根据您的需求配置 API Key：
 ```env
-# 核心大模型配置（以下二选一或同时配置均可）
+ZHIPU_API_KEY=your_zhipu_api_key_here
+ZHIPU_MODEL=glm-4-flash
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
+DEEPSEEK_MODEL=deepseek-chat
 ```
 
-> 💡 **双擎 AI 调用设计机制（重要）**：
-> - **优先 DeepSeek**：系统后端在处理“简历解析”和“求职岗位匹配”时，会首先检查 `.env` 中是否配置了 `DEEPSEEK_API_KEY`。如果配置，则采用 DeepSeek-Chat 极速模型进行处理，国内调用延迟更低。
-> - **无缝降级 Gemini**：如果未配置 DeepSeek 密钥，或者 DeepSeek 接口遇到网络/额度报错，系统会自动降级调用 `GEMINI_API_KEY`（使用高性能的 `gemini-3.5-flash`）。
-> - **本地完美兜底（Rule-Based Fallback）**：如果两个 AI 密钥均未配置，后端依然内置了高度复杂的**本地规则匹配算法**。它可以自动对简历的专业、实习、技术栈与岗位 JD 进行多维度的关键词映射与匹配得分计算，并输出专业真实的中文匹配报告，**确保应用在离线/无 Key 状态下绝不崩溃，依然完美可用！**
+> 💡 **双引擎 AI 调用设计机制（重要）**：
+> - **智谱首发**：系统后端在处理“简历解析”“求职岗位匹配”和“岗位顾问问答”时，会首先检查 `.env` 中是否配置了 `ZHIPU_API_KEY`。默认模型为 `glm-4-flash`。
+> - **DeepSeek 兜底**：如果智谱接口遇到网络、额度或服务报错，系统会自动降级调用 `DEEPSEEK_API_KEY`，默认模型为 `deepseek-chat`。
+> - **不伪造 AI 结果**：如果两个 AI Key 都未配置，简历解析、岗位匹配和岗位问答会返回明确的“AI 服务未配置”提示，不会使用假数据、随机评分或模板话术模拟 AI 结果。
 
 ### 4. 运行与构建命令
 
@@ -86,35 +88,20 @@ GEMINI_API_KEY=your_gemini_api_key_here
 
 ---
 
-## 🇨🇳 中国大陆开发者求职落地方案 (网络/梯子与环境问题)
+## 🇨🇳 中国大陆开发者求职落地方案
 
-由于本系统集成了先进的 AI 大模型，中国大陆求职者在本地测试和独立部署时通常关心网络代理及“挂梯子”问题，请参考以下落地解决方案：
+本项目 AI 调用默认使用国内更友好的服务组合：
 
-### 1. 免翻墙！首选 DeepSeek 引擎直连
-- **无需挂梯子**：DeepSeek（深度求求）作为国内的大模型服务商，其 API 节点在国内**可以直接连接**，无需任何梯子或代理，并且响应速度极快、成本极低。
-- **推荐做法**：如果您在大陆本地运行，请将大模型切换为 **DeepSeek**（在 `.env` 中配置 `DEEPSEEK_API_KEY` 即可）。此时，不仅本地运行完全不卡顿，未来的公网部署也变得极其简单。
+### 1. 首选智谱 AI
+- **推荐配置**：在 `.env` 中填写 `ZHIPU_API_KEY`，默认模型为 `glm-4-flash`。
+- **适用能力**：简历结构化解析、岗位匹配分析、岗位顾问问答。
 
-### 2. 使用 Gemini 引擎时的本地网络代理配置
-如果您想在大陆本地调用 Gemini API，因为谷歌服务的网络限制，您的后端必须通过代理进行请求。以下是配置方案：
-- **终端代理注入**：在启动 `npm run dev` 之前，在本地终端执行以下命令将您的科学上网工具（Clash, v2ray 等）代理端口暴露给 Node 进程（以代理端口 `7890` 为例）：
-  - **macOS / Linux**：
-    ```bash
-    export http_proxy=http://127.0.0.1:7890
-    export https_proxy=http://127.0.0.1:7890
-    npm run dev
-    ```
-  - **Windows (CMD)**：
-    ```cmd
-    set http_proxy=http://127.0.0.1:7890
-    set https_proxy=http://127.0.0.1:7890
-    npm run dev
-    ```
-  - **Windows (PowerShell)**：
-    ```powershell
-    $env:http_proxy="http://127.0.0.1:7890"
-    $env:https_proxy="http://127.0.0.1:7890"
-    npm run dev
-    ```
+### 2. DeepSeek 作为兜底
+- **兜底配置**：在 `.env` 中填写 `DEEPSEEK_API_KEY`，默认模型为 `deepseek-chat`。
+- **触发条件**：智谱接口失败时自动尝试 DeepSeek。
+
+### 3. 未配置 Key 时的行为
+如果 `ZHIPU_API_KEY` 和 `DEEPSEEK_API_KEY` 都为空，AI 相关接口会返回配置缺失提示。系统不会用随机分数、默认简历或模板话术冒充 AI 结果。
 
 
 ## 📄 许可证

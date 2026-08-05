@@ -2,5 +2,5 @@
   "name": "精准职达",
   "description": "大学生专属求职双引擎匹配平台，结合AI简历解析与科学性格测评，精准匹配央国企及互联网岗位。",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }

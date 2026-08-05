@@ -4,7 +4,7 @@ import { EmptyExtractedTextError, FileParseFailedError } from './errors';
 import type { ExtractedResumeText, NormalizedUpload } from './types';
 import { MAX_AI_TEXT_CHARS } from './validation';
 
-const require = createRequire(import.meta.url);
+const require = createRequire(`${process.cwd()}/package.json`);
 const defaultPdfParser = require('pdf-parse');
 
 export type PdfParser = (buffer: Buffer) => Promise<{ text?: string }>;

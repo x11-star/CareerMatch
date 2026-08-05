@@ -1,0 +1,166 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String        @id @default(cuid())
+  phone          String        @unique
+  name           String?
+  school         String?
+  major          String?
+  graduationYear String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  resumes        Resume[]
+  assessments    Assessment[]
+  sessions       Session[]
+  favorites      Favorite[]
+  matchResults   MatchResult[]
+}
+
+model SmsCode {
+  id         String    @id @default(cuid())
+  phone      String
+  codeHash   String
+  purpose    String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  @@index([phone, createdAt])
+}
+
+model Session {
+  id         String    @id @default(cuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime?
+  userAgent  String?
+  ipAddress  String?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+}
+
+model Resume {
+  id                String        @id @default(cuid())
+  userId            String
+  name              String
+  school            String
+  major             String
+  graduationYear    String
+  skills            Json
+  internships       Json
+  projects          Json
+  inferredDirection String
+  targetCities      Json
+  rawText           String?
+  sourceFileName    String?
+  sourceFileType    String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchResults      MatchResult[]
+
+  @@index([userId, updatedAt])
+}
+
+model Assessment {
+  id                 String        @id @default(cuid())
+  userId             String
+  answers            Json
+  typeTitle          String
+  description        String
+  radarScores        Json
+  industryFit        Json
+  hollandCode        String
+  hollandTags        Json
+  deepInterpretation Json
+  createdAt          DateTime      @default(now())
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchResults       MatchResult[]
+
+  @@index([userId, createdAt])
+}
+
+model Position {
+  id               String        @id @default(cuid())
+  title            String
+  company          String
+  city             String
+  type             String
+  industry         String?
+  category         String?
+  subIndustry      String?
+  subCategory      String?
+  salaryRange      String?
+  difficultyRating String?
+  tags             Json
+  summary          String
+  responsibilities Json
+  requirements     Json
+  softSkills       Json
+  salaryDetail     String?
+  careerPath       Json?
+  fitPersonality   Json?
+  howToPrepare     Json?
+  relatedJobs      Json?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  favorites        Favorite[]
+  matchResults     MatchResult[]
+
+  @@unique([company, title, city])
+  @@index([type])
+  @@index([industry])
+  @@index([category])
+  @@index([city])
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  userId     String
+  positionId String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position   Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, positionId])
+  @@index([userId])
+  @@index([positionId])
+}
+
+model MatchResult {
+  id                          String     @id @default(cuid())
+  userId                      String
+  resumeId                    String
+  assessmentId                String
+  positionId                  String
+  resumeHash                  String
+  assessmentHash              String
+  resumeMatch                 Int
+  personalityMatch            Int
+  overallMatch                Int
+  resumeMatchExplanation      String
+  personalityMatchExplanation String
+  whyExcellent                String
+  provider                    String
+  model                       String
+  createdAt                   DateTime   @default(now())
+  user                        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resume                      Resume     @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  assessment                  Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  position                    Position   @relation(fields: [positionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, resumeId, assessmentId, positionId, resumeHash, assessmentHash])
+  @@index([userId, positionId, resumeId, assessmentId])
+}

@@ -70,6 +70,45 @@ OCR_PROVIDER=local
 > - **DeepSeek 兜底**：如果智谱接口遇到网络、额度或服务报错，系统会自动降级调用 `DEEPSEEK_API_KEY`，默认模型为 `deepseek-chat`。
 > - **不伪造 AI 结果**：如果两个 AI Key 都未配置，简历解析、岗位匹配和岗位问答会返回明确的“AI 服务未配置”提示，不会使用假数据、随机评分或模板话术模拟 AI 结果。
 
+### PostgreSQL + Prisma 数据层（第三阶段）
+
+第三阶段使用本机 PostgreSQL，不引入 Docker Compose。默认开发数据库和测试数据库可参考 `.env.example`：
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/careermatch?schema=public"
+TEST_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/careermatch_test?schema=public"
+```
+
+如果本机可使用 `createdb`：
+
+```bash
+createdb careermatch
+createdb careermatch_test
+```
+
+Windows 上如果没有 `createdb` 命令，可以用 pgAdmin 或 `psql` 手动执行：
+
+```sql
+CREATE DATABASE careermatch;
+CREATE DATABASE careermatch_test;
+```
+
+初始化 Prisma：
+
+```bash
+npm run db:generate
+npm run db:migrate
+npm run db:seed
+```
+
+数据库测试：
+
+```bash
+npm run test:db
+```
+
+未配置 `TEST_DATABASE_URL` 时，`test:db` 会输出 `test:db skipped: TEST_DATABASE_URL is not configured` 并以 0 退出，避免没有本机 PostgreSQL 的环境被阻塞。配置 `TEST_DATABASE_URL` 后，测试脚本会把 Prisma datasource 指向测试库并清理测试表；不要把 `TEST_DATABASE_URL` 配成开发库。
+
 ### 4. 运行与构建命令
 
 - **本地开发模式**：

@@ -12,9 +12,15 @@
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit",
     "test:ai": "tsx tests/ai/run-tests.ts",
-    "test:files": "tsx tests/files/run-tests.ts"
+    "test:files": "tsx tests/files/run-tests.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "test:db": "tsx tests/db/run-tests.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
     "canvas": "^3.2.3",
@@ -36,6 +42,7 @@
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.0",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",

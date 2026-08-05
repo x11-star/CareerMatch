@@ -52,6 +52,10 @@ export function toHttpFileError(error: unknown): {
   if (error instanceof FileTooLargeError) {
     return { status: 413, body: { error: error.message, code: error.code } };
   }
+  if (error instanceof Error && (error as any).type === 'entity.too.large') {
+    const fileTooLargeError = new FileTooLargeError();
+    return { status: 413, body: { error: fileTooLargeError.message, code: fileTooLargeError.code } };
+  }
   if (error instanceof FileParseError) {
     return { status: 422, body: { error: error.message, code: error.code } };
   }

@@ -6,13 +6,21 @@ import { defaultAiService } from "./src/server/ai/aiService";
 import { toHttpAiError } from "./src/server/ai/errors";
 import { parseUploadedResumeText } from "./src/server/files/fileParseService";
 import { toHttpFileError } from "./src/server/files/errors";
+import { MAX_UPLOAD_JSON_BYTES } from "./src/server/files/validation";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: MAX_UPLOAD_JSON_BYTES }));
+app.use((error: any, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (error?.type === "entity.too.large") {
+    const httpError = toHttpFileError(error);
+    return res.status(httpError.status).json(httpError.body);
+  }
+  return next(error);
+});
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", mode: process.env.NODE_ENV });

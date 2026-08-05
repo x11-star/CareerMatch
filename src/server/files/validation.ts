@@ -4,6 +4,7 @@ import type { FileSourceType, NormalizedUpload, UploadedFileInput } from './type
 export { FileTooLargeError, UnsupportedFileTypeError } from './errors';
 
 export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+export const MAX_UPLOAD_JSON_BYTES = 13 * 1024 * 1024;
 export const MAX_AI_TEXT_CHARS = 20_000;
 export const MAX_PDF_OCR_PAGES = 3;
 

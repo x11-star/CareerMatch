@@ -25,6 +25,14 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
   const [isLoadingMatch, setIsLoadingMatch] = useState(false);
   const [matchError, setMatchError] = useState('');
 
+  async function parseMatchApiError(response: Response): Promise<string> {
+    const body = await response.json().catch(() => null);
+    if (body?.code === 'AI_CONFIGURATION_MISSING') {
+      return 'AI 匹配服务未配置：请在 .env 中填写 ZHIPU_API_KEY 或 DEEPSEEK_API_KEY 后重启服务。';
+    }
+    return body?.error || `获取 AI 匹配评估失败：HTTP ${response.status}`;
+  }
+
   useEffect(() => {
     let active = true;
     async function fetchMatch() {
@@ -60,7 +68,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP 错误 ${response.status}`);
+          throw new Error(await parseMatchApiError(response));
         }
 
         const data = await response.json();
@@ -169,6 +177,12 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
         <h3 className="text-sm font-bold text-slate-900 border-l-4 border-blue-600 pl-2 mb-6">
           你的双引擎相性指标
         </h3>
+
+        {matchError && (
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800">
+            {matchError}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="border border-slate-100 bg-slate-50/50 rounded-2xl p-4">

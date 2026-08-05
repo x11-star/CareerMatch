@@ -26,6 +26,17 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
   const [isApiParsing, setIsApiParsing] = useState(false);
   const [uploadTab, setUploadTab] = useState<'file' | 'text'>('file');
 
+  async function parseApiError(response: Response): Promise<string> {
+    const body = await response.json().catch(() => null);
+    if (body?.code === 'AI_CONFIGURATION_MISSING') {
+      return 'AI 服务未配置：请在 .env 中填写 ZHIPU_API_KEY 或 DEEPSEEK_API_KEY 后重启服务。';
+    }
+    if (body?.code === 'OCR_NOT_IMPLEMENTED') {
+      return body.error || '图片简历解析将在 OCR 模块完成后开放，请先上传 PDF、DOCX、TXT 或粘贴文本。';
+    }
+    return body?.error || `解析服务器返回错误：HTTP ${response.status}`;
+  }
+
   const triggerRealAiParse = async (
     params: { text?: string; fileData?: string; mimeType?: string },
     displayName: string
@@ -68,8 +79,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
       setUploadProgress(100);
 
       if (!response.ok) {
-        const errJson = await response.json().catch(() => ({ error: '解析服务器返回错误' }));
-        throw new Error(errJson.error || `HTTP 错误 ${response.status}`);
+        throw new Error(await parseApiError(response));
       }
 
       const parsedData: ResumeData = await response.json();

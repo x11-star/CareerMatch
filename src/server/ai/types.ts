@@ -5,7 +5,7 @@ export type AiProviderName = 'zhipu' | 'deepseek';
 export interface ResumeParseInput {
   extractedText: string;
   fileName?: string;
-  sourceType: 'text' | 'pdf' | 'docx' | 'txt';
+  sourceType: 'text' | 'pdf' | 'docx' | 'txt' | 'image' | 'ocr-pdf';
 }
 
 export interface MatchResult {

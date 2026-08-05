@@ -422,7 +422,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
                   uploadTab === 'text' ? 'bg-white text-slate-950 shadow-xs' : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                ✍️ 粘贴简历文本 (支持 DeepSeek/Gemini)
+                ✍️ 粘贴简历文本 (智谱优先 / DeepSeek 兜底)
               </button>
             </div>
 

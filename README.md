@@ -11,8 +11,11 @@
    - **多维雷达图与性格解读**：基于大五人格理论计算各维度百分位雷达分，结合霍兰德职业兴趣代码（RIASEC），全方位剖析您的工作风格、核心优势及发展建议。
 
 2. **📄 AI 智能简历深度解析（支持多格式）**
-   - **格式支持**：支持上传 `.pdf`（电子版）、`.docx`（Word）简历文件，或直接粘贴简历文本。
-   - **高精度解析**：后端集成 `pdf-parse` 与 `mammoth` 提取简历文本，结合大模型进行结构化数据清洗，输出姓名、学历、技能、实习经历、项目沉淀、求职意向及 AI 推断方向。
+   - **格式支持**：支持 `.pdf`、`.docx`、`.txt`、`.jpg`、`.png`、`.webp`。
+   - **上传限制**：单文件最大 8MB；扫描 PDF 第一版默认处理前 3 页。
+   - **本地提取与 OCR**：文本 PDF 和 DOCX 会先在后端本地提取文字；图片简历和扫描版 PDF 会使用本地 OCR 识别文字，再交给智谱/DeepSeek 结构化。
+   - **真实错误提示**：OCR 和 AI 都失败时，系统会给出真实错误提示，不会生成模拟简历。
+   - **运行提示**：本地 OCR 首次运行可能下载或使用语言数据，速度会慢于纯文本提取。
 
 3. **🎯 双擎岗位智能匹配与求职诊断（拒绝水分）**
    - **去通胀化评分**：真实、直白、不客套。针对无相关实习、专业跨度极大（如人文社科竞聘航天飞行器设计）的候选人，系统会硬性扣分，真实揭示初筛淘汰率。
@@ -28,7 +31,7 @@
 ## 🛠️ 技术栈
 
 - **前端 (Frontend)**: React 19, Vite, TypeScript, Tailwind CSS, Recharts (动态雷达图/柱状图), Framer Motion (页面转场与卡片动效), Lucide Icons (高质感矢量图标).
-- **后端 (Backend)**: Node.js, Express (整合 Vite 中间件热重载开发模式), esbuild (高效生产环境服务打包), `mammoth` (Word 解析), `pdf-parse` (PDF 提取).
+- **后端 (Backend)**: Node.js, Express (整合 Vite 中间件热重载开发模式), esbuild (高效生产环境服务打包), `mammoth` (Word 解析), `pdf-parse` (PDF 提取), `pdfjs-dist` + `canvas` (扫描 PDF 页面渲染), `tesseract.js` (本地 OCR).
 - **AI 服务**: 智谱 AI（主引擎） + DeepSeek（兜底），通过后端 Provider 模块统一调用。
 - **云端服务**: Firebase Auth & Firestore 仍用于当前阶段的用户鉴权与持久化存储，后续上线预备版会迁移到 PostgreSQL。
 
@@ -59,6 +62,7 @@ ZHIPU_API_KEY=your_zhipu_api_key_here
 ZHIPU_MODEL=glm-4-flash
 DEEPSEEK_API_KEY=your_deepseek_api_key_here
 DEEPSEEK_MODEL=deepseek-chat
+OCR_PROVIDER=local
 ```
 
 > 💡 **双引擎 AI 调用设计机制（重要）**：

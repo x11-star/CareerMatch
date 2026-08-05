@@ -26,13 +26,16 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
   const [isApiParsing, setIsApiParsing] = useState(false);
   const [uploadTab, setUploadTab] = useState<'file' | 'text'>('file');
 
+  const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+  const SUPPORTED_EXTENSIONS = ['txt', 'pdf', 'docx', 'png', 'jpg', 'jpeg', 'webp'];
+
   async function parseApiError(response: Response): Promise<string> {
     const body = await response.json().catch(() => null);
     if (body?.code === 'AI_CONFIGURATION_MISSING') {
       return 'AI 服务未配置：请在 .env 中填写 ZHIPU_API_KEY 或 DEEPSEEK_API_KEY 后重启服务。';
     }
-    if (body?.code === 'OCR_NOT_IMPLEMENTED') {
-      return body.error || '图片简历解析将在 OCR 模块完成后开放，请先上传 PDF、DOCX、TXT 或粘贴文本。';
+    if (body?.code === 'UNSUPPORTED_FILE_TYPE' || body?.code === 'FILE_TOO_LARGE' || body?.code === 'EMPTY_EXTRACTED_TEXT' || body?.code === 'FILE_PARSE_FAILED') {
+      return body.error || '文件解析失败，请检查文件格式和清晰度。';
     }
     return body?.error || `解析服务器返回错误：HTTP ${response.status}`;
   }
@@ -325,6 +328,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
       case 'jpg':
       case 'jpeg': return 'image/jpeg';
       case 'webp': return 'image/webp';
+      case 'txt': return 'text/plain';
       default: return 'application/octet-stream';
     }
   };
@@ -333,6 +337,16 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    if (!SUPPORTED_EXTENSIONS.includes(ext)) {
+      setApiParseError('不支持的文件格式。请上传 PDF、DOCX、TXT、JPG、PNG 或 WebP。');
+      return;
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setApiParseError('文件超过 8MB 限制，请压缩后重新上传。');
+      return;
+    }
 
     if (file.name.endsWith('.txt')) {
       const reader = new FileReader();
@@ -435,15 +449,15 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
                     <span className="text-sm font-semibold text-slate-700 block mb-1">
                       拖拽文件到此处，或 <span className="text-blue-600">点击选择</span>
                     </span>
-                    <span className="text-xs text-slate-400 block mb-2">支持 .txt / .pdf / .doc / .docx / .png / .jpg</span>
+                    <span className="text-xs text-slate-400 block mb-2">支持 .txt / .pdf / .docx / .png / .jpg / .webp，单文件不超过 8MB</span>
                     <span className="text-[10px] text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-2.5 py-1.5 block max-w-xs mx-auto font-medium">
-                      💡 提示：.txt 文件支持 100% 真实 AI 解析！如为 PDF/Word 格式，建议复制文字并使用「粘贴简历文本」选项卡以获取完美的真实大模型解析。
+                      💡 PDF/DOCX 会先提取文本；图片和扫描版 PDF 会使用本地 OCR 识别后再交给 AI 解析。
                     </span>
                   </div>
                   <input
                     id="resume-file-input"
                     type="file"
-                    accept=".txt,.pdf,.doc,.docx,.png,.jpg,.jpeg"
+                    accept=".txt,.pdf,.docx,.png,.jpg,.jpeg,.webp"
                     className="hidden"
                     onChange={handleFileChange}
                   />

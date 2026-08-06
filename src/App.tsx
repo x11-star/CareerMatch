@@ -14,9 +14,8 @@ import ShareModal from './components/ShareModal';
 
 import { MOCK_POSITIONS, DEFAULT_RESUME_DATA } from './data';
 import { ResumeData, PersonalityResult, Position } from './types';
-import { Landmark } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
-import { getLatestResume, getLatestAssessment, getPositions, seedPositionsToFirestore } from './lib/firebaseStore';
+import { getLatestResume, getLatestAssessment, getPositions } from './lib/userDataStore';
 
 type ViewType = 'landing' | 'upload' | 'assessment' | 'assessment-result' | 'results' | 'detail' | 'browser' | 'profile';
 
@@ -29,26 +28,6 @@ export default function App() {
   const [selectedPositionId, setSelectedPositionId] = useState<string>('sg-01');
   const [activeModal, setActiveModal] = useState<'download' | 'share' | null>(null);
   const [positions, setPositions] = useState<Position[]>(MOCK_POSITIONS);
-
-  const [seedingStatus, setSeedingStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [seedingError, setSeedingError] = useState('');
-
-  const handleManualSeed = async () => {
-    setSeedingStatus('loading');
-    setSeedingError('');
-    try {
-      await seedPositionsToFirestore();
-      setSeedingStatus('success');
-      const dbPositions = await getPositions();
-      if (dbPositions && dbPositions.length > 0) {
-        setPositions(dbPositions);
-      }
-    } catch (err: any) {
-      console.error(err);
-      setSeedingStatus('error');
-      setSeedingError(err.message || '未知错误');
-    }
-  };
 
   // Load positions once on mount
   useEffect(() => {
@@ -65,16 +44,16 @@ export default function App() {
     loadPositions();
   }, []);
 
-  // Sync with Firestore whenever user state changes
+  // Sync saved user data whenever user state changes
   useEffect(() => {
     async function fetchUserData() {
       if (user) {
         try {
-          const resume = await getLatestResume(user.uid);
+          const resume = await getLatestResume(user);
           if (resume) {
             setResumeData(resume);
           }
-          const assessment = await getLatestAssessment(user.uid);
+          const assessment = await getLatestAssessment(user);
           if (assessment) {
             setPersonalityResult(assessment);
           } else {

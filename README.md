@@ -33,7 +33,7 @@
 - **前端 (Frontend)**: React 19, Vite, TypeScript, Tailwind CSS, Recharts (动态雷达图/柱状图), Framer Motion (页面转场与卡片动效), Lucide Icons (高质感矢量图标).
 - **后端 (Backend)**: Node.js, Express (整合 Vite 中间件热重载开发模式), esbuild (高效生产环境服务打包), `mammoth` (Word 解析), `pdf-parse` (PDF 提取), `pdfjs-dist` + `canvas` (扫描 PDF 页面渲染), `tesseract.js` (本地 OCR).
 - **AI 服务**: 智谱 AI（主引擎） + DeepSeek（兜底），通过后端 Provider 模块统一调用。
-- **云端服务**: Firebase Auth & Firestore 仍用于当前阶段的用户鉴权与持久化存储，后续上线预备版会迁移到 PostgreSQL。
+- **云端服务**: 登录用户路径使用本项目后端 API + PostgreSQL，服务端通过 HttpOnly Cookie 维护会话；游客数据继续保存在浏览器 localStorage。
 
 ---
 
@@ -108,6 +108,25 @@ npm run test:db
 ```
 
 未配置 `TEST_DATABASE_URL` 时，`test:db` 会输出 `test:db skipped: TEST_DATABASE_URL is not configured` 并以 0 退出，避免没有本机 PostgreSQL 的环境被阻塞。配置 `TEST_DATABASE_URL` 后，测试脚本会把 Prisma datasource 指向测试库并清理测试表；不要把 `TEST_DATABASE_URL` 配成开发库。
+
+### 手机号开发验证码登录
+
+第四阶段后，登录用户路径使用本项目后端 API + PostgreSQL，不再使用 Firebase Auth/Firestore。
+
+本地开发默认使用开发验证码，不会发送真实短信：
+
+```env
+SMS_PROVIDER="dev"
+DEV_SMS_CODE="123456"
+```
+
+示例手机号：`13388888888`。示例手机号只用于文档和测试，真实用户可以输入自己的手机号。
+
+登录成功后，服务端设置 HttpOnly Cookie `careermatch_session`，前端不会把 session token 写入 localStorage。
+
+游客仍可继续体验，游客简历、测评和收藏保存在当前浏览器 localStorage。登录后如果检测到游客数据，页面会提示是否同步到手机号账号。
+
+`TEST_DATABASE_URL` 未配置时，`npm run test:db`、`npm run test:auth`、`npm run test:api` 会跳过 guarded-live 数据库测试并以 0 退出。配置后，这些测试会运行 migration 并真实访问测试数据库。
 
 ### 4. 运行与构建命令
 

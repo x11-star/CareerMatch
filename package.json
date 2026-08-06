@@ -17,7 +17,10 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "test:db": "tsx tests/db/run-tests.ts"
+    "test:db": "tsx tests/db/run-tests.ts",
+    "test:auth": "tsx tests/auth/run-tests.ts",
+    "test:api": "tsx tests/api/run-tests.ts",
+    "test:frontend": "tsx tests/frontend/run-tests.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -26,7 +29,6 @@
     "canvas": "^3.2.3",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
-    "firebase": "^12.16.0",
     "lucide-react": "^0.546.0",
     "mammoth": "^1.12.0",
     "motion": "^12.23.24",

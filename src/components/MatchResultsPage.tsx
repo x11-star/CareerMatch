@@ -3,7 +3,7 @@ import { Award, Landmark, Laptop, Briefcase, MapPin, DollarSign, Star, FileDown,
 import { MOCK_POSITIONS } from '../data';
 import { Position, ResumeData, PersonalityResult } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { getPositions, getFavorites, toggleFavorite } from '../lib/firebaseStore';
+import { getPositions, getFavorites, toggleFavorite } from '../lib/userDataStore';
 
 interface MatchResultsPageProps {
   onSelectPosition: (id: string) => void;
@@ -28,7 +28,7 @@ export default function MatchResultsPage({ onSelectPosition, onOpenModal, onReta
 
       if (user) {
         try {
-          const dbFavs = await getFavorites(user.uid);
+          const dbFavs = await getFavorites(user);
           const favMap: Record<string, boolean> = {};
           dbFavs.forEach((id) => {
             favMap[id] = true;
@@ -48,9 +48,9 @@ export default function MatchResultsPage({ onSelectPosition, onOpenModal, onReta
     setFavorites({ ...favorites, [id]: isFavNow });
     if (user) {
       try {
-        await toggleFavorite(user.uid, id);
+        await toggleFavorite(user, id);
       } catch (err) {
-        console.error("Failed to toggle favorite in Firestore", err);
+        console.error('Failed to toggle favorite', err);
       }
     }
   };

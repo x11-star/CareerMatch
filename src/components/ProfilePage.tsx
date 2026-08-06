@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, FileText, BrainCircuit, Heart, FileDown, Settings, Edit2, ShieldAlert, CheckCircle, ExternalLink, X, Save } from 'lucide-react';
+import { User, FileText, BrainCircuit, FileDown, Settings, Edit2, ShieldAlert, CheckCircle, ExternalLink, X, Save } from 'lucide-react';
 import { DEFAULT_RESUME_DATA, DEFAULT_PERSONALITY_RESULT } from '../data';
 import { useAuth } from '../context/AuthContext';
 import { ResumeData, PersonalityResult } from '../types';
@@ -63,7 +63,7 @@ export default function ProfilePage({ onNavigate, onOpenModal, resumeData, perso
       await updateProfile(editForm);
       setIsEditing(false);
     } catch (err) {
-      console.error("Failed to save profile in Firestore", err);
+      console.error('Failed to save profile', err);
     }
   };
 
@@ -79,7 +79,7 @@ export default function ProfilePage({ onNavigate, onOpenModal, resumeData, perso
             <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
               {displayName}
               <span className="text-[10px] bg-blue-50 text-blue-600 border border-blue-100 rounded-md px-1.5 py-0.5 font-bold uppercase tracking-wider">
-                已认证学信网
+                {user?.isGuest ? '游客模式' : '手机号登录'}
               </span>
             </h2>
             <p className="text-xs text-slate-500 font-medium mt-1">
@@ -255,36 +255,36 @@ export default function ProfilePage({ onNavigate, onOpenModal, resumeData, perso
               <div className="space-y-5 text-xs text-slate-700">
                 <div className="flex justify-between items-center py-2 border-b border-slate-50">
                   <div>
-                    <div className="font-bold text-slate-800">绑定手机</div>
-                    <div className="text-slate-400 mt-0.5">138 **** 9283 (已绑定并实名认证)</div>
+                    <div className="font-bold text-slate-800">登录手机</div>
+                    <div className="text-slate-400 mt-0.5">{user?.phone || '游客模式未绑定手机号'}</div>
                   </div>
-                  <button className="text-blue-600 hover:underline font-bold cursor-pointer">修改</button>
+                  <span className="text-slate-400 font-semibold">暂不支持修改</span>
                 </div>
 
-                <div className="flex justify-between items-center py-2 border-b border-slate-50">
+                <div className="flex justify-between items-center py-2 border-b border-slate-50 opacity-70">
                   <div>
-                    <div className="font-bold text-slate-800">绑定邮箱</div>
-                    <div className="text-slate-400 mt-0.5">{user?.email || 'syl*****@gmail.com'}</div>
+                    <div className="font-bold text-slate-800">邮箱绑定</div>
+                    <div className="text-slate-400 mt-0.5">本阶段暂未开放邮箱绑定</div>
                   </div>
-                  <button className="text-blue-600 hover:underline font-bold cursor-pointer">修改</button>
+                  <span className="text-slate-400 font-semibold">未开放</span>
                 </div>
 
-                <div className="flex justify-between items-center py-2 border-b border-slate-50">
+                <div className="flex justify-between items-center py-2 border-b border-slate-50 opacity-70">
                   <div>
                     <div className="font-bold text-slate-800">微信绑定</div>
-                    <div className="text-emerald-600 font-semibold mt-0.5">🟢 已微信授权登陆</div>
+                    <div className="text-slate-400 mt-0.5">本阶段暂未开放微信绑定</div>
                   </div>
-                  <button className="text-slate-400 hover:text-red-500 font-semibold cursor-pointer">解除绑定</button>
+                  <span className="text-slate-400 font-semibold">未开放</span>
                 </div>
 
-                <div className="flex justify-between items-center py-2 bg-red-50/50 p-4 rounded-xl border border-red-100">
+                <div className="flex justify-between items-center py-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <div>
-                    <div className="font-bold text-red-800 flex items-center gap-1">
+                    <div className="font-bold text-slate-800 flex items-center gap-1">
                       <ShieldAlert className="w-4 h-4" /> 账号注销与数据清除
                     </div>
-                    <div className="text-red-600/80 mt-0.5">此操作为毁灭性、不可逆的，注销后将彻底抹去您的解析简历与性格档案！</div>
+                    <div className="text-slate-500 mt-0.5">账号注销功能后续开放。本阶段不会执行数据删除。</div>
                   </div>
-                  <button className="text-red-600 hover:text-red-700 font-bold underline cursor-pointer">注销账号</button>
+                  <span className="text-slate-400 font-semibold">未开放</span>
                 </div>
               </div>
             </div>

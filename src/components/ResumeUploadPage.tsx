@@ -3,7 +3,7 @@ import { Upload, FileText, CheckCircle2, RotateCw, AlertCircle, Edit3, ArrowRigh
 import { DEFAULT_RESUME_DATA } from '../data';
 import { ResumeData } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { saveResume, getLatestResume } from '../lib/firebaseStore';
+import { saveResume, getLatestResume } from '../lib/userDataStore';
 
 interface ResumeUploadPageProps {
   onConfirm: (data: ResumeData) => void;
@@ -138,12 +138,12 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
     targetCities: ''
   });
 
-  // Load existing resume if present in Firestore/local storage
+  // Load existing resume if present in server/local storage
   useEffect(() => {
     async function loadSavedResume() {
       if (user) {
         try {
-          const latestResume = await getLatestResume(user.uid);
+          const latestResume = await getLatestResume(user);
           if (latestResume) {
             setResumeData(latestResume);
             setCurrentState('D_DONE');
@@ -159,7 +159,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
   const handleConfirmClick = async () => {
     if (user) {
       try {
-        await saveResume(user.uid, resumeData);
+        await saveResume(user, resumeData);
       } catch (e) {
         console.error("Failed to save resume", e);
       }

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Search, MapPin, ChevronRight, Briefcase, Filter, X, SlidersHorizontal, Layers, GraduationCap, Coins } from 'lucide-react';
 import { MOCK_POSITIONS } from '../data';
 import { Position } from '../types';
-import { getPositions } from '../lib/firebaseStore';
+import { getPositions } from '../lib/userDataStore';
 
 interface PositionBrowserPageProps {
   onSelectPosition: (id: string) => void;
@@ -52,7 +52,7 @@ export default function PositionBrowserPage({ onSelectPosition }: PositionBrowse
         const data = await getPositions();
         setPositions(data);
       } catch (e) {
-        console.error("Failed to fetch positions from Firestore:", e);
+        console.error('Failed to fetch positions:', e);
       }
     }
     loadPositions();

@@ -5,7 +5,7 @@ import { MOCK_QUESTIONS } from '../data';
 import { PersonalityResult } from '../types';
 import { calculatePersonalityResult } from '../lib/assessmentHelper';
 import { useAuth } from '../context/AuthContext';
-import { saveAssessment } from '../lib/firebaseStore';
+import { saveAssessment } from '../lib/userDataStore';
 
 interface AssessmentPageProps {
   onComplete: (result: PersonalityResult) => void;
@@ -47,9 +47,9 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
         const result = calculatePersonalityResult(updatedAnswers);
         if (user) {
           try {
-            await saveAssessment(user.uid, result);
+            await saveAssessment(user, result, updatedAnswers);
           } catch (e) {
-            console.error("Failed to save assessment to Firestore", e);
+            console.error('Failed to save assessment', e);
           }
         }
         setTimeout(() => {
@@ -85,9 +85,9 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
     setTimeout(async () => {
       if (user) {
         try {
-          await saveAssessment(user.uid, result);
+          await saveAssessment(user, result, mockAnswers);
         } catch (e) {
-          console.error("Failed to save assessment to Firestore", e);
+          console.error('Failed to save assessment', e);
         }
       }
       onComplete(result);

@@ -1,7 +1,6 @@
 import type express from 'express';
 import { defaultAuthService } from '../auth/authService';
 import { clearAuthCookie, readAuthCookie, setAuthCookie } from '../http/cookies';
-import { requireAuth } from '../http/authMiddleware';
 import { sendHttpError } from '../http/errors';
 
 function publicUser(user: {
@@ -53,15 +52,6 @@ export function registerAuthRoutes(app: express.Express) {
       return res.json({ ok: true });
     } catch (error) {
       clearAuthCookie(res);
-      return sendHttpError(res, error);
-    }
-  });
-
-  app.get('/api/me', async (req, res) => {
-    try {
-      const user = await requireAuth(req);
-      return res.json({ user: publicUser(user) });
-    } catch (error) {
       return sendHttpError(res, error);
     }
   });

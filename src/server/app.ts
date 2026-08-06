@@ -5,6 +5,11 @@ import { parseUploadedResumeText } from "./files/fileParseService";
 import { toHttpFileError } from "./files/errors";
 import { MAX_UPLOAD_JSON_BYTES } from "./files/validation";
 import { registerAuthRoutes } from "./routes/authRoutes";
+import { registerMeRoutes } from "./routes/meRoutes";
+import { registerResumeRoutes } from "./routes/resumeRoutes";
+import { registerAssessmentRoutes } from "./routes/assessmentRoutes";
+import { registerPositionRoutes } from "./routes/positionRoutes";
+import { registerFavoriteRoutes } from "./routes/favoriteRoutes";
 
 type AiService = ReturnType<typeof createAiService>;
 
@@ -30,6 +35,11 @@ export function createApp(options: CreateAppOptions = {}) {
   });
 
   registerAuthRoutes(app);
+  registerMeRoutes(app);
+  registerResumeRoutes(app);
+  registerAssessmentRoutes(app);
+  registerPositionRoutes(app);
+  registerFavoriteRoutes(app);
 
   app.post("/api/parse-resume", async (req, res) => {
     const { text, fileData, mimeType, fileName } = req.body;

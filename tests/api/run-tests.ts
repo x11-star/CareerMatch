@@ -29,6 +29,7 @@ if (migrate.status !== 0) process.exit(migrate.status ?? 1);
 
 try {
   await import('./authRoutes.test');
+  await import('./dataRoutes.test');
 } finally {
   const { prisma } = await import('../../src/server/db/prisma');
   await prisma.$disconnect();

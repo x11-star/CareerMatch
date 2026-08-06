@@ -1,6 +1,5 @@
 import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { pathToFileURL } from 'node:url';
 import dotenv from 'dotenv';
 
 dotenv.config({ quiet: true });
@@ -29,7 +28,7 @@ if (migrate.status !== 0) process.exit(migrate.status ?? 1);
 try {
   const testPath = new URL('./authService.test.ts', import.meta.url);
   if (existsSync(testPath)) {
-    await import(pathToFileURL(testPath.pathname).href);
+    await import('./authService.test');
   } else {
     console.log('test:auth skipped: authService.test.ts is not implemented yet');
   }

@@ -4,6 +4,7 @@ import { toHttpAiError } from "./ai/errors";
 import { parseUploadedResumeText } from "./files/fileParseService";
 import { toHttpFileError } from "./files/errors";
 import { MAX_UPLOAD_JSON_BYTES } from "./files/validation";
+import { registerAuthRoutes } from "./routes/authRoutes";
 
 type AiService = ReturnType<typeof createAiService>;
 
@@ -27,6 +28,8 @@ export function createApp(options: CreateAppOptions = {}) {
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok", mode: process.env.NODE_ENV });
   });
+
+  registerAuthRoutes(app);
 
   app.post("/api/parse-resume", async (req, res) => {
     const { text, fileData, mimeType, fileName } = req.body;

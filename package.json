@@ -17,7 +17,10 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "test:db": "tsx tests/db/run-tests.ts"
+    "test:db": "tsx tests/db/run-tests.ts",
+    "test:auth": "tsx tests/auth/run-tests.ts",
+    "test:api": "tsx tests/api/run-tests.ts",
+    "test:frontend": "tsx tests/frontend/run-tests.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

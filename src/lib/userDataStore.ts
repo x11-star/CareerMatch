@@ -18,6 +18,20 @@ export function writeGuestJson(storage: Pick<Storage, 'setItem'>, key: string, v
   storage.setItem(key, JSON.stringify(value));
 }
 
+export function buildGuestImportPayload(storage: Pick<Storage, 'getItem'>) {
+  const guestUid = storage.getItem('guest_uid');
+  if (!guestUid) return null;
+  const resume = readGuestJson(storage, `resume_${guestUid}`);
+  const assessment = readGuestJson(storage, `assessment_${guestUid}`);
+  const favoritePositionIds = readGuestJson(storage, `favorites_${guestUid}`);
+  if (!resume && !assessment && !Array.isArray(favoritePositionIds)) return null;
+  return {
+    ...(resume ? { resume } : {}),
+    ...(assessment ? { assessment } : {}),
+    favoritePositionIds: Array.isArray(favoritePositionIds) ? favoritePositionIds : [],
+  };
+}
+
 function storage() {
   return window.localStorage;
 }

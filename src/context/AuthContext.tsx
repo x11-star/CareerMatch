@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '../lib/apiClient';
-import type { AppUser } from '../lib/userDataStore';
+import { buildGuestImportPayload, type AppUser } from '../lib/userDataStore';
 
 type UserProfile = {
   id: string;
@@ -93,6 +93,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const result = await api.verifyLoginCode(phone, code);
       setUser(toAppUser(result.user));
       setUserProfile(result.user);
+      const guestImportPayload = buildGuestImportPayload(localStorage);
+      if (guestImportPayload && window.confirm('检测到当前浏览器有游客简历、测评或收藏数据，是否同步到手机号账号？')) {
+        await api.importLocalData(guestImportPayload);
+        await refreshMe();
+      }
     } finally {
       setLoading(false);
     }

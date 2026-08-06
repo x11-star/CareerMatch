@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Heart, Share2, FileDown, ShieldCheck, Sparkles, MapPin, DollarSign, Star, CheckCircle2, AlertCircle, RotateCw } from 'lucide-react';
 import { Position, ResumeData, PersonalityResult } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 interface PositionDetailPageProps {
   position: Position;
@@ -11,6 +12,7 @@ interface PositionDetailPageProps {
 }
 
 export default function PositionDetailPage({ position, onBack, onOpenModal, resumeData, personalityResult }: PositionDetailPageProps) {
+  const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
   const [isAiAnalysisOpen, setIsAiAnalysisOpen] = useState(true);
 
@@ -39,7 +41,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
       setIsLoadingMatch(true);
       setMatchError('');
       
-      const cacheKey = `match_${position.id}_${resumeData?.name || 'guest'}`;
+      const cacheKey = `match_${user?.isGuest ? 'guest' : user?.id || 'none'}_${position.id}_${resumeData?.name || 'guest'}`;
       const cached = sessionStorage.getItem(cacheKey);
       if (cached) {
         try {
@@ -60,11 +62,9 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            resumeData,
-            personalityResult,
-            position,
-          }),
+          body: JSON.stringify(user && !user.isGuest
+            ? { positionId: position.id }
+            : { resumeData, personalityResult, position }),
         });
 
         if (!response.ok) {
@@ -92,7 +92,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
     return () => {
       active = false;
     };
-  }, [position.id, resumeData, personalityResult]);
+  }, [user, position.id, resumeData, personalityResult]);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">

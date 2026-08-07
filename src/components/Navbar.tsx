@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Target, Menu, X, User, LogIn, ChevronDown, Award, LogOut, Phone, KeyRound } from 'lucide-react';
+import { Award, ChevronDown, KeyRound, LogIn, LogOut, Menu, Phone, Target, User, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
@@ -13,7 +13,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [phone, setPhone] = useState('13388888888');
+  const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [devCode, setDevCode] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -21,10 +21,11 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
 
   const navItems = [
     { label: '首页', view: 'landing' },
+    { label: '上传简历', view: 'upload' },
+    { label: '职业测评', view: 'assessment' },
     { label: '岗位库', view: 'browser' },
-    { label: '我的测评', view: 'upload' },
-    { label: '匹配报告', view: 'results' },
-    { label: '个人中心', view: 'profile' },
+    { label: '诊断报告', view: 'results' },
+    { label: '我的档案', view: 'profile' },
   ];
 
   const handleNavClick = (view: string) => {
@@ -36,6 +37,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
   const isNavActive = (view: string) => {
     if (currentView === view) return true;
     if (view === 'upload' && currentView === 'assessment') return true;
+    if (view === 'assessment' && currentView === 'assessment-result') return true;
     if (view === 'results' && (currentView === 'assessment-result' || currentView === 'detail')) return true;
     return false;
   };
@@ -85,58 +87,53 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
     }
   };
 
-  const avatarChar = userProfile?.name ? userProfile.name[0] : (user ? '客' : '匿');
-  const userName = userProfile?.name || (user ? (user.isGuest ? '游客学子' : '求职学子') : '未登录');
-  const userSubTitle = user?.isGuest ? '游客模式' : `${userProfile?.school || '未填写学校'} · ${userProfile?.major || '未填写专业'}`;
+  const avatarChar = userProfile?.name ? userProfile.name[0] : (user ? '访' : '未');
+  const userName = user?.isGuest ? '游客模式' : (user ? '手机号登录' : '未登录');
+  const userSubTitle = user?.isGuest ? '本机保存体验数据' : (user ? maskPhone(user.phone) : '登录后保存到账号');
 
   return (
     <>
-      <nav className="sticky top-0 z-50 h-16 bg-white border-b border-slate-200 shadow-xs">
-        <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-full">
-            {/* Logo */}
+      <nav className="sticky top-0 z-50 h-16 border-b border-career-line bg-career-surface/95 shadow-xs backdrop-blur">
+        <div className="mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-full items-center justify-between">
             <button
               id="nav-logo-btn"
               onClick={() => handleNavClick('landing')}
-              className="flex items-center gap-2 text-blue-600 font-bold text-xl cursor-pointer hover:opacity-90 transition-opacity"
+              className="flex cursor-pointer items-center gap-2 text-xl font-semibold text-career-ink transition-opacity hover:opacity-90"
             >
-              <div className="p-1.5 bg-blue-100 rounded-lg">
-                <Target className="w-6 h-6 text-blue-600" />
+              <div className="rounded-xl bg-career-primary-soft p-1.5 text-career-primary">
+                <Target className="h-6 w-6" />
               </div>
-              <span className="font-display tracking-tight text-slate-900">
-                精准<span className="text-blue-600">职达</span>
-              </span>
+              <span className="tracking-tight">精准职达</span>
             </button>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden items-center gap-6 md:flex">
               {navItems.map((item) => (
                 <button
                   key={item.view}
                   id={`nav-item-${item.view}`}
                   onClick={() => handleNavClick(item.view)}
-                  className={`relative h-16 px-1 flex items-center text-sm font-medium transition-colors cursor-pointer ${
+                  className={`relative flex h-16 cursor-pointer items-center px-1 text-sm font-medium transition-colors ${
                     isNavActive(item.view)
-                      ? 'text-blue-600'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'text-career-primary'
+                      : 'text-career-muted hover:text-career-ink'
                   }`}
                 >
                   {item.label}
                   {isNavActive(item.view) && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-full" />
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-career-primary" />
                   )}
                 </button>
               ))}
             </div>
 
-            {/* User Section */}
-            <div className="hidden md:flex items-center gap-4">
+            <div className="hidden items-center gap-3 md:flex">
               <button
                 id="nav-share-btn"
                 onClick={() => onOpenModal('share')}
-                className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg transition-colors cursor-pointer font-medium"
+                className="rounded-xl border border-career-line bg-career-bg px-3 py-1.5 text-xs font-medium text-career-muted transition-colors hover:bg-career-surface-muted hover:text-career-ink"
               >
-                分享好友
+                复制分享链接
               </button>
 
               {user ? (
@@ -144,35 +141,39 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
                   <button
                     id="user-profile-menu-btn"
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    className="flex items-center gap-2 p-1.5 rounded-full border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
+                    className="flex cursor-pointer items-center gap-2 rounded-full border border-career-line bg-career-surface p-1.5 transition-colors hover:bg-career-surface-muted"
                   >
-                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-career-primary-soft text-sm font-semibold text-career-primary">
                       {avatarChar}
                     </div>
-                    <span className="text-xs font-semibold text-slate-700 max-w-[80px] truncate">{userName}</span>
-                    <ChevronDown className="w-4 h-4 text-slate-500" />
+                    <span className="max-w-24 truncate text-xs font-semibold text-career-ink">{userName}</span>
+                    <ChevronDown className="h-4 w-4 text-career-muted" />
                   </button>
 
                   {userDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-lg py-1 text-sm text-slate-700 z-50">
+                    <div className="absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-career-line bg-career-surface py-2 text-sm text-career-ink shadow-lg">
+                      <div className="border-b border-career-line px-4 pb-3 pt-2">
+                        <p className="text-xs font-semibold text-career-ink">{userName}</p>
+                        <p className="mt-1 text-[11px] text-career-muted">{userSubTitle}</p>
+                      </div>
                       <button
                         onClick={() => handleNavClick('profile')}
-                        className="w-full text-left px-4 py-2 hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-2"
+                        className="flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-left transition-colors hover:bg-career-surface-muted"
                       >
-                        <User className="w-4 h-4" /> 个人中心
+                        <User className="h-4 w-4" /> 我的档案
                       </button>
                       <button
                         onClick={() => handleNavClick('upload')}
-                        className="w-full text-left px-4 py-2 hover:bg-slate-50 transition-colors cursor-pointer flex items-center gap-2"
+                        className="flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-left transition-colors hover:bg-career-surface-muted"
                       >
-                        <Award className="w-4 h-4" /> 重新匹配测评
+                        <Award className="h-4 w-4" /> 更新材料
                       </button>
-                      <div className="border-t border-slate-100 my-1" />
+                      <div className="my-1 border-t border-career-line" />
                       <button
                         onClick={handleLogoutClick}
-                        className="w-full text-left px-4 py-2 hover:bg-slate-50 text-red-600 transition-colors cursor-pointer flex items-center gap-2"
+                        className="flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-left text-career-danger transition-colors hover:bg-career-danger-soft"
                       >
-                        <LogOut className="w-4 h-4" /> 退出登录
+                        <LogOut className="h-4 w-4" /> 退出登录
                       </button>
                     </div>
                   )}
@@ -180,78 +181,62 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
               ) : (
                 <button
                   onClick={handleLoginClick}
-                  className="flex items-center gap-1 text-xs bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl transition-colors font-semibold cursor-pointer"
+                  className="flex cursor-pointer items-center gap-1 rounded-2xl bg-career-primary px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-primary-700"
                 >
-                  <LogIn className="w-3.5 h-3.5" /> 快捷登录
+                  <LogIn className="h-3.5 w-3.5" /> 手机号登录
                 </button>
               )}
             </div>
 
-            {/* Mobile Menu Toggle */}
-            <div className="flex md:hidden items-center gap-3">
+            <div className="flex items-center gap-3 md:hidden">
               <button
                 id="nav-share-mobile-btn"
                 onClick={() => onOpenModal('share')}
-                className="text-xs bg-slate-100 text-slate-700 px-2.5 py-1.5 rounded-lg"
+                className="rounded-xl border border-career-line bg-career-bg px-2.5 py-1.5 text-xs text-career-muted"
               >
                 分享
               </button>
               <button
                 id="mobile-menu-toggle-btn"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-slate-600 hover:text-slate-900 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                className="rounded-xl border border-career-line p-2 text-career-muted transition-colors hover:bg-career-surface-muted hover:text-career-ink"
               >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Mobile Menu Drawer */}
         {mobileMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-white border-b border-slate-200 shadow-md py-4 px-4 flex flex-col gap-3 z-40">
+          <div className="absolute left-0 right-0 top-16 z-40 flex flex-col gap-2 border-b border-career-line bg-career-surface px-4 py-4 shadow-md md:hidden">
             {navItems.map((item) => (
               <button
                 key={item.view}
                 id={`nav-item-mobile-${item.view}`}
                 onClick={() => handleNavClick(item.view)}
-                className={`text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                className={`cursor-pointer rounded-xl px-4 py-2.5 text-left text-sm font-medium transition-colors ${
                   isNavActive(item.view)
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-career-primary-soft text-career-primary'
+                    : 'text-career-muted hover:bg-career-surface-muted hover:text-career-ink'
                 }`}
               >
                 {item.label}
               </button>
             ))}
-            <div className="border-t border-slate-100 pt-3 flex items-center justify-between px-4">
+            <div className="mt-2 border-t border-career-line px-4 pt-3">
               {user ? (
-                <>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold text-sm">
-                      {avatarChar}
-                    </div>
-                    <div>
-                      <div className="text-xs font-semibold text-slate-800">{userName}</div>
-                      <div className="text-[10px] text-slate-500">
-                        {userSubTitle}
-                      </div>
-                    </div>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-xs font-semibold text-career-ink">{userName}</div>
+                    <div className="text-[11px] text-career-muted">{userSubTitle}</div>
                   </div>
-                  <button
-                    id="mobile-user-profile-btn"
-                    onClick={() => handleNavClick('profile')}
-                    className="text-xs text-blue-600 font-medium hover:underline"
-                  >
+                  <button id="mobile-user-profile-btn" onClick={() => handleNavClick('profile')} className="text-xs font-semibold text-career-primary">
                     管理
                   </button>
-                </>
+                </div>
               ) : (
-                <button
-                  onClick={handleLoginClick}
-                  className="w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold text-center"
-                >
-                  快捷登录
+                <button onClick={handleLoginClick} className="w-full rounded-xl bg-career-primary py-2 text-center text-xs font-semibold text-white">
+                  手机号登录
                 </button>
               )}
             </div>
@@ -261,56 +246,56 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
 
       {loginModalOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl border border-slate-200 p-6">
+          <div className="w-full max-w-sm rounded-3xl border border-career-line bg-career-surface p-6 shadow-xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">手机号登录</h2>
-                <p className="mt-1 text-xs text-slate-500">开发环境使用固定验证码，不发送真实短信。</p>
+                <h2 className="text-lg font-semibold text-career-ink">手机号登录</h2>
+                <p className="mt-1 text-xs leading-5 text-career-muted">开发环境使用验证码接口，不接入真实短信服务商。</p>
               </div>
               <button
                 onClick={() => setLoginModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                className="rounded-xl p-1 text-career-muted transition-colors hover:bg-career-surface-muted hover:text-career-ink"
                 aria-label="关闭登录弹窗"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="mt-5 space-y-4">
-              <label className="block text-xs font-semibold text-slate-700">
+              <label className="block text-xs font-semibold text-career-ink">
                 手机号
-                <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
-                  <Phone className="w-4 h-4 text-slate-400" />
+                <div className="mt-1.5 flex items-center gap-2 rounded-2xl border border-career-line bg-career-bg px-3 py-2 focus-within:border-career-primary focus-within:ring-2 focus-within:ring-career-primary-soft">
+                  <Phone className="h-4 w-4 text-career-muted" />
                   <input
                     value={phone}
                     onChange={(event) => setPhone(event.target.value)}
-                    className="w-full border-0 outline-none text-sm text-slate-900 placeholder:text-slate-400"
+                    className="w-full border-0 bg-transparent text-sm text-career-ink outline-none placeholder:text-career-muted"
                     placeholder="请输入手机号"
                   />
                 </div>
               </label>
 
-              <label className="block text-xs font-semibold text-slate-700">
+              <label className="block text-xs font-semibold text-career-ink">
                 验证码
-                <div className="mt-1.5 flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
-                  <KeyRound className="w-4 h-4 text-slate-400" />
+                <div className="mt-1.5 flex items-center gap-2 rounded-2xl border border-career-line bg-career-bg px-3 py-2 focus-within:border-career-primary focus-within:ring-2 focus-within:ring-career-primary-soft">
+                  <KeyRound className="h-4 w-4 text-career-muted" />
                   <input
                     value={code}
                     onChange={(event) => setCode(event.target.value)}
-                    className="w-full border-0 outline-none text-sm text-slate-900 placeholder:text-slate-400"
+                    className="w-full border-0 bg-transparent text-sm text-career-ink outline-none placeholder:text-career-muted"
                     placeholder="请输入 6 位验证码"
                   />
                 </div>
               </label>
 
               {devCode && (
-                <div className="rounded-xl bg-blue-50 px-3 py-2 text-xs text-blue-700">
-                  开发验证码：<span className="font-bold tracking-widest">{devCode}</span>
+                <div className="rounded-2xl bg-career-primary-soft px-3 py-2 text-xs text-career-primary">
+                  开发验证码：<span className="font-semibold tracking-widest">{devCode}</span>
                 </div>
               )}
 
               {loginError && (
-                <div className="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-600">
+                <div className="rounded-2xl bg-career-danger-soft px-3 py-2 text-xs text-career-danger">
                   {loginError}
                 </div>
               )}
@@ -318,15 +303,15 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={handleRequestCode}
-                  disabled={loginSubmitting}
-                  className="rounded-xl border border-blue-200 px-4 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-60"
+                  disabled={loginSubmitting || !phone.trim()}
+                  className="rounded-2xl border border-career-line px-4 py-2 text-xs font-semibold text-career-primary hover:bg-career-primary-soft disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   获取验证码
                 </button>
                 <button
                   onClick={handleVerifyCode}
-                  disabled={loginSubmitting}
-                  className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+                  disabled={loginSubmitting || !phone.trim() || !code.trim()}
+                  className="rounded-2xl bg-career-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   登录
                 </button>
@@ -334,7 +319,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
 
               <button
                 onClick={handleGuest}
-                className="w-full rounded-xl bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                className="w-full rounded-2xl bg-career-surface-muted px-4 py-2 text-xs font-semibold text-career-ink hover:bg-career-primary-soft"
               >
                 先以游客身份体验
               </button>
@@ -344,4 +329,9 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
       )}
     </>
   );
+}
+
+function maskPhone(phone: string | null | undefined) {
+  if (!phone) return '未绑定手机号';
+  return `${phone.slice(0, 3)}****${phone.slice(-4)}`;
 }

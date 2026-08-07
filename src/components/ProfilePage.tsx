@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { User, FileText, BrainCircuit, FileDown, Settings, Edit2, ShieldAlert, CheckCircle, ExternalLink, X, Save } from 'lucide-react';
-import { DEFAULT_RESUME_DATA, DEFAULT_PERSONALITY_RESULT } from '../data';
+import { BrainCircuit, Edit2, FileText, Heart, Save, Settings, ShieldAlert, User, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { ResumeData, PersonalityResult } from '../types';
+import PageHeader from './ui/PageHeader';
+import SectionPanel from './ui/SectionPanel';
+import EmptyState from './ui/EmptyState';
 
 interface ProfilePageProps {
   onNavigate: (view: string) => void;
@@ -11,49 +13,37 @@ interface ProfilePageProps {
   personalityResult?: PersonalityResult | null;
 }
 
-export default function ProfilePage({ onNavigate, onOpenModal, resumeData, personalityResult }: ProfilePageProps) {
+type ProfileTab = 'profile' | 'resume' | 'assessment' | 'favorites' | 'privacy' | 'security';
+
+export default function ProfilePage({ onNavigate, resumeData, personalityResult }: ProfilePageProps) {
   const { user, userProfile, updateProfile } = useAuth();
-  const [activeSubTab, setActiveSubTab] = useState<'resume' | 'assessment' | 'settings'>('resume');
+  const [activeSubTab, setActiveSubTab] = useState<ProfileTab>('profile');
   const [isEditing, setIsEditing] = useState(false);
 
-  const resume = resumeData || DEFAULT_RESUME_DATA;
-  const personality = personalityResult || DEFAULT_PERSONALITY_RESULT;
+  const hasResume = Boolean(resumeData?.name || resumeData?.school || resumeData?.major);
+  const displayName = userProfile?.name || resumeData?.name || '未完善';
+  const displaySchool = userProfile?.school || resumeData?.school || '未完善';
+  const displayMajor = userProfile?.major || resumeData?.major || '未完善';
+  const displayGraduationYear = userProfile?.graduationYear || resumeData?.graduationYear || '未完善';
+  const completeness = `${displayName !== '未完善' ? 1 : 0 + (displaySchool !== '未完善' ? 1 : 0) + (displayMajor !== '未完善' ? 1 : 0) + (hasResume ? 1 : 0) + (personalityResult ? 1 : 0)}/5 项`;
 
-  const displayName = userProfile?.name || resume.name;
-  const displaySchool = userProfile?.school || resume.school;
-  const displayMajor = userProfile?.major || resume.major;
-  const displayGraduationYear = userProfile?.graduationYear || resume.graduationYear;
+  const [editForm, setEditForm] = useState({ name: displayName, school: displaySchool, major: displayMajor, graduationYear: displayGraduationYear });
 
-  const [editForm, setEditForm] = useState({
-    name: displayName,
-    school: displaySchool,
-    major: displayMajor,
-    graduationYear: displayGraduationYear
-  });
-
-  // Sync editForm state when async profile or resumeData props update
   React.useEffect(() => {
-    setEditForm({
-      name: displayName,
-      school: displaySchool,
-      major: displayMajor,
-      graduationYear: displayGraduationYear
-    });
+    setEditForm({ name: displayName, school: displaySchool, major: displayMajor, graduationYear: displayGraduationYear });
   }, [displayName, displaySchool, displayMajor, displayGraduationYear]);
 
-  const sideMenu = [
-    { id: 'resume', label: '📄 我的求职简历', icon: FileText },
-    { id: 'assessment', label: '🧠 我的职业测评', icon: BrainCircuit },
-    { id: 'settings', label: '⚙️ 账号安全设置', icon: Settings },
+  const sideMenu: { id: ProfileTab; label: string; icon: React.ElementType }[] = [
+    { id: 'profile', label: '我的资料', icon: User },
+    { id: 'resume', label: '我的简历', icon: FileText },
+    { id: 'assessment', label: '我的测评', icon: BrainCircuit },
+    { id: 'favorites', label: '我的收藏', icon: Heart },
+    { id: 'privacy', label: '数据与隐私', icon: ShieldAlert },
+    { id: 'security', label: '账号安全', icon: Settings },
   ];
 
   const handleEditClick = () => {
-    setEditForm({
-      name: displayName,
-      school: displaySchool,
-      major: displayMajor,
-      graduationYear: displayGraduationYear
-    });
+    setEditForm({ name: displayName, school: displaySchool, major: displayMajor, graduationYear: displayGraduationYear });
     setIsEditing(true);
   };
 
@@ -68,303 +58,149 @@ export default function ProfilePage({ onNavigate, onOpenModal, resumeData, perso
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      {/* Header Profile Summary */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xs mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white font-extrabold font-display text-2xl shadow-xs shrink-0">
-            {displayName ? displayName[0] : '求'}
-          </div>
-          <div>
-            <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
-              {displayName}
-              <span className="text-[10px] bg-blue-50 text-blue-600 border border-blue-100 rounded-md px-1.5 py-0.5 font-bold uppercase tracking-wider">
-                {user?.isGuest ? '游客模式' : '手机号登录'}
-              </span>
-            </h2>
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              {displaySchool} · {displayMajor} · {displayGraduationYear}
-            </p>
-          </div>
-        </div>
-        <button 
-          onClick={handleEditClick}
-          className="text-xs bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 px-4 py-2 rounded-xl transition-colors font-semibold flex items-center gap-1 cursor-pointer"
-        >
-          <Edit2 className="w-3.5 h-3.5" /> 编辑个人资料
-        </button>
-      </div>
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      <PageHeader eyebrow="Profile file" title="我的档案" description="管理你的资料、简历、测评、收藏和隐私设置。" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Left Sidebar */}
+      <SectionPanel className="mb-8" title="账号摘要" actions={<button onClick={handleEditClick} className="inline-flex items-center gap-1 rounded-2xl bg-career-primary px-4 py-2 text-xs font-semibold text-white"><Edit2 className="h-3.5 w-3.5" />编辑资料</button>}>
+        <div className="grid gap-3 md:grid-cols-4">
+          <SummaryItem label="登录状态" value={user?.isGuest ? '游客模式' : user ? '手机号登录' : '未登录'} />
+          <SummaryItem label="手机号" value={maskPhone(user?.phone)} />
+          <SummaryItem label="资料完整度" value={completeness} />
+          <SummaryItem label="最近更新" value="随资料更新" />
+        </div>
+      </SectionPanel>
+
+      <div className="grid gap-8 lg:grid-cols-4">
         <div className="space-y-2">
           {sideMenu.map((item) => {
             const IconComponent = item.icon;
             const isActive = activeSubTab === item.id;
             return (
-              <button
-                key={item.id}
-                onClick={() => setActiveSubTab(item.id as any)}
-                className={`w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-3 ${
-                  isActive
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 bg-white border border-slate-200/40'
-                }`}
-              >
-                <IconComponent className="w-4 h-4 shrink-0" />
-                {item.label}
+              <button key={item.id} onClick={() => setActiveSubTab(item.id)} className={`flex w-full cursor-pointer items-center gap-3 rounded-2xl px-4 py-3 text-left text-xs font-semibold transition-colors ${isActive ? 'bg-career-primary text-white' : 'border border-career-line bg-career-surface text-career-muted hover:bg-career-surface-muted hover:text-career-ink'}`}>
+                <IconComponent className="h-4 w-4 shrink-0" /> {item.label}
               </button>
             );
           })}
-
-          <button
-            onClick={() => onOpenModal('download')}
-            className="w-full text-left px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-3 text-slate-700 hover:bg-slate-50 bg-white border border-slate-200/40"
-          >
-            <FileDown className="w-4 h-4 text-blue-600" />
-            📊 下载完整PDF报告
-          </button>
+          <div className="rounded-2xl border border-career-line bg-career-surface-muted px-4 py-3 text-xs font-semibold text-career-muted">
+            PDF 导出第六阶段开放
+          </div>
         </div>
 
-        {/* Right Panel Contents */}
         <div className="lg:col-span-3">
-          {/* SubTab 1: Resume parsed info */}
+          {activeSubTab === 'profile' && (
+            <SectionPanel title="我的资料" description="未填写的信息显示为未完善，不使用默认学校或专业。">
+              <InfoGrid items={[
+                ['姓名', displayName],
+                ['学校', displaySchool],
+                ['专业', displayMajor],
+                ['毕业年份', displayGraduationYear],
+              ]} />
+            </SectionPanel>
+          )}
+
           {activeSubTab === 'resume' && (
-            <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xs space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                <div>
-                  <h3 className="text-base font-extrabold text-slate-900">简历快照摘要</h3>
-                  <p className="text-[10px] text-slate-400 mt-0.5">上次AI解析：2026-07-11 · 解析置信度：92%</p>
+            <SectionPanel title="我的简历" description="查看最近结构化结果；没有简历时先上传材料。" actions={<button onClick={() => onNavigate('upload')} className="rounded-2xl bg-career-primary px-4 py-2 text-xs font-semibold text-white">重新上传</button>}>
+              {hasResume && resumeData ? (
+                <div className="space-y-5">
+                  <InfoGrid items={[
+                    ['姓名', resumeData.name || '未完善'],
+                    ['学校', resumeData.school || '未完善'],
+                    ['专业', resumeData.major || '未完善'],
+                    ['求职方向', resumeData.inferredDirection || '未完善'],
+                  ]} />
+                  <div><h3 className="text-sm font-semibold text-career-ink">简历摘要</h3><p className="mt-2 text-sm leading-6 text-career-muted">技能：{resumeData.skills.length > 0 ? resumeData.skills.join('、') : '未完善'}；目标城市：{resumeData.targetCities.length > 0 ? resumeData.targetCities.join('、') : '未完善'}。</p></div>
                 </div>
-                <button
-                  onClick={() => onNavigate('upload')}
-                  className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-600 px-3.5 py-2 rounded-xl font-bold cursor-pointer transition-colors"
-                >
-                  重新上传并覆盖
-                </button>
-              </div>
-
-              {/* Parsed summary details */}
-              <div className="space-y-4 text-xs text-slate-700">
-                <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl">
-                  <div>候选人姓名: <span className="font-bold text-slate-900">{displayName}</span></div>
-                  <div>届数: <span className="font-bold text-slate-900">{displayGraduationYear}</span></div>
-                  <div className="col-span-2">在读高校: <span className="font-bold text-slate-900">{displaySchool}</span></div>
-                  <div className="col-span-2">所学专业: <span className="font-bold text-slate-900">{displayMajor}</span></div>
-                </div>
-
-                <div>
-                  <h4 className="font-bold text-slate-800 mb-2">📌 掌握专业硬技能</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {resume.skills.map((skill, i) => (
-                      <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md font-semibold font-mono">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-bold text-slate-800 mb-2">💼 重点实习记录</h4>
-                  <div className="space-y-2">
-                    {resume.internships.map((intern, i) => (
-                      <div key={i} className="border border-slate-100 bg-slate-50 p-3 rounded-lg flex justify-between items-center">
-                        <div>
-                          <span className="font-bold text-slate-800">{intern.company}</span>
-                          <span className="text-slate-400 mx-2">|</span>
-                          <span className="text-slate-600 font-medium">{intern.role}</span>
-                        </div>
-                        <span className="text-[10px] text-slate-400 font-mono">{intern.duration}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-bold text-slate-800 mb-2">🛠️ 项目实践经历</h4>
-                  <div className="space-y-2">
-                    {resume.projects.map((p, i) => (
-                      <div key={i} className="border border-slate-100 bg-slate-50 p-3 rounded-lg">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="font-bold text-slate-800">{p.name}</span>
-                          <span className="text-slate-400 text-[10px]">{p.role}</span>
-                        </div>
-                        <div className="text-[11px] text-blue-600 font-mono">核心技术: {p.tech}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+              ) : <EmptyState title="还没有简历档案" description="上传简历后，结构化结果会在这里集中查看。" action={<button onClick={() => onNavigate('upload')} className="rounded-2xl bg-career-primary px-4 py-2 text-sm font-semibold text-white">上传简历</button>} />}
+            </SectionPanel>
           )}
 
-          {/* SubTab 2: Assessment Details */}
           {activeSubTab === 'assessment' && (
-            <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xs space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-                <div>
-                  <h3 className="text-base font-extrabold text-slate-900">科学性格测评</h3>
-                  <p className="text-[10px] text-slate-400 mt-0.5">类型划分：{personality.typeTitle}</p>
+            <SectionPanel title="我的测评" description="测评用于岗位环境和协作方式适配判断。" actions={<button onClick={() => onNavigate('assessment')} className="rounded-2xl bg-career-primary px-4 py-2 text-xs font-semibold text-white">重新测评</button>}>
+              {personalityResult ? (
+                <div className="space-y-4">
+                  <InfoGrid items={[
+                    ['测评类型', personalityResult.typeTitle],
+                    ['霍兰德代码', personalityResult.hollandCode],
+                    ['央国企适配', `${personalityResult.industryFit.stateOwned}`],
+                    ['互联网适配', `${personalityResult.industryFit.internet}`],
+                  ]} />
+                  <p className="text-sm leading-6 text-career-muted">{personalityResult.description}</p>
                 </div>
-                <button
-                  onClick={() => onNavigate('upload')}
-                  className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl font-bold cursor-pointer"
-                >
-                  重测性格
-                </button>
-              </div>
-
-              <div className="space-y-4 text-xs">
-                <div className="p-4 bg-linear-to-br from-blue-50/50 to-indigo-50/50 border border-blue-100 rounded-xl leading-relaxed text-slate-700">
-                  <span className="font-bold text-blue-700 block mb-1">性格简述：</span>
-                  {personality.description}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div className="border border-slate-100 bg-slate-50 p-3.5 rounded-xl">
-                    <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">霍兰德兴趣代码</span>
-                    <span className="block text-xl font-black text-blue-600 mt-1 font-mono">{personality.hollandCode}</span>
-                  </div>
-                  <div className="border border-slate-100 bg-slate-50 p-3.5 rounded-xl">
-                    <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider">测评完备度</span>
-                    <span className="block text-xl font-black text-emerald-600 mt-1 flex items-center justify-center gap-1">
-                      100% <CheckCircle className="w-4 h-4 inline" />
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    onClick={() => onNavigate('assessment-result')}
-                    className="text-blue-600 hover:underline flex items-center gap-1 font-bold cursor-pointer"
-                  >
-                    前往查看完整科学图表及大五人格维度解读 <ExternalLink className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            </div>
+              ) : <EmptyState title="还没有职业测评" description="完成测评后，这里会显示职业兴趣和岗位适配判断依据。" action={<button onClick={() => onNavigate('assessment')} className="rounded-2xl bg-career-primary px-4 py-2 text-sm font-semibold text-white">完成测评</button>} />}
+            </SectionPanel>
           )}
 
-          {/* SubTab 3: Settings */}
-          {activeSubTab === 'settings' && (
-            <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xs space-y-6">
-              <h3 className="text-base font-extrabold text-slate-900 pb-4 border-b border-slate-100">
-                账号与安全设置
-              </h3>
+          {activeSubTab === 'favorites' && (
+            <SectionPanel title="我的收藏" description="收藏岗位会在这里集中查看。">
+              <EmptyState title="暂无收藏" description="暂无收藏。你可以在岗位诊断页收藏感兴趣的岗位，之后会在这里集中查看。" action={<button onClick={() => onNavigate('results')} className="rounded-2xl bg-career-primary px-4 py-2 text-sm font-semibold text-white">查看岗位</button>} />
+            </SectionPanel>
+          )}
 
-              <div className="space-y-5 text-xs text-slate-700">
-                <div className="flex justify-between items-center py-2 border-b border-slate-50">
-                  <div>
-                    <div className="font-bold text-slate-800">登录手机</div>
-                    <div className="text-slate-400 mt-0.5">{user?.phone || '游客模式未绑定手机号'}</div>
-                  </div>
-                  <span className="text-slate-400 font-semibold">暂不支持修改</span>
-                </div>
+          {activeSubTab === 'privacy' && (
+            <SectionPanel title="数据与隐私" description="说明数据保存位置和 AI 处理边界。">
+              <PolicyList items={[
+                '游客数据保存在本机浏览器。',
+                '登录后，简历、测评和收藏保存到账号。',
+                'AI 处理只在你发起解析或诊断时发生。',
+                '清除本机缓存功能后续开放。',
+              ]} />
+            </SectionPanel>
+          )}
 
-                <div className="flex justify-between items-center py-2 border-b border-slate-50 opacity-70">
-                  <div>
-                    <div className="font-bold text-slate-800">邮箱绑定</div>
-                    <div className="text-slate-400 mt-0.5">本阶段暂未开放邮箱绑定</div>
-                  </div>
-                  <span className="text-slate-400 font-semibold">未开放</span>
-                </div>
-
-                <div className="flex justify-between items-center py-2 border-b border-slate-50 opacity-70">
-                  <div>
-                    <div className="font-bold text-slate-800">微信绑定</div>
-                    <div className="text-slate-400 mt-0.5">本阶段暂未开放微信绑定</div>
-                  </div>
-                  <span className="text-slate-400 font-semibold">未开放</span>
-                </div>
-
-                <div className="flex justify-between items-center py-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <div>
-                    <div className="font-bold text-slate-800 flex items-center gap-1">
-                      <ShieldAlert className="w-4 h-4" /> 账号注销与数据清除
-                    </div>
-                    <div className="text-slate-500 mt-0.5">账号注销功能后续开放。本阶段不会执行数据删除。</div>
-                  </div>
-                  <span className="text-slate-400 font-semibold">未开放</span>
-                </div>
-              </div>
-            </div>
+          {activeSubTab === 'security' && (
+            <SectionPanel title="账号安全" description="阶段 5 不新增账号删除或第三方绑定能力。">
+              <PolicyList items={[
+                '当前登录方式：手机号验证码。',
+                'Session 默认有效期 7 天。',
+                '退出登录会清除当前会话 Cookie。',
+                '账号注销功能后续开放。本阶段不会执行数据删除。',
+              ]} />
+            </SectionPanel>
           )}
         </div>
       </div>
 
-      {/* Editing Modal */}
       {isEditing && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-6 shadow-2xl relative">
-            <button 
-              onClick={() => setIsEditing(false)}
-              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600"
-            >
-              <X className="w-5 h-5" />
-            </button>
-            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-blue-600" /> 编辑个人资料
-            </h3>
-            <form onSubmit={handleSaveProfile} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">姓名</label>
-                <input 
-                  type="text" 
-                  value={editForm.name} 
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">毕业学校</label>
-                <input 
-                  type="text" 
-                  value={editForm.school} 
-                  onChange={(e) => setEditForm({ ...editForm, school: e.target.value })}
-                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">主修专业</label>
-                <input 
-                  type="text" 
-                  value={editForm.major} 
-                  onChange={(e) => setEditForm({ ...editForm, major: e.target.value })}
-                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">届数（例如：2027届）</label>
-                <input 
-                  type="text" 
-                  value={editForm.graduationYear} 
-                  onChange={(e) => setEditForm({ ...editForm, graduationYear: e.target.value })}
-                  className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-sm focus:border-blue-600 focus:ring-1 focus:ring-blue-600 outline-none"
-                  required
-                />
-              </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button 
-                  type="button" 
-                  onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer"
-                >
-                  取消
-                </button>
-                <button 
-                  type="submit" 
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1 cursor-pointer"
-                >
-                  <Save className="w-3.5 h-3.5" /> 保存更改
-                </button>
-              </div>
-            </form>
-          </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+          <form onSubmit={handleSaveProfile} className="w-full max-w-md rounded-3xl border border-career-line bg-career-surface p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="flex items-center gap-2 text-lg font-semibold text-career-ink"><User className="h-5 w-5 text-career-primary" /> 编辑个人资料</h3>
+              <button type="button" onClick={() => setIsEditing(false)} className="text-career-muted hover:text-career-ink"><X className="h-5 w-5" /></button>
+            </div>
+            <div className="space-y-4">
+              <TextInput label="姓名" value={editForm.name} onChange={(value) => setEditForm({ ...editForm, name: value })} />
+              <TextInput label="毕业学校" value={editForm.school} onChange={(value) => setEditForm({ ...editForm, school: value })} />
+              <TextInput label="主修专业" value={editForm.major} onChange={(value) => setEditForm({ ...editForm, major: value })} />
+              <TextInput label="届数" value={editForm.graduationYear} onChange={(value) => setEditForm({ ...editForm, graduationYear: value })} />
+            </div>
+            <div className="mt-5 flex justify-end gap-3 border-t border-career-line pt-4">
+              <button type="button" onClick={() => setIsEditing(false)} className="rounded-2xl bg-career-surface-muted px-4 py-2 text-xs font-semibold text-career-ink">取消</button>
+              <button type="submit" className="inline-flex items-center gap-1 rounded-2xl bg-career-primary px-4 py-2 text-xs font-semibold text-white"><Save className="h-3.5 w-3.5" />保存更改</button>
+            </div>
+          </form>
         </div>
       )}
     </div>
   );
+}
+
+function maskPhone(phone: string | null | undefined) {
+  if (!phone) return '游客模式未绑定手机号';
+  return `${phone.slice(0, 3)}****${phone.slice(-4)}`;
+}
+
+const SummaryItem: React.FC<{ label: string; value: string }> = ({ label, value }) => {
+  return <div className="rounded-2xl bg-career-bg p-3"><p className="text-xs text-career-muted">{label}</p><p className="mt-1 text-sm font-semibold text-career-ink">{value}</p></div>;
+};
+
+function InfoGrid({ items }: { items: [string, string][] }) {
+  return <div className="grid gap-3 md:grid-cols-2">{items.map(([label, value]) => <SummaryItem key={label} label={label} value={value || '未完善'} />)}</div>;
+}
+
+function PolicyList({ items }: { items: string[] }) {
+  return <div className="space-y-3">{items.map((item) => <div key={item} className="rounded-2xl bg-career-bg px-4 py-3 text-sm leading-6 text-career-muted">{item}</div>)}</div>;
+}
+
+function TextInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return <label className="block text-xs font-semibold text-career-ink">{label}<input value={value === '未完善' ? '' : value} onChange={(e) => onChange(e.target.value)} className="mt-1.5 w-full rounded-2xl border border-career-line bg-career-bg px-4 py-2 text-sm outline-none focus:border-career-primary" /></label>;
 }

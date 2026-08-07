@@ -81,7 +81,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Card: Radar Chart */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs flex flex-col items-center justify-center">
-          <h3 className="text-sm font-bold text-slate-900 border-l-4 border-blue-600 pl-2 mb-6 self-start">
+          <h3 className="mb-6 self-start text-sm font-semibold text-slate-900">
             大五人格科学量表
           </h3>
 
@@ -181,7 +181,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
         <div className="space-y-6">
           {/* Fit Progress */}
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-            <h3 className="text-sm font-bold text-slate-900 border-l-4 border-blue-600 pl-2 mb-4">
+            <h3 className="mb-4 text-sm font-semibold text-slate-900">
               两大求职赛道适配度
             </h3>
             <div className="space-y-4">
@@ -241,7 +241,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
 
       {/* Full Width Card: AI Deep Interpretation */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs mt-8">
-        <h3 className="text-sm font-bold text-slate-900 border-l-4 border-blue-600 pl-2 mb-4 flex items-center gap-1.5">
+        <h3 className="mb-4 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
           <Shield className="w-4 h-4 text-blue-600" />
           AI 深度人格与求职性向解读
         </h3>

@@ -5,6 +5,7 @@ import { ResumeData, PersonalityResult } from '../types';
 import PageHeader from './ui/PageHeader';
 import SectionPanel from './ui/SectionPanel';
 import EmptyState from './ui/EmptyState';
+import { formatProfileCompleteness } from '../lib/profileCompleteness';
 
 interface ProfilePageProps {
   onNavigate: (view: string) => void;
@@ -25,7 +26,13 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
   const displaySchool = userProfile?.school || resumeData?.school || '未完善';
   const displayMajor = userProfile?.major || resumeData?.major || '未完善';
   const displayGraduationYear = userProfile?.graduationYear || resumeData?.graduationYear || '未完善';
-  const completeness = `${displayName !== '未完善' ? 1 : 0 + (displaySchool !== '未完善' ? 1 : 0) + (displayMajor !== '未完善' ? 1 : 0) + (hasResume ? 1 : 0) + (personalityResult ? 1 : 0)}/5 项`;
+  const completeness = formatProfileCompleteness({
+    displayName,
+    displaySchool,
+    displayMajor,
+    hasResume,
+    hasAssessment: Boolean(personalityResult),
+  });
 
   const [editForm, setEditForm] = useState({ name: displayName, school: displaySchool, major: displayMajor, graduationYear: displayGraduationYear });
 

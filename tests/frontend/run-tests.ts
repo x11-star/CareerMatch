@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 
-const tests = ['./apiClient.test.ts', './userDataStore.test.ts', './uiCopy.test.ts'];
+const tests = ['./apiClient.test.ts', './userDataStore.test.ts', './uiCopy.test.ts', './profileCompleteness.test.ts'];
 let imported = 0;
 
 for (const test of tests) {

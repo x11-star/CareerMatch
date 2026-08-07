@@ -52,20 +52,20 @@ export default function LandingPage({ onNavigate, positions = [] }: LandingPageP
             <div className="space-y-4">
               <div>
                 <p className="text-xs font-semibold text-career-muted">岗位诊断报告</p>
-                <h2 className="mt-1 text-xl font-semibold text-career-ink">后端开发工程师 · 诊断摘录</h2>
+                <h2 className="mt-1 text-xl font-semibold text-career-ink">岗位诊断报告 · 示例结构</h2>
               </div>
               <div className="grid gap-3 text-sm">
                 <div className="rounded-2xl bg-career-success-soft p-4">
                   <p className="font-semibold text-career-ink">结论：推荐投递</p>
-                  <p className="mt-1 text-xs leading-5 text-career-muted">项目经历接近岗位要求，但需要补充工程化证据。</p>
+                  <p className="mt-1 text-xs leading-5 text-career-muted">系统会在你上传简历并完成测评后，给出是否建议深入查看该岗位。</p>
                 </div>
                 <div className="rounded-2xl bg-career-surface-muted p-4">
                   <p className="font-semibold text-career-ink">硬条件</p>
-                  <p className="mt-1 text-xs leading-5 text-career-muted">TypeScript、Node.js、数据库基础较匹配。</p>
+                  <p className="mt-1 text-xs leading-5 text-career-muted">逐条对照岗位要求、简历材料和测评结果，不使用预设人设填充。</p>
                 </div>
                 <div className="rounded-2xl bg-career-warning-soft p-4">
                   <p className="font-semibold text-career-ink">下一步</p>
-                  <p className="mt-1 text-xs leading-5 text-career-muted">投递前补齐项目复盘、接口设计和缓存问题准备。</p>
+                  <p className="mt-1 text-xs leading-5 text-career-muted">缺少简历或测评时，只提示下一步，不生成方向和技能结论。</p>
                 </div>
               </div>
             </div>

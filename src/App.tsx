@@ -12,7 +12,7 @@ import ProfilePage from './components/ProfilePage';
 import DownloadModal from './components/DownloadModal';
 import ShareModal from './components/ShareModal';
 
-import { MOCK_POSITIONS, DEFAULT_RESUME_DATA } from './data';
+import { MOCK_POSITIONS } from './data';
 import { ResumeData, PersonalityResult, Position } from './types';
 import { useAuth } from './context/AuthContext';
 import { getLatestResume, getLatestAssessment, getPositions } from './lib/userDataStore';
@@ -23,7 +23,7 @@ export default function App() {
   const { user } = useAuth();
   const [currentView, setCurrentView] = useState<ViewType>('landing');
   const [previousView, setPreviousView] = useState<ViewType>('results');
-  const [resumeData, setResumeData] = useState<ResumeData>(DEFAULT_RESUME_DATA);
+  const [resumeData, setResumeData] = useState<ResumeData | null>(null);
   const [personalityResult, setPersonalityResult] = useState<PersonalityResult | null>(null);
   const [selectedPositionId, setSelectedPositionId] = useState<string>('sg-01');
   const [activeModal, setActiveModal] = useState<'download' | 'share' | null>(null);
@@ -63,7 +63,7 @@ export default function App() {
           console.error("Failed to load user resume or assessments", err);
         }
       } else {
-        setResumeData(DEFAULT_RESUME_DATA);
+        setResumeData(null);
         setPersonalityResult(null);
       }
     }

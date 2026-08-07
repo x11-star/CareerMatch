@@ -4,6 +4,7 @@ import { MOCK_POSITIONS } from '../data';
 import { Position, ResumeData, PersonalityResult } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { getPositions, getFavorites, toggleFavorite } from '../lib/userDataStore';
+import { hasRealResumeData } from '../lib/resumeState';
 import PageHeader from './ui/PageHeader';
 import SectionPanel from './ui/SectionPanel';
 import EmptyState from './ui/EmptyState';
@@ -12,7 +13,7 @@ interface MatchResultsPageProps {
   onSelectPosition: (id: string) => void;
   onOpenModal: (modalType: 'download' | 'share' | null) => void;
   onRetake: () => void;
-  resumeData?: ResumeData;
+  resumeData?: ResumeData | null;
   personalityResult?: PersonalityResult | null;
 }
 
@@ -55,6 +56,9 @@ export default function MatchResultsPage({ onSelectPosition, onRetake, resumeDat
     }
   };
 
+  const hasResume = hasRealResumeData(resumeData);
+  const hasAssessment = Boolean(personalityResult);
+
   const filteredPositions = useMemo(() => {
     let list = positions.filter((p) => p.type === activeTab);
     if (cityFilter !== 'all') list = list.filter((p) => p.city.includes(cityFilter));
@@ -87,6 +91,11 @@ export default function MatchResultsPage({ onSelectPosition, onRetake, resumeDat
         primaryAction={<button onClick={onRetake} className="rounded-2xl bg-career-primary px-4 py-2 text-sm font-semibold text-white">更新材料</button>}
       />
 
+      {!hasResume ? (
+        <EmptyState title="还没有简历档案" description="还没有简历档案。上传简历后才能生成岗位匹配。" action={<button onClick={onRetake} className="rounded-2xl bg-career-primary px-4 py-2 text-sm font-semibold text-white">上传简历</button>} />
+      ) : !hasAssessment ? (
+        <EmptyState title="还没有职业测评" description="还没有职业测评。完成测评后才能判断性格适配。" action={<button onClick={onRetake} className="rounded-2xl bg-career-primary px-4 py-2 text-sm font-semibold text-white">完成测评</button>} />
+      ) : (
       <div className="space-y-6">
         <SectionPanel title="求职画像摘要" description="用于解释岗位推荐的基础材料，不用默认学校或专业填充缺失信息。">
           <div className="grid gap-3 md:grid-cols-5">
@@ -149,11 +158,7 @@ export default function MatchResultsPage({ onSelectPosition, onRetake, resumeDat
           </button>
         </div>
 
-        {!resumeData?.name ? (
-          <EmptyState title="还没有简历档案" description="还没有简历档案。上传简历后才能生成岗位匹配。" action={<button onClick={onRetake} className="rounded-2xl bg-career-primary px-4 py-2 text-sm font-semibold text-white">上传简历</button>} />
-        ) : !personalityResult ? (
-          <EmptyState title="还没有职业测评" description="还没有职业测评。完成测评后才能判断性格适配。" action={<button onClick={onRetake} className="rounded-2xl bg-career-primary px-4 py-2 text-sm font-semibold text-white">完成测评</button>} />
-        ) : filteredPositions.length === 0 ? (
+        {filteredPositions.length === 0 ? (
           <EmptyState title="当前筛选条件下没有岗位" description="当前筛选条件下没有岗位。尝试放宽城市、类型或难度。" />
         ) : (
           <div className="space-y-3">
@@ -170,6 +175,7 @@ export default function MatchResultsPage({ onSelectPosition, onRetake, resumeDat
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 }

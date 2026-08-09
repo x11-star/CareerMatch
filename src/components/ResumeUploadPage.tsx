@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowRight, CheckCircle2, Edit3, FileText, RotateCw, Upload } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Edit3, RotateCw, Upload } from 'lucide-react';
 import { DEFAULT_RESUME_DATA } from '../data';
 import { ResumeData } from '../types';
 import { useAuth } from '../context/AuthContext';

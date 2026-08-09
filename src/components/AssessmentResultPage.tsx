@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shield, Award, Sparkles, ArrowRight, Share2, Compass, Check } from 'lucide-react';
+import { Shield, Sparkles, ArrowRight, Share2, Compass, Check } from 'lucide-react';
 import { DEFAULT_PERSONALITY_RESULT } from '../data';
 import { PersonalityResult } from '../types';
 

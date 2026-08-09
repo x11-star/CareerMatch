@@ -6,7 +6,6 @@ import { useAuth } from '../context/AuthContext';
 import { getPositions, getFavorites, toggleFavorite } from '../lib/userDataStore';
 import { hasRealResumeData } from '../lib/resumeState';
 import PageHeader from './ui/PageHeader';
-import SectionPanel from './ui/SectionPanel';
 import EmptyState from './ui/EmptyState';
 
 interface MatchResultsPageProps {
@@ -80,7 +79,6 @@ export default function MatchResultsPage({ onSelectPosition, onRetake, resumeDat
   const displayDirection = resumeData?.inferredDirection || '未完善';
   const skills = resumeData?.skills?.slice(0, 4) || [];
   const targetCities = resumeData?.targetCities?.join('、') || '未完善';
-  const profileComplete = `${resumeData?.name ? '简历已上传' : '简历未完善'} · ${personalityResult ? '测评已完成' : '测评未完成'}`;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 pb-20">

@@ -89,7 +89,8 @@ export function registerMeRoutes(app: express.Express) {
   app.post('/api/me/change-phone/request-code', async (req, res) => {
     try {
       const user = await requireAuth(req);
-      const result = await defaultAuthService.requestChangePhoneCode(user.id, String(req.body?.newPhone || ''));
+      // S1 修复:验证码发到当前手机号(user.phone),证明对当前账号的控制权。
+      const result = await defaultAuthService.requestChangePhoneCode(user.id, user.phone);
       return res.json(result);
     } catch (error) {
       return sendHttpError(res, error);
@@ -99,7 +100,8 @@ export function registerMeRoutes(app: express.Express) {
   app.post('/api/me/change-phone/verify', async (req, res) => {
     try {
       const user = await requireAuth(req);
-      const result = await defaultAuthService.verifyChangePhoneCode(user.id, String(req.body?.newPhone || ''), String(req.body?.code || ''));
+      // S1 修复:验证当前手机号的码(currentPhone=user.phone)+ 提交新号。
+      const result = await defaultAuthService.verifyChangePhoneCode(user.id, user.phone, String(req.body?.code || ''), String(req.body?.newPhone || ''));
       return res.json({ user: publicUser(result.user) });
     } catch (error) {
       return sendHttpError(res, error);

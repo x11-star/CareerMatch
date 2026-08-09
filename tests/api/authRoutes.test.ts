@@ -82,10 +82,10 @@ async function testChangePhoneFlowPreservesCookie() {
   const app = createApp();
   const cookie = await loginWithPhone(app, '13388888888');
 
+  // S1: request 不带 newPhone,验证码发到当前号 13388888888
   const requestCode = await request(app, '/api/me/change-phone/request-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', cookie },
-    body: JSON.stringify({ newPhone: '13300000000' }),
   });
   assert.equal(requestCode.status, 200);
   assert.equal((await requestCode.json()).devCode, '123456');
@@ -93,7 +93,7 @@ async function testChangePhoneFlowPreservesCookie() {
   const verify = await request(app, '/api/me/change-phone/verify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', cookie },
-    body: JSON.stringify({ newPhone: '13300000000', code: '123456' }),
+    body: JSON.stringify({ code: '123456', newPhone: '13300000000' }),
   });
   assert.equal(verify.status, 200);
   assert.equal((await verify.json()).user.phone, '13300000000');
@@ -110,13 +110,21 @@ async function testChangePhoneRejectsOwnedPhone() {
   await loginWithPhone(app, '13311111111');
   const cookie = await loginWithPhone(app, '13388888888');
 
+  // S1: request 发码到当前号(成功),占用检查移到 verify
   const requestCode = await request(app, '/api/me/change-phone/request-code', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', cookie },
-    body: JSON.stringify({ newPhone: '13311111111' }),
   });
-  assert.equal(requestCode.status, 409);
-  assert.equal((await requestCode.json()).code, 'PHONE_ALREADY_USED');
+  assert.equal(requestCode.status, 200);
+
+  // verify 阶段:新号 13311111111 已被别人占用 → 409
+  const verify = await request(app, '/api/me/change-phone/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', cookie },
+    body: JSON.stringify({ code: '123456', newPhone: '13311111111' }),
+  });
+  assert.equal(verify.status, 409);
+  assert.equal((await verify.json()).code, 'PHONE_ALREADY_USED');
 }
 
 async function testDeleteAccountFlowClearsCookieAndSession() {

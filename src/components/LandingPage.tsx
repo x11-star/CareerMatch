@@ -48,7 +48,7 @@ export default function LandingPage({ onNavigate, positions = [] }: LandingPageP
           </div>
 
           {/* 真实诊断片段:文档摘录,非卡片预览 */}
-          <div className="mt-14 border-l-2 border-career-primary pl-6">
+          <div className="mt-14 border-l border-career-primary/40 pl-6">
             <p className="text-[11px] font-semibold tracking-[0.16em] text-career-muted uppercase">诊断报告摘录</p>
             <p className="mt-3 text-xl font-semibold leading-7 text-career-ink">
               <span className="text-3xl font-bold tabular-nums text-career-ink">82</span><span className="text-lg font-semibold text-career-muted">%</span> 推荐投递,建议补充项目证明。

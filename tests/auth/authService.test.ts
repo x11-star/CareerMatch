@@ -70,29 +70,30 @@ async function testRequestChangePhoneCodeStoresHashWithPurpose() {
   const auth = createAuthService({ smsSender: createDevSmsSender({ fixedCode: '123456' }) });
   const verified = await loginHelper(auth, '13388888888');
 
-  const result = await auth.requestChangePhoneCode(verified.user.id, '13300000000');
+  // S1: 验证码发到当前手机号(user.phone),不是新号
+  const result = await auth.requestChangePhoneCode(verified.user.id, '13388888888');
   assert.equal(result.devCode, '123456');
-  const code = await prisma.smsCode.findFirstOrThrow({ where: { phone: '13300000000' } });
+  const code = await prisma.smsCode.findFirstOrThrow({ where: { phone: '13388888888' } });
   assert.equal(code.purpose, 'change_phone');
   assert.notEqual(code.codeHash, '123456');
 }
 
-async function testRequestChangePhoneCodeRejectsUsedPhone() {
+async function testRequestChangePhoneCodeRejectsMismatchedCurrentPhone() {
   await resetAuthTables();
   const auth = createAuthService({ smsSender: createDevSmsSender({ fixedCode: '123456' }) });
   const a = await loginHelper(auth, '13388888888');
-  await loginHelper(auth, '13311111111');
 
-  await assert.rejects(() => auth.requestChangePhoneCode(a.user.id, '13311111111'), /PHONE_ALREADY_USED/);
+  // S1: currentPhone 必须属于当前账号,否则拒绝(防止越权)
+  await assert.rejects(() => auth.requestChangePhoneCode(a.user.id, '13311111111'), /PHONE_MISMATCH/);
 }
 
 async function testVerifyChangePhoneCodeUpdatesPhoneAndKeepsSession() {
   await resetAuthTables();
   const auth = createAuthService({ smsSender: createDevSmsSender({ fixedCode: '123456' }) });
   const verified = await loginHelper(auth, '13388888888');
-  await auth.requestChangePhoneCode(verified.user.id, '13300000000');
+  await auth.requestChangePhoneCode(verified.user.id, '13388888888');
 
-  const result = await auth.verifyChangePhoneCode(verified.user.id, '13300000000', '123456');
+  const result = await auth.verifyChangePhoneCode(verified.user.id, '13388888888', '123456', '13300000000');
   assert.equal(result.user.phone, '13300000000');
 
   const dbUser = await prisma.user.findUniqueOrThrow({ where: { id: verified.user.id } });
@@ -107,11 +108,12 @@ async function testVerifyChangePhoneCodeRejectsLoginCode() {
   await resetAuthTables();
   const auth = createAuthService({ smsSender: createDevSmsSender({ fixedCode: '123456' }) });
   const verified = await loginHelper(auth, '13388888888');
-  // Issue a LOGIN code for the new phone, then try to use it for change-phone.
+  // S1: change-phone 码发到当前号 13388888888。login 码发到别的号,不能混用。
+  await auth.requestChangePhoneCode(verified.user.id, '13388888888');
   await auth.requestLoginCode('13322222222');
 
   await assert.rejects(
-    () => auth.verifyChangePhoneCode(verified.user.id, '13322222222', '123456'),
+    () => auth.verifyChangePhoneCode(verified.user.id, '13322222222', '123456', '13399999999'),
     /INVALID_SMS_CODE/,
   );
   const dbUser = await prisma.user.findUniqueOrThrow({ where: { id: verified.user.id } });
@@ -123,12 +125,12 @@ async function testVerifyChangePhoneCodeRejectsDuplicateOnRace() {
   const auth = createAuthService({ smsSender: createDevSmsSender({ fixedCode: '123456' }) });
   const verified = await loginHelper(auth, '13388888888');
   await loginHelper(auth, '13333333333');
-  await auth.requestChangePhoneCode(verified.user.id, '13344444444');
+  await auth.requestChangePhoneCode(verified.user.id, '13388888888');
   // Race: another user grabs the new phone between request and verify.
   await prisma.user.update({ where: { phone: '13333333333' }, data: { phone: '13344444444' } });
 
   await assert.rejects(
-    () => auth.verifyChangePhoneCode(verified.user.id, '13344444444', '123456'),
+    () => auth.verifyChangePhoneCode(verified.user.id, '13388888888', '123456', '13344444444'),
     /PHONE_ALREADY_USED/,
   );
   const dbUser = await prisma.user.findUniqueOrThrow({ where: { id: verified.user.id } });
@@ -181,7 +183,7 @@ const tests = [
   testWrongCodeIncrementsAttempts,
   testGetSessionUserAndLogout,
   testRequestChangePhoneCodeStoresHashWithPurpose,
-  testRequestChangePhoneCodeRejectsUsedPhone,
+  testRequestChangePhoneCodeRejectsMismatchedCurrentPhone,
   testVerifyChangePhoneCodeUpdatesPhoneAndKeepsSession,
   testVerifyChangePhoneCodeRejectsLoginCode,
   testVerifyChangePhoneCodeRejectsDuplicateOnRace,

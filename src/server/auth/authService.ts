@@ -68,28 +68,36 @@ export function createAuthService(options: AuthOptions = {}) {
       return { ok: true as const };
     },
 
-    async requestChangePhoneCode(userId: string, newPhone: string) {
-      if (!PHONE_PATTERN.test(newPhone)) throw new HttpError(400, 'INVALID_PHONE', '请输入有效的手机号');
-      const owner = await findUserByPhone(newPhone);
-      if (owner && owner.id !== userId) throw new HttpError(409, 'PHONE_ALREADY_USED', '该手机号已被其他账号绑定');
-      await enforceSendInterval(newPhone, 'change_phone');
+    async requestChangePhoneCode(userId: string, currentPhone: string) {
+      if (!PHONE_PATTERN.test(currentPhone)) throw new HttpError(400, 'INVALID_PHONE', '请输入有效的手机号');
+      // S1 修复:换绑前必须验证用户对当前手机号(即当前账号)的控制权。
+      // 验证码发到 currentPhone(session 里的 user.phone),而非新号。
+      // 这样 session 泄露单独不足以换绑,攻击者还需控制当前手机号。
+      const account = await findUserByPhone(currentPhone);
+      if (!account || account.id !== userId) throw new HttpError(403, 'PHONE_MISMATCH', '手机号与当前账号不匹配');
+      await enforceSendInterval(currentPhone, 'change_phone');
       const code = nextSmsCode();
-      await createSmsCode({ phone: newPhone, purpose: 'change_phone', codeHash: hashSmsCode(newPhone, 'change_phone', code), expiresAt: new Date(now().getTime() + CODE_TTL_MS) });
-      const sent = await smsSender.sendSmsCode({ phone: newPhone, purpose: 'change_phone', code });
+      await createSmsCode({ phone: currentPhone, purpose: 'change_phone', codeHash: hashSmsCode(currentPhone, 'change_phone', code), expiresAt: new Date(now().getTime() + CODE_TTL_MS) });
+      const sent = await smsSender.sendSmsCode({ phone: currentPhone, purpose: 'change_phone', code });
       return { ok: true as const, devCode: sent.devCode, expiresInSeconds: 300 };
     },
 
-    async verifyChangePhoneCode(userId: string, newPhone: string, code: string) {
-      if (!PHONE_PATTERN.test(newPhone)) throw new HttpError(400, 'INVALID_PHONE', '请输入有效的手机号');
-      const latest = await findLatestSmsCode(newPhone, 'change_phone');
+    async verifyChangePhoneCode(userId: string, currentPhone: string, code: string, newPhone: string) {
+      if (!PHONE_PATTERN.test(currentPhone)) throw new HttpError(400, 'INVALID_PHONE', '请输入有效的手机号');
+      if (!PHONE_PATTERN.test(newPhone)) throw new HttpError(400, 'INVALID_PHONE', '请输入有效的新手机号');
+      // 先验证对当前手机号的控制权(step-up)
+      const latest = await findLatestSmsCode(currentPhone, 'change_phone');
       const current = now();
       const invalid = new HttpError(400, 'INVALID_SMS_CODE', '验证码错误或已过期');
       if (!latest || latest.consumedAt || latest.expiresAt.getTime() < current.getTime() || latest.attempts >= MAX_ATTEMPTS) throw invalid;
-      const expectedHash = hashSmsCode(newPhone, 'change_phone', code);
+      const expectedHash = hashSmsCode(currentPhone, 'change_phone', code);
       if (!safeEqualHash(latest.codeHash, expectedHash)) {
         await incrementSmsCodeAttempts(latest.id);
         throw invalid;
       }
+      // 新号占用检查
+      const owner = await findUserByPhone(newPhone);
+      if (owner && owner.id !== userId) throw new HttpError(409, 'PHONE_ALREADY_USED', '该手机号已被其他账号绑定');
       await markSmsCodeConsumed(latest.id);
       try {
         await updateUserPhone(userId, newPhone);

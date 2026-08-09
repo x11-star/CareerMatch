@@ -80,7 +80,8 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
     setPhoneError('');
     setPhoneSubmitting(true);
     try {
-      const result = await requestChangePhoneCode(newPhone);
+      // S1 修复:验证码发到当前手机号(后端用 user.phone),不依赖 newPhone。
+      const result = await requestChangePhoneCode();
       setPhoneDevCode(result.devCode || '');
     } catch (err: any) {
       setPhoneError(err?.message || '验证码发送失败，请稍后再试');
@@ -93,7 +94,7 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
     setPhoneError('');
     setPhoneSubmitting(true);
     try {
-      await verifyChangePhoneCode(newPhone, phoneCode);
+      await verifyChangePhoneCode(phoneCode, newPhone);
       setChangePhoneOpen(false);
       setNewPhone('');
       setPhoneCode('');
@@ -283,7 +284,7 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-lg font-semibold text-career-ink">更换手机号</h3>
-                <p className="mt-1 text-xs leading-5 text-career-muted">输入新手机号和验证码，验证后完成更换。当前会话保持登录。</p>
+                <p className="mt-1 text-xs leading-5 text-career-muted">验证码会发到你当前绑定的手机号 {maskPhone(user?.phone)},验证后输入新手机号完成更换。</p>
               </div>
               <button type="button" onClick={() => setChangePhoneOpen(false)} className="rounded-xl p-1 text-career-muted hover:bg-career-surface-muted hover:text-career-ink" aria-label="关闭"><X className="h-5 w-5" /></button>
             </div>
@@ -313,7 +314,7 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
               )}
 
               <div className="grid grid-cols-2 gap-3">
-                <button type="button" onClick={handleRequestPhoneCode} disabled={phoneSubmitting || !newPhone.trim()} className="rounded-md border border-career-line px-4 py-2 text-xs font-semibold text-career-primary hover:bg-career-primary-soft disabled:cursor-not-allowed disabled:opacity-60">获取验证码</button>
+                <button type="button" onClick={handleRequestPhoneCode} disabled={phoneSubmitting} className="rounded-md border border-career-line px-4 py-2 text-xs font-semibold text-career-primary hover:bg-career-primary-soft disabled:cursor-not-allowed disabled:opacity-60">获取验证码</button>
                 <button type="button" onClick={handleVerifyPhoneCode} disabled={phoneSubmitting || !newPhone.trim() || !phoneCode.trim()} className="rounded-md bg-career-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60">确认更换</button>
               </div>
             </div>
@@ -371,10 +372,6 @@ const SummaryItem: React.FC<{ label: string; value: string }> = ({ label, value 
 
 function InfoGrid({ items }: { items: [string, string][] }) {
   return <div className="grid gap-3 md:grid-cols-2">{items.map(([label, value]) => <SummaryItem key={label} label={label} value={value || '未完善'} />)}</div>;
-}
-
-function PolicyList({ items }: { items: string[] }) {
-  return <div className="space-y-3">{items.map((item) => <div key={item} className="rounded-md bg-career-bg px-4 py-3 text-sm leading-6 text-career-muted">{item}</div>)}</div>;
 }
 
 function TextInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {

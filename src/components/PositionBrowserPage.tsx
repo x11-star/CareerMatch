@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, MapPin, ChevronRight, Briefcase, Filter, X, SlidersHorizontal, Layers, GraduationCap, Coins } from 'lucide-react';
+import { Search, MapPin, ChevronRight, Briefcase, Filter, X, SlidersHorizontal, GraduationCap, Coins } from 'lucide-react';
 import { MOCK_POSITIONS } from '../data';
 import { Position } from '../types';
 import { getPositions } from '../lib/userDataStore';

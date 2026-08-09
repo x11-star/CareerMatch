@@ -22,6 +22,10 @@ interface AuthContextType {
   logout: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
   refreshMe: () => Promise<void>;
+  requestChangePhoneCode: (newPhone: string) => Promise<{ devCode?: string }>;
+  verifyChangePhoneCode: (newPhone: string, code: string) => Promise<void>;
+  requestDeleteAccountCode: () => Promise<{ devCode?: string }>;
+  deleteAccount: (code: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -140,6 +144,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUserProfile(result.user);
   };
 
+  const requestChangePhoneCode = async (newPhone: string) => {
+    const result = await api.requestChangePhoneCode(newPhone);
+    return { devCode: result.devCode };
+  };
+
+  const verifyChangePhoneCode = async (newPhone: string, code: string) => {
+    const result = await api.verifyChangePhoneCode(newPhone, code);
+    setUser(toAppUser(result.user));
+    setUserProfile(result.user);
+  };
+
+  const requestDeleteAccountCode = async () => {
+    const result = await api.requestDeleteAccountCode();
+    return { devCode: result.devCode };
+  };
+
+  const deleteAccount = async (code: string) => {
+    await api.deleteAccount(code);
+    await logout();
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -152,6 +177,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logout,
       updateProfile,
       refreshMe,
+      requestChangePhoneCode,
+      verifyChangePhoneCode,
+      requestDeleteAccountCode,
+      deleteAccount,
     }}>
       {children}
     </AuthContext.Provider>

@@ -10,7 +10,7 @@ import { countPositions, getPositionById, listPositions } from '../../src/server
 import { createResume, getLatestResumeByUserId, getResumeByIdForUser, updateLatestResumeByUserId } from '../../src/server/repositories/resumesRepository';
 import { createSession, deleteSessionByTokenHash, findSessionByTokenHash, touchSession } from '../../src/server/repositories/sessionsRepository';
 import { createSmsCode, findLatestSmsCode, incrementSmsCodeAttempts, markSmsCodeConsumed } from '../../src/server/repositories/smsCodesRepository';
-import { createUser, deleteUser, findUserByPhone, updateUserProfile, upsertUserByPhone } from '../../src/server/repositories/usersRepository';
+import { createUser, deleteUser, findUserByPhone, updateUserPhone, updateUserProfile, upsertUserByPhone } from '../../src/server/repositories/usersRepository';
 
 async function cleanDatabase() {
   await prisma.matchResult.deleteMany();
@@ -100,6 +100,26 @@ async function testUsersRepositoryCreatesFindsAndUpsertsUsers() {
 
   await deleteUser(created.id);
   assert.equal(await findUserByPhone('13800138000'), null);
+}
+
+async function testUpdateUserPhoneUpdatesAndEnforcesUnique() {
+  await cleanDatabase();
+
+  const userA = await createUser({ phone: '13800139000' });
+  await createUser({ phone: '13800139001' });
+
+  const updated = await updateUserPhone(userA.id, '13800139099');
+  assert.equal(updated.phone, '13800139099');
+  assert.equal((await findUserByPhone('13800139099'))?.id, userA.id);
+
+  await assert.rejects(
+    () => updateUserPhone(userA.id, '13800139001'),
+    (error: unknown) => {
+      assert.ok(error instanceof UniqueConstraintError, 'should be UniqueConstraintError');
+      assert.ok((error as UniqueConstraintError).target.includes('phone'), 'target should include phone');
+      return true;
+    },
+  );
 }
 
 async function testSmsCodeRepositoryStoresAndConsumesHashOnly() {
@@ -326,6 +346,7 @@ const tests = [
   testUniqueConstraintErrorMapping,
   testPositionSeedMappingKeepsStableUpsertKey,
   testUsersRepositoryCreatesFindsAndUpsertsUsers,
+  testUpdateUserPhoneUpdatesAndEnforcesUnique,
   testSmsCodeRepositoryStoresAndConsumesHashOnly,
   testSessionRepositoryStoresTokenHashAndTouch,
   testResumeRepositoryRequiresUserScope,

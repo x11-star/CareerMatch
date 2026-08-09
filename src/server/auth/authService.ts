@@ -2,9 +2,10 @@ import type { User } from '@prisma/client';
 import { createSessionToken, hashSessionToken, hashSmsCode, safeEqualHash } from './hash';
 import { createSmsSenderFromEnv, nextSmsCode, type SmsSender, type SmsPurpose } from './smsSender';
 import { HttpError } from '../http/errors';
+import { UniqueConstraintError, RecordNotFoundError } from '../db/errors';
 import { createSmsCode, findLatestSmsCode, incrementSmsCodeAttempts, markSmsCodeConsumed } from '../repositories/smsCodesRepository';
 import { createSession, deleteSessionByTokenHash, findSessionByTokenHash, touchSession } from '../repositories/sessionsRepository';
-import { upsertUserByPhone } from '../repositories/usersRepository';
+import { deleteUser, findUserByPhone, updateUserPhone, upsertUserByPhone } from '../repositories/usersRepository';
 
 const PHONE_PATTERN = /^1\d{10}$/;
 const CODE_TTL_MS = 5 * 60 * 1000;
@@ -66,7 +67,87 @@ export function createAuthService(options: AuthOptions = {}) {
       }
       return { ok: true as const };
     },
+
+    async requestChangePhoneCode(userId: string, currentPhone: string) {
+      if (!PHONE_PATTERN.test(currentPhone)) throw new HttpError(400, 'INVALID_PHONE', '请输入有效的手机号');
+      // S1 修复:换绑前必须验证用户对当前手机号(即当前账号)的控制权。
+      // 验证码发到 currentPhone(session 里的 user.phone),而非新号。
+      // 这样 session 泄露单独不足以换绑,攻击者还需控制当前手机号。
+      const account = await findUserByPhone(currentPhone);
+      if (!account || account.id !== userId) throw new HttpError(403, 'PHONE_MISMATCH', '手机号与当前账号不匹配');
+      await enforceSendInterval(currentPhone, 'change_phone');
+      const code = nextSmsCode();
+      await createSmsCode({ phone: currentPhone, purpose: 'change_phone', codeHash: hashSmsCode(currentPhone, 'change_phone', code), expiresAt: new Date(now().getTime() + CODE_TTL_MS) });
+      const sent = await smsSender.sendSmsCode({ phone: currentPhone, purpose: 'change_phone', code });
+      return { ok: true as const, devCode: sent.devCode, expiresInSeconds: 300 };
+    },
+
+    async verifyChangePhoneCode(userId: string, currentPhone: string, code: string, newPhone: string) {
+      if (!PHONE_PATTERN.test(currentPhone)) throw new HttpError(400, 'INVALID_PHONE', '请输入有效的手机号');
+      if (!PHONE_PATTERN.test(newPhone)) throw new HttpError(400, 'INVALID_PHONE', '请输入有效的新手机号');
+      // 先验证对当前手机号的控制权(step-up)
+      const latest = await findLatestSmsCode(currentPhone, 'change_phone');
+      const current = now();
+      const invalid = new HttpError(400, 'INVALID_SMS_CODE', '验证码错误或已过期');
+      if (!latest || latest.consumedAt || latest.expiresAt.getTime() < current.getTime() || latest.attempts >= MAX_ATTEMPTS) throw invalid;
+      const expectedHash = hashSmsCode(currentPhone, 'change_phone', code);
+      if (!safeEqualHash(latest.codeHash, expectedHash)) {
+        await incrementSmsCodeAttempts(latest.id);
+        throw invalid;
+      }
+      // 新号占用检查
+      const owner = await findUserByPhone(newPhone);
+      if (owner && owner.id !== userId) throw new HttpError(409, 'PHONE_ALREADY_USED', '该手机号已被其他账号绑定');
+      await markSmsCodeConsumed(latest.id);
+      try {
+        await updateUserPhone(userId, newPhone);
+      } catch (error) {
+        if (error instanceof UniqueConstraintError) throw new HttpError(409, 'PHONE_ALREADY_USED', '该手机号已被其他账号绑定');
+        throw error;
+      }
+      const user = await findUserByPhone(newPhone);
+      if (!user) throw new HttpError(404, 'USER_NOT_FOUND', '账号不存在或已注销');
+      return { user };
+    },
+
+    async requestDeleteAccountCode(userId: string, phone: string) {
+      if (!PHONE_PATTERN.test(phone)) throw new HttpError(400, 'INVALID_PHONE', '请输入有效的手机号');
+      await enforceSendInterval(phone, 'delete_account');
+      const code = nextSmsCode();
+      await createSmsCode({ phone, purpose: 'delete_account', codeHash: hashSmsCode(phone, 'delete_account', code), expiresAt: new Date(now().getTime() + CODE_TTL_MS) });
+      const sent = await smsSender.sendSmsCode({ phone, purpose: 'delete_account', code });
+      return { ok: true as const, devCode: sent.devCode, expiresInSeconds: 300 };
+    },
+
+    async verifyDeleteAccountCode(userId: string, phone: string, code: string) {
+      if (!PHONE_PATTERN.test(phone)) throw new HttpError(400, 'INVALID_PHONE', '请输入有效的手机号');
+      const latest = await findLatestSmsCode(phone, 'delete_account');
+      const current = now();
+      const invalid = new HttpError(400, 'INVALID_SMS_CODE', '验证码错误或已过期');
+      if (!latest || latest.consumedAt || latest.expiresAt.getTime() < current.getTime() || latest.attempts >= MAX_ATTEMPTS) throw invalid;
+      const expectedHash = hashSmsCode(phone, 'delete_account', code);
+      if (!safeEqualHash(latest.codeHash, expectedHash)) {
+        await incrementSmsCodeAttempts(latest.id);
+        throw invalid;
+      }
+      await markSmsCodeConsumed(latest.id);
+      try {
+        await deleteUser(userId);
+      } catch (error) {
+        if (error instanceof RecordNotFoundError) throw new HttpError(404, 'USER_NOT_FOUND', '账号不存在或已注销');
+        throw error;
+      }
+      return { ok: true as const };
+    },
   };
+
+  async function enforceSendInterval(phone: string, purpose: SmsPurpose) {
+    const latest = await findLatestSmsCode(phone, purpose);
+    const current = now();
+    if (latest && current.getTime() - latest.createdAt.getTime() < SEND_INTERVAL_MS) {
+      throw new HttpError(429, 'SMS_CODE_RATE_LIMITED', '验证码发送太频繁，请稍后再试');
+    }
+  }
 }
 
 export const defaultAuthService = createAuthService();

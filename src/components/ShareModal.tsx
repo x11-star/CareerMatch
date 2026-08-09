@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Send, Link, Image, Check, Smartphone } from 'lucide-react';
+import { Check, Image, Link, Smartphone, X } from 'lucide-react';
 
 interface ShareModalProps {
   onClose: () => void;
@@ -14,77 +14,36 @@ export default function ShareModal({ onClose }: ShareModalProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleShareSimulate = (platform: string) => {
-    alert(`已为您调起系统 ${platform} 接口进行卡片分享 (演示)`);
-    onClose();
-  };
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop overlay */}
-      <div onClick={onClose} className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" />
+      <div onClick={onClose} className="absolute inset-0 bg-career-ink/40 backdrop-blur-xs transition-opacity" />
 
-      {/* Modal box */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 max-w-sm w-full relative z-10 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-        <button
-          onClick={onClose}
-          className="absolute right-5 top-5 p-1.5 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
-        >
-          <X className="w-5 h-5" />
+      <div className="relative z-10 w-full max-w-sm rounded-lg border border-career-line bg-career-surface p-6 shadow-lg sm:p-8">
+        <button onClick={onClose} className="absolute right-5 top-5 rounded-full p-1.5 text-career-muted transition-colors hover:bg-career-surface-muted hover:text-career-ink">
+          <X className="h-5 w-5" />
         </button>
 
-        <h3 className="text-base font-bold text-slate-900 font-display mb-2 flex items-center gap-1.5">
-          <Send className="w-4.5 h-4.5 text-blue-600 rotate-45" />
-          分享给求职同学
-        </h3>
-        <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-          与一同备战秋招、考公或拼大厂的小伙伴，分享你的职业测评结果与优质岗位红利分析吧。
-        </p>
+        <h3 className="mb-2 text-base font-semibold text-career-ink">分享诊断链接</h3>
+        <p className="mb-6 text-xs leading-5 text-career-muted">当前阶段只有复制链接是真功能。微信、QQ 和长图分享需要后续接入真实 SDK 或生成接口。</p>
 
-        <div className="grid grid-cols-2 gap-3 mb-6 text-xs font-semibold">
-          <button
-            onClick={() => handleShareSimulate('微信 WeChat')}
-            className="p-3 bg-slate-50 border border-slate-100 hover:border-emerald-300 rounded-xl transition-all text-slate-700 hover:text-emerald-700 cursor-pointer flex flex-col items-center gap-2 group"
-          >
-            <Smartphone className="w-6 h-6 text-slate-400 group-hover:text-emerald-500 transition-colors" />
-            微信好友
+        <div className="mb-6 grid grid-cols-2 gap-3 text-xs font-semibold">
+          <UnavailableShareButton icon={<Smartphone className="h-6 w-6" />} label="微信分享暂未接入" />
+          <UnavailableShareButton icon={<Smartphone className="h-6 w-6" />} label="QQ 分享暂未接入" />
+          <button onClick={handleCopyLink} className="flex cursor-pointer flex-col items-center gap-2 rounded-md border border-career-line bg-career-bg p-3 text-career-ink transition-colors hover:border-career-primary hover:bg-career-primary-soft">
+            {copied ? <Check className="h-6 w-6 text-career-success" /> : <Link className="h-6 w-6 text-career-primary" />}
+            {copied ? '链接已复制' : '复制网址链接'}
           </button>
-          <button
-            onClick={() => handleShareSimulate('QQ')}
-            className="p-3 bg-slate-50 border border-slate-100 hover:border-blue-300 rounded-xl transition-all text-slate-700 hover:text-blue-600 cursor-pointer flex flex-col items-center gap-2 group"
-          >
-            <Smartphone className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
-            QQ 同学群
-          </button>
-          <button
-            onClick={handleCopyLink}
-            className="p-3 bg-slate-50 border border-slate-100 hover:border-blue-400 rounded-xl transition-all text-slate-700 hover:text-blue-600 cursor-pointer flex flex-col items-center gap-2 group"
-          >
-            {copied ? (
-              <Check className="w-6 h-6 text-emerald-500 transition-colors" />
-            ) : (
-              <Link className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
-            )}
-            {copied ? '链接已复制！' : '复制网址链接'}
-          </button>
-          <button
-            onClick={() => handleShareSimulate('生成长图')}
-            className="p-3 bg-slate-50 border border-slate-100 hover:border-blue-400 rounded-xl transition-all text-slate-700 hover:text-blue-600 cursor-pointer flex flex-col items-center gap-2 group"
-          >
-            <Image className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
-            生成专属长图
-          </button>
+          <UnavailableShareButton icon={<Image className="h-6 w-6" />} label="长图生成后续开放" />
         </div>
 
-        <div className="text-center pt-2">
-          <button
-            onClick={onClose}
-            className="text-xs text-slate-400 hover:text-slate-600 font-semibold"
-          >
-            取消分享
-          </button>
+        <div className="text-center">
+          <button onClick={onClose} className="text-xs font-semibold text-career-muted hover:text-career-ink">关闭</button>
         </div>
       </div>
     </div>
   );
+}
+
+function UnavailableShareButton({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return <button disabled className="flex cursor-not-allowed flex-col items-center gap-2 rounded-md border border-career-line bg-career-surface-muted p-3 text-career-muted opacity-80">{icon}{label}</button>;
 }

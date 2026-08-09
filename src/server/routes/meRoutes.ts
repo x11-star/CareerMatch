@@ -1,6 +1,8 @@
 import type express from 'express';
 import { requireAuth } from '../http/authMiddleware';
 import { sendHttpError } from '../http/errors';
+import { clearAuthCookie } from '../http/cookies';
+import { defaultAuthService } from '../auth/authService';
 import { updateUserProfile } from '../repositories/usersRepository';
 import { createResume, updateLatestResumeByUserId } from '../repositories/resumesRepository';
 import { createAssessment } from '../repositories/assessmentsRepository';
@@ -79,6 +81,49 @@ export function registerMeRoutes(app: express.Express) {
       }
 
       return res.json({ imported: { resume: resumeImported, assessment: assessmentImported, favorites: favoritesImported } });
+    } catch (error) {
+      return sendHttpError(res, error);
+    }
+  });
+
+  app.post('/api/me/change-phone/request-code', async (req, res) => {
+    try {
+      const user = await requireAuth(req);
+      // S1 修复:验证码发到当前手机号(user.phone),证明对当前账号的控制权。
+      const result = await defaultAuthService.requestChangePhoneCode(user.id, user.phone);
+      return res.json(result);
+    } catch (error) {
+      return sendHttpError(res, error);
+    }
+  });
+
+  app.post('/api/me/change-phone/verify', async (req, res) => {
+    try {
+      const user = await requireAuth(req);
+      // S1 修复:验证当前手机号的码(currentPhone=user.phone)+ 提交新号。
+      const result = await defaultAuthService.verifyChangePhoneCode(user.id, user.phone, String(req.body?.code || ''), String(req.body?.newPhone || ''));
+      return res.json({ user: publicUser(result.user) });
+    } catch (error) {
+      return sendHttpError(res, error);
+    }
+  });
+
+  app.post('/api/me/delete-account/request-code', async (req, res) => {
+    try {
+      const user = await requireAuth(req);
+      const result = await defaultAuthService.requestDeleteAccountCode(user.id, user.phone);
+      return res.json(result);
+    } catch (error) {
+      return sendHttpError(res, error);
+    }
+  });
+
+  app.post('/api/me/delete-account', async (req, res) => {
+    try {
+      const user = await requireAuth(req);
+      const result = await defaultAuthService.verifyDeleteAccountCode(user.id, user.phone, String(req.body?.code || ''));
+      clearAuthCookie(res);
+      return res.json(result);
     } catch (error) {
       return sendHttpError(res, error);
     }

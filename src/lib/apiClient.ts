@@ -29,6 +29,15 @@ export const api = {
   }),
   logout: () => requestJson<{ ok: true }>('/api/auth/logout', { method: 'POST' }),
   updateMe: (profile: any) => requestJson<{ user: any }>('/api/me', { method: 'PATCH', body: JSON.stringify(profile) }),
+  requestChangePhoneCode: () => requestJson<{ ok: true; devCode?: string; expiresInSeconds: number }>('/api/me/change-phone/request-code', {
+    method: 'POST',
+  }),
+  verifyChangePhoneCode: (code: string, newPhone: string) => requestJson<{ user: any }>('/api/me/change-phone/verify', {
+    method: 'POST',
+    body: JSON.stringify({ code, newPhone }),
+  }),
+  requestDeleteAccountCode: () => requestJson<{ ok: true; devCode?: string; expiresInSeconds: number }>('/api/me/delete-account/request-code', { method: 'POST' }),
+  deleteAccount: (code: string) => requestJson<{ ok: true }>('/api/me/delete-account', { method: 'POST', body: JSON.stringify({ code }) }),
   getLatestResume: () => requestJson<{ resume: ResumeData | null }>('/api/resumes/latest'),
   saveResume: (resume: ResumeData, metadata: any = {}) => requestJson<{ resume: ResumeData }>('/api/resumes', {
     method: 'POST',

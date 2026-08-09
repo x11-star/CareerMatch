@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Heart, Share2, FileDown, ShieldCheck, Sparkles, MapPin, DollarSign, Star, CheckCircle2, AlertCircle, RotateCw } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ArrowLeft, Heart } from 'lucide-react';
 import { Position, ResumeData, PersonalityResult } from '../types';
 import { useAuth } from '../context/AuthContext';
+import PageHeader from './ui/PageHeader';
+import StatusBanner from './ui/StatusBanner';
+import MatchDimensionsChart from './ui/MatchDimensionsChart';
 
 interface PositionDetailPageProps {
   position: Position;
@@ -11,11 +14,27 @@ interface PositionDetailPageProps {
   personalityResult?: PersonalityResult | null;
 }
 
+function diagnosisTone(score: number): 'success' | 'warning' | 'error' {
+  if (score >= 80) return 'success';
+  if (score >= 65) return 'warning';
+  return 'error';
+}
+
+function diagnosisLabel(score: number) {
+  if (score >= 80) return '推荐';
+  if (score >= 65) return '谨慎';
+  return '不建议';
+}
+
+function diagnosisSentence(score: number) {
+  if (score >= 80) return '推荐投递，但建议补充项目证明。';
+  if (score >= 65) return '可以尝试，但需要先补齐关键差距。';
+  return '当前匹配度较低，建议优先考虑更贴近背景的岗位。';
+}
+
 export default function PositionDetailPage({ position, onBack, onOpenModal, resumeData, personalityResult }: PositionDetailPageProps) {
   const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
-  const [isAiAnalysisOpen, setIsAiAnalysisOpen] = useState(true);
-
   const [matchResult, setMatchResult] = useState<{
     resumeMatch: number;
     personalityMatch: number;
@@ -30,7 +49,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
   async function parseMatchApiError(response: Response): Promise<string> {
     const body = await response.json().catch(() => null);
     if (body?.code === 'AI_CONFIGURATION_MISSING') {
-      return 'AI 匹配服务未配置：请在 .env 中填写 ZHIPU_API_KEY 或 DEEPSEEK_API_KEY 后重启服务。';
+      return 'AI 匹配服务暂不可用，请稍后再试。';
     }
     return body?.error || `获取 AI 匹配评估失败：HTTP ${response.status}`;
   }
@@ -40,7 +59,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
     async function fetchMatch() {
       setIsLoadingMatch(true);
       setMatchError('');
-      
+
       const cacheKey = `match_${user?.isGuest ? 'guest' : user?.id || 'none'}_${position.id}_${resumeData?.name || 'guest'}`;
       const cached = sessionStorage.getItem(cacheKey);
       if (cached) {
@@ -52,350 +71,195 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
           }
           return;
         } catch (e) {
-          console.warn("Failed to parse cached match, re-fetching:", e);
+          console.warn('Failed to parse cached match, re-fetching:', e);
         }
       }
 
       try {
         const response = await fetch('/api/match-position', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(user && !user.isGuest
-            ? { positionId: position.id }
-            : { resumeData, personalityResult, position }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(user && !user.isGuest ? { positionId: position.id } : { resumeData, personalityResult, position }),
         });
-
-        if (!response.ok) {
-          throw new Error(await parseMatchApiError(response));
-        }
-
+        if (!response.ok) throw new Error(await parseMatchApiError(response));
         const data = await response.json();
         if (active) {
           setMatchResult(data);
           sessionStorage.setItem(cacheKey, JSON.stringify(data));
         }
       } catch (err: any) {
-        console.error("Failed to run AI match:", err);
-        if (active) {
-          setMatchError(err.message || '获取AI相性匹配评估失败');
-        }
+        console.error('Failed to run AI match:', err);
+        if (active) setMatchError(err.message || '获取 AI 相性匹配评估失败');
       } finally {
-        if (active) {
-          setIsLoadingMatch(false);
-        }
+        if (active) setIsLoadingMatch(false);
       }
     }
 
     fetchMatch();
-    return () => {
-      active = false;
-    };
-  }, [user, position.id, resumeData, personalityResult]);
+    return () => { active = false; };
+  }, [user, position, resumeData, personalityResult]);
+
+  const score = matchResult?.overallMatch ?? position.overallMatch;
+  const scoreTone = diagnosisTone(score);
+  const resumeSkills = useMemo(() => new Set((resumeData?.skills || []).map((skill) => skill.toLowerCase())), [resumeData]);
+  const metRequirements = position.requirements.filter((req) => resumeSkillsHasRequirement(resumeSkills, req));
+  const missingRequirements = position.requirements.filter((req) => !resumeSkillsHasRequirement(resumeSkills, req));
+  const hasExperience = Boolean(resumeData?.internships?.length || resumeData?.projects?.length);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Top action bar */}
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={onBack}
-          className="text-sm text-slate-500 hover:text-slate-800 font-medium flex items-center gap-1 transition-colors cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4" /> 返回推荐结果
-        </button>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsFavorite(!isFavorite)}
-            className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-center ${
-              isFavorite 
-                ? 'bg-red-50 border-red-200 text-red-500' 
-                : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-400'
-            }`}
-          >
-            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-red-500' : ''}`} />
-          </button>
-          <button
-            onClick={() => onOpenModal('share')}
-            className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 cursor-pointer"
-          >
-            <Share2 className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onOpenModal('download')}
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1"
-          >
-            <FileDown className="w-4 h-4" /> 下载报告
-          </button>
-        </div>
-      </div>
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      <button onClick={onBack} className="mb-6 flex cursor-pointer items-center gap-1 text-sm font-medium text-career-muted transition-colors hover:text-career-ink">
+        <ArrowLeft className="h-4 w-4" /> 返回推荐结果
+      </button>
 
-      {/* Main Header Block */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xs mb-8">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+      <PageHeader
+        eyebrow="Position diagnosis"
+        title="岗位诊断报告"
+        description={`${position.company} · ${position.title} · ${position.city}`}
+        primaryAction={<button onClick={() => onOpenModal('share')} className="rounded-md border border-career-line bg-career-surface px-4 py-2 text-sm font-semibold text-career-ink">复制分享链接</button>}
+        secondaryAction={<button onClick={() => setIsFavorite(!isFavorite)} className="rounded-md border border-career-line bg-career-surface px-4 py-2 text-sm font-semibold text-career-ink"><Heart className={`mr-1 inline h-4 w-4 ${isFavorite ? 'fill-career-danger text-career-danger' : ''}`} />{isFavorite ? '已收藏' : '收藏岗位'}</button>}
+        meta={<div className="flex flex-wrap gap-2 text-xs text-career-muted"><span>{position.type === 'state-owned' ? '央国企' : '互联网'}</span><span>·</span><span>{position.salaryRange}</span><span>·</span><span>难度 {position.difficultyRating}/5</span></div>}
+      />
+
+      <div className="space-y-10">
+        {isLoadingMatch && <StatusBanner tone="pending" title="正在生成 AI 匹配解释" description="系统正在比对简历、测评和岗位要求，处理时间可能需要几秒。" />}
+        {matchError && <StatusBanner tone="warning" title="AI 诊断解释暂不可用" description={matchError} />}
+
+        {/* 结论段:hero-metric + 匹配维度图 */}
+        <section className="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
           <div>
-            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-              position.type === 'state-owned' 
-                ? 'bg-purple-100 text-purple-700 border border-purple-200/40' 
-                : 'bg-blue-100 text-blue-700 border border-blue-200/40'
-            }`}>
-              {position.type === 'state-owned' ? '央国企' : '互联网大厂'}
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900 mt-2">
-              {position.title}
-            </h1>
-            <p className="text-sm font-semibold text-slate-600 mt-1">
-              {position.company} · 工程技术类与关键职能部门
+            <p className="text-[11px] font-semibold tracking-[0.16em] text-career-muted uppercase">诊断结论</p>
+            <div className="mt-3 flex items-baseline gap-3">
+              <span className="text-5xl font-bold tabular-nums tracking-tight text-career-ink">{score}<span className="text-2xl font-semibold text-career-muted">%</span></span>
+              <span className={`text-sm font-semibold ${scoreTone === 'success' ? 'text-career-success' : scoreTone === 'warning' ? 'text-career-warning' : 'text-career-danger'}`}>{diagnosisLabel(score)}</span>
+            </div>
+            <p className="mt-3 text-base leading-7 text-career-ink">{diagnosisSentence(score)}</p>
+            <p className="mt-2 text-sm leading-6 text-career-muted">
+              {missingRequirements.length > 0 ? `准备优先级:先补关键差距(${missingRequirements.slice(0, 2).join('、')})。` : '准备优先级:重点整理项目证据和面试表达。'}
             </p>
           </div>
-          <div className="bg-linear-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 text-center shrink-0">
-            <span className="text-[10px] font-bold text-blue-500 uppercase tracking-wider block">综合匹配度</span>
-            <span className="text-3xl font-black font-display text-blue-600">
-              {isLoadingMatch ? (
-                <span className="animate-pulse">...</span>
-              ) : (
-                `${matchResult?.overallMatch ?? position.overallMatch}%`
-              )}
-            </span>
+          <div className="lg:border-l lg:border-career-line lg:pl-8">
+            <p className="mb-3 text-[11px] font-semibold tracking-[0.16em] text-career-muted uppercase">匹配维度</p>
+            <MatchDimensionsChart
+              resumeMatch={matchResult?.resumeMatch ?? position.resumeMatch}
+              personalityMatch={matchResult?.personalityMatch ?? position.personalityMatch}
+              overallMatch={score}
+            />
+            <p className="mt-3 text-xs leading-5 text-career-muted">对照推荐线 80% 与谨慎线 65%;分数不是唯一结论。</p>
           </div>
-        </div>
+        </section>
 
-        <div className="flex flex-wrap items-center gap-y-3 gap-x-6 text-xs text-slate-500 font-semibold pt-4 border-t border-slate-100">
-          <span className="flex items-center gap-1"><MapPin className="w-4 h-4 text-slate-400" /> {position.city}</span>
-          <span className="flex items-center gap-1 text-amber-600"><DollarSign className="w-4 h-4" /> {position.salaryRange}</span>
-          <span className="flex items-center gap-0.5 text-amber-400">
-            评级：
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} className={`w-3.5 h-3.5 ${i < position.difficultyRating ? 'fill-amber-400' : 'text-slate-200'}`} />
-            ))}
-          </span>
-        </div>
-      </div>
+        {/* 证据段:硬条件 + 性格适配 + AI 解读,条目列表而非卡片网格 */}
+        <section>
+          <h2 className="text-lg font-semibold text-career-ink">证据</h2>
+          <p className="mt-1 text-sm text-career-muted">诊断依据来自岗位要求、简历材料和职业测评。</p>
 
-      {/* Matching Score Breakdown */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xs mb-8">
-        <h3 className="text-sm font-bold text-slate-900 border-l-4 border-blue-600 pl-2 mb-6">
-          你的双引擎相性指标
-        </h3>
-
-        {matchError && (
-          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800">
-            {matchError}
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="border border-slate-100 bg-slate-50/50 rounded-2xl p-4">
-            <div className="flex justify-between text-xs font-bold text-slate-700 mb-2">
-              <span>📄 简历技能硬匹配</span>
-              <span className="text-blue-600">
-                {isLoadingMatch ? '...' : `${matchResult?.resumeMatch ?? position.resumeMatch}%`}
-              </span>
+          <div className="mt-5 grid gap-x-10 gap-y-6 md:grid-cols-3">
+            <div>
+              <h3 className="text-sm font-semibold text-career-ink">已满足</h3>
+              <ul className="mt-2 divide-y divide-career-line/60">
+                {(metRequirements.length > 0 ? metRequirements : ['暂无可直接确认的硬技能']).map((item) => <li key={item} className="py-2 text-sm text-career-ink">{item}</li>)}
+              </ul>
             </div>
-            <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-blue-600 rounded-full transition-all duration-500" 
-                style={{ width: `${isLoadingMatch ? 30 : (matchResult?.resumeMatch ?? position.resumeMatch)}%` }} 
-              />
+            <div>
+              <h3 className="text-sm font-semibold text-career-ink">部分满足</h3>
+              <ul className="mt-2 divide-y divide-career-line/60">
+                {position.softSkills.slice(0, 3).map((item) => <li key={item} className="py-2 text-sm text-career-ink">{item}</li>)}
+                {position.softSkills.length === 0 && <li className="py-2 text-sm text-career-muted">暂无软技能数据</li>}
+              </ul>
             </div>
-            <p className="text-[10px] text-slate-400 mt-2 min-h-[40px]">
-              {isLoadingMatch ? (
-                <span className="flex items-center gap-1 animate-pulse"><RotateCw className="w-3 h-3 animate-spin text-blue-500" /> AI正在深度计算简历与岗位适配度...</span>
-              ) : (
-                matchResult?.resumeMatchExplanation ?? `基于您的${resumeData?.school || '清华大学计算机专业'}、实习及技术栈与该岗位的硬性技术适配契合度评估。`
-              )}
-            </p>
-          </div>
-
-          <div className="border border-slate-100 bg-slate-50/50 rounded-2xl p-4">
-            <div className="flex justify-between text-xs font-bold text-slate-700 mb-2">
-              <span>🧠 职业性格软匹配</span>
-              <span className="text-emerald-600">
-                {isLoadingMatch ? '...' : `${matchResult?.personalityMatch ?? position.personalityMatch}%`}
-              </span>
+            <div>
+              <h3 className="text-sm font-semibold text-career-ink">缺失 / 待证明</h3>
+              <ul className="mt-2 divide-y divide-career-line/60">
+                {(missingRequirements.slice(0, 4).length > 0 ? missingRequirements.slice(0, 4) : ['请准备能证明能力的项目复盘']).map((item) => <li key={item} className="py-2 text-sm text-career-ink">{item}</li>)}
+              </ul>
             </div>
-            <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-emerald-600 rounded-full transition-all duration-500" 
-                style={{ width: `${isLoadingMatch ? 30 : (matchResult?.personalityMatch ?? position.personalityMatch)}%` }} 
-              />
+          </div>
+
+          <div className="mt-6 grid gap-x-10 gap-y-6 md:grid-cols-2">
+            <div>
+              <h3 className="text-sm font-semibold text-career-ink">性格适配点</h3>
+              <ul className="mt-2 divide-y divide-career-line/60">
+                {(position.fitPersonality.length > 0 ? position.fitPersonality : [personalityResult?.typeTitle || '完成测评后生成更明确的适配点']).map((item) => <li key={item} className="py-2 text-sm text-career-ink">{item}</li>)}
+              </ul>
             </div>
-            <p className="text-[10px] text-slate-400 mt-2 min-h-[40px]">
-              {isLoadingMatch ? (
-                <span className="flex items-center gap-1 animate-pulse"><RotateCw className="w-3 h-3 animate-spin text-emerald-500" /> AI正在比对性格特质与企业文化...</span>
-              ) : (
-                matchResult?.personalityMatchExplanation ?? `您的“${personalityResult?.typeTitle || '尽责稳定型'}”大五性格模型与该岗位特质的重合契合度评估。`
-              )}
-            </p>
-          </div>
-        </div>
-
-        {/* AI Insight dropdown */}
-        <div className="mt-6 border-t border-slate-100 pt-4">
-          <button
-            onClick={() => setIsAiAnalysisOpen(!isAiAnalysisOpen)}
-            className="w-full flex justify-between items-center text-xs font-bold text-slate-700 hover:text-blue-600 cursor-pointer"
-          >
-            <span className="flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-blue-500" />
-              AI 专家解读：为什么我是该职位的卓越候选人？
-            </span>
-            <span>{isAiAnalysisOpen ? '收起 ▲' : '展开 ▼'}</span>
-          </button>
-
-          {isAiAnalysisOpen && (
-            <div className="mt-3 bg-blue-50/40 border border-blue-100/50 rounded-xl p-4 text-xs text-slate-600 leading-relaxed min-h-[60px] flex items-center">
-              {isLoadingMatch ? (
-                <div className="flex items-center gap-2 text-blue-600 font-bold animate-pulse py-2">
-                  <RotateCw className="w-4 h-4 animate-spin text-blue-600" />
-                  <span>精准双引擎 AI 正在深度生成您的专属岗位分析报告...</span>
-                </div>
-              ) : (
-                matchResult?.whyExcellent ?? (
-                  `您有扎实的项目技术累积，对岗位核心概念有良好理解。同时在性格测试上展现出优异特征，这种品质在目标单位中能转化为优秀的长期坚守与业务突破价值。`
-                )
-              )}
+            <div>
+              <h3 className="text-sm font-semibold text-career-ink">风险点</h3>
+              <ul className="mt-2 divide-y divide-career-line/60">
+                <li className="py-2 text-sm text-career-ink">{personalityResult ? '如果岗位节奏或反馈密度与你的测评倾向不同,需要提前准备适应策略。' : '还没有职业测评,暂不能判断岗位环境风险。'}</li>
+              </ul>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Job specs */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-2xs mb-8 space-y-8">
-        {/* Summary */}
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 border-l-4 border-slate-400 pl-2 mb-3">
-            📋 岗位概述
-          </h3>
-          <p className="text-sm text-slate-600 leading-relaxed">
-            {position.summary}
-          </p>
-        </div>
-
-        {/* Responsibilities */}
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 border-l-4 border-slate-400 pl-2 mb-3">
-            🎯 核心职责
-          </h3>
-          <ul className="space-y-2">
-            {position.responsibilities.map((resp, i) => (
-              <li key={i} className="text-sm text-slate-600 flex gap-2">
-                <span className="text-blue-500 font-semibold">•</span>
-                <span>{resp}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Requirements */}
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 border-l-4 border-slate-400 pl-2 mb-3">
-            🛠️ 硬核心技能要求
-          </h3>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {position.requirements.map((req, i) => (
-              <span key={i} className="px-2.5 py-1 bg-slate-100 border border-slate-200/50 text-slate-700 text-xs font-semibold rounded-lg">
-                {req}
-              </span>
-            ))}
           </div>
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">软实力素质偏好</h4>
-          <ul className="space-y-2">
-            {position.softSkills.map((soft, i) => (
-              <li key={i} className="text-sm text-slate-600 flex gap-2">
-                <span className="text-emerald-500 font-semibold">✓</span>
-                <span>{soft}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
 
-        {/* Salary Reference */}
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 border-l-4 border-slate-400 pl-2 mb-3">
-            💰 薪资与核心福利参考
-          </h3>
-          <p className="text-sm text-slate-600 leading-relaxed bg-amber-50/30 border border-amber-100/50 p-4 rounded-xl">
-            {position.salaryDetail}
-          </p>
-        </div>
-
-        {/* Career Path */}
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 border-l-4 border-slate-400 pl-2 mb-4">
-            📈 职业发展路径
-          </h3>
-          <div className="relative border-l-2 border-slate-100 pl-4 ml-2 space-y-5">
-            {position.careerPath.map((pathItem, i) => {
-              const [role, duration] = pathItem.split('：');
-              return (
-                <div key={i} className="relative">
-                  <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-blue-600 ring-4 ring-white" />
-                  <div className="text-sm font-bold text-slate-800">{role}</div>
-                  <div className="text-xs text-slate-500 mt-0.5">{duration}</div>
-                </div>
-              );
-            })}
+          <div className="mt-6 rounded-lg bg-career-bg p-4">
+            <h3 className="text-sm font-semibold text-career-ink">AI 专家解读</h3>
+            <p className="mt-2 text-sm leading-6 text-career-muted">{matchResult?.whyExcellent || 'AI 解释将在服务可用时生成;当前可先查看结构化差距和准备建议。'}</p>
+            <p className="mt-2 text-xs text-career-muted">岗位概述:{position.summary}</p>
           </div>
-        </div>
+        </section>
 
-        {/* Suitability */}
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 border-l-4 border-slate-400 pl-2 mb-3">
-            🧩 适配性格特质
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {position.fitPersonality.map((p, i) => (
-              <span key={i} className="px-3 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold rounded-full">
-                {p}
-              </span>
-            ))}
-          </div>
-        </div>
+        {/* 行动段:差距 + 补救建议 + 面试准备,可扫读的行动清单 */}
+        <section>
+          <h2 className="text-lg font-semibold text-career-ink">行动建议</h2>
+          <p className="mt-1 text-sm text-career-muted">差距用于制定行动,不用于否定当前背景;按时间窗口安排。</p>
 
-        {/* Sector Comparison */}
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 border-l-4 border-slate-400 pl-2 mb-3">
-            📊 赛道比对分析（央国企 vs 互联网）
-          </h3>
-          <p className="text-sm text-slate-600 leading-relaxed">
-            {position.type === 'state-owned' 
-              ? '【央国企同类岗位】：相比于互联网大厂，本岗位初期薪资可能较为平缓，但是极高稳定性与低淘汰焦虑不可多得。完整的福利和落户机制极具综合价值，非常适合注重生活质量和长期安稳的同学。'
-              : '【互联网同类岗位】：高挑战，高起薪，技术选型极快。适合崇尚极速成长，在敏捷、扁平的企业文化中自如游弋的同学。但由于没有编制，通常需要具备敏捷的职业转换心态。'}
-          </p>
-        </div>
-
-        {/* How to prepare */}
-        <div>
-          <h3 className="text-sm font-bold text-slate-900 border-l-4 border-slate-400 pl-2 mb-4">
-            📝 如何成功上岸（求职指南）
-          </h3>
-          <div className="space-y-4">
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">校招关键时间线</h4>
-              <div className="space-y-1.5 text-xs text-slate-700">
-                {position.howToPrepare.timeline.map((line, i) => (
-                  <div key={i} className="flex gap-1">
-                    <span className="text-blue-500">•</span>
-                    <span>{line}</span>
-                  </div>
-                ))}
+          <div className="mt-5 grid gap-x-10 gap-y-2 md:grid-cols-4">
+            {[
+              { label: '技能差距', value: missingRequirements.slice(0, 3).join('、') || '技能项基本覆盖,补项目证据' },
+              { label: '经历差距', value: hasExperience ? '把实习或项目整理成 STAR 结构,突出具体贡献' : '暂无实习或项目,补充课程项目或竞赛' },
+              { label: '表达差距', value: '准备项目背景、职责、难点、方案和结果' },
+              { label: '行业理解', value: '准备公司业务、岗位所属部门和近期行业变化' },
+            ].map((item) => (
+              <div key={item.label} className="border-t border-career-line pt-3">
+                <p className="text-[10px] font-semibold tracking-[0.14em] text-career-muted uppercase">{item.label}</p>
+                <p className="mt-1 text-sm leading-6 text-career-ink">{item.value}</p>
               </div>
-            </div>
+            ))}
+          </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">笔试考察科目</h4>
-                <p className="text-slate-600 leading-relaxed">{position.howToPrepare.exam}</p>
+          <div className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-3">
+            {[
+              { title: '7 天可做', items: ['补齐岗位要求中最缺的 1-2 个技能证明', '把一个项目整理成 STAR 复盘稿', '准备 3 个和岗位职责相关的问题'] },
+              { title: '30 天可做', items: ['补一个小型项目或案例,覆盖岗位核心技术', '针对目标岗位更新简历摘要和项目描述', '完成 2-3 次模拟面试复盘'] },
+              { title: '投递前必须补', items: ['确认简历中没有空泛形容词', '准备岗位要求逐条对应证据', '梳理公司业务和部门方向'] },
+            ].map((group) => (
+              <div key={group.title}>
+                <h3 className="text-sm font-semibold text-career-ink">{group.title}</h3>
+                <ul className="mt-2 divide-y divide-career-line/60">
+                  {group.items.map((item) => <li key={item} className="py-2 text-sm text-career-ink">{item}</li>)}
+                </ul>
               </div>
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">面试重点提示</h4>
-                <p className="text-slate-600 leading-relaxed">{position.howToPrepare.interview}</p>
-              </div>
+            ))}
+          </div>
+
+          <div className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-3">
+            <div>
+              <h3 className="text-sm font-semibold text-career-ink">可能被问的问题</h3>
+              <ul className="mt-2 divide-y divide-career-line/60">
+                {(position.howToPrepare.timeline?.length ? position.howToPrepare.timeline : ['请说明你最能证明岗位能力的项目']).map((item) => <li key={item} className="py-2 text-sm text-career-ink">{item}</li>)}
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-career-ink">笔试或技能准备</h3>
+              <p className="mt-2 py-2 text-sm leading-6 text-career-ink">{position.howToPrepare.exam || '复习岗位要求中的基础知识和常见题型。'}</p>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-career-ink">项目复盘重点</h3>
+              <p className="mt-2 py-2 text-sm leading-6 text-career-ink">{position.howToPrepare.interview || '准备项目中的难点、取舍、指标和复盘。'}</p>
             </div>
           </div>
-        </div>
+        </section>
+
+        {/* 导出边界:降权脚注 */}
+        <p className="border-t border-career-line pt-4 text-xs leading-5 text-career-muted">
+          复制分享链接是真功能;PDF 导出第六阶段开放。当前阶段先保证在线诊断报告真实、可读、可复查。
+        </p>
       </div>
     </div>
   );
+}
+
+function resumeSkillsHasRequirement(skills: Set<string>, requirement: string) {
+  const normalized = requirement.toLowerCase();
+  return Array.from(skills).some((skill) => normalized.includes(skill) || skill.includes(normalized));
 }

@@ -34,6 +34,10 @@ export function updateUserProfile(userId: string, input: UpdateUserProfileInput)
   return runDb(() => prisma.user.update({ where: { id: userId }, data: input }));
 }
 
+export function updateUserPhone(userId: string, phone: string) {
+  return runDb(() => prisma.user.update({ where: { id: userId }, data: { phone } }));
+}
+
 export function deleteUser(userId: string) {
   return runDb(() => prisma.user.delete({ where: { id: userId } }));
 }

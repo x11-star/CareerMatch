@@ -1,6 +1,6 @@
 import { createRandomNumericCode } from './hash';
 
-export type SmsPurpose = 'login';
+export type SmsPurpose = 'login' | 'change_phone' | 'delete_account';
 
 export interface SmsSender {
   sendSmsCode(input: { phone: string; code: string; purpose: SmsPurpose }): Promise<{ devCode?: string }>;

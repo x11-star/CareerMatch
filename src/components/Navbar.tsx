@@ -36,7 +36,6 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
 
   const isNavActive = (view: string) => {
     if (currentView === view) return true;
-    if (view === 'upload' && currentView === 'assessment') return true;
     if (view === 'assessment' && currentView === 'assessment-result') return true;
     if (view === 'results' && (currentView === 'assessment-result' || currentView === 'detail')) return true;
     return false;
@@ -89,11 +88,11 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
 
   const avatarChar = userProfile?.name ? userProfile.name[0] : (user ? '访' : '未');
   const userName = user?.isGuest ? '游客模式' : (user ? '手机号登录' : '未登录');
-  const userSubTitle = user?.isGuest ? '本机保存体验数据' : (user ? maskPhone(user.phone) : '登录后保存到账号');
+  const userSubTitle = user?.isGuest ? '登录后保存到账号' : (user ? maskPhone(user.phone) : '登录后保存到账号');
 
   return (
     <>
-      <nav className="sticky top-0 z-50 h-16 border-b border-career-line bg-career-surface/95 shadow-xs backdrop-blur">
+      <nav className="sticky top-0 z-50 h-16 border-b border-career-line bg-career-surface/95 backdrop-blur">
         <div className="mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-full items-center justify-between">
             <button
@@ -151,7 +150,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
                   </button>
 
                   {userDropdownOpen && (
-                    <div className="absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-career-line bg-career-surface py-2 text-sm text-career-ink shadow-lg">
+                    <div className="absolute right-0 z-50 mt-2 w-56 rounded-md border border-career-line bg-career-surface py-2 text-sm text-career-ink shadow-lg">
                       <div className="border-b border-career-line px-4 pb-3 pt-2">
                         <p className="text-xs font-semibold text-career-ink">{userName}</p>
                         <p className="mt-1 text-[11px] text-career-muted">{userSubTitle}</p>
@@ -181,7 +180,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
               ) : (
                 <button
                   onClick={handleLoginClick}
-                  className="flex cursor-pointer items-center gap-1 rounded-2xl bg-career-primary px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-primary-700"
+                  className="flex cursor-pointer items-center gap-1 rounded-md bg-career-primary px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-primary-700"
                 >
                   <LogIn className="h-3.5 w-3.5" /> 手机号登录
                 </button>
@@ -245,12 +244,12 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
       </nav>
 
       {loginModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 px-4">
-          <div className="w-full max-w-sm rounded-3xl border border-career-line bg-career-surface p-6 shadow-xl">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-career-ink/40 px-4">
+          <div className="w-full max-w-sm rounded-lg border border-career-line bg-career-surface p-6 shadow-xl">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-career-ink">手机号登录</h2>
-                <p className="mt-1 text-xs leading-5 text-career-muted">开发环境使用验证码接口，不接入真实短信服务商。</p>
+                <p className="mt-1 text-xs leading-5 text-career-muted">输入手机号和验证码，登录后保存简历、测评和收藏。</p>
               </div>
               <button
                 onClick={() => setLoginModalOpen(false)}
@@ -264,7 +263,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
             <div className="mt-5 space-y-4">
               <label className="block text-xs font-semibold text-career-ink">
                 手机号
-                <div className="mt-1.5 flex items-center gap-2 rounded-2xl border border-career-line bg-career-bg px-3 py-2 focus-within:border-career-primary focus-within:ring-2 focus-within:ring-career-primary-soft">
+                <div className="mt-1.5 flex items-center gap-2 rounded-md border border-career-line bg-career-bg px-3 py-2 focus-within:border-career-primary focus-within:ring-2 focus-within:ring-career-primary-soft">
                   <Phone className="h-4 w-4 text-career-muted" />
                   <input
                     value={phone}
@@ -277,7 +276,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
 
               <label className="block text-xs font-semibold text-career-ink">
                 验证码
-                <div className="mt-1.5 flex items-center gap-2 rounded-2xl border border-career-line bg-career-bg px-3 py-2 focus-within:border-career-primary focus-within:ring-2 focus-within:ring-career-primary-soft">
+                <div className="mt-1.5 flex items-center gap-2 rounded-md border border-career-line bg-career-bg px-3 py-2 focus-within:border-career-primary focus-within:ring-2 focus-within:ring-career-primary-soft">
                   <KeyRound className="h-4 w-4 text-career-muted" />
                   <input
                     value={code}
@@ -289,13 +288,13 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
               </label>
 
               {devCode && (
-                <div className="rounded-2xl bg-career-primary-soft px-3 py-2 text-xs text-career-primary">
-                  开发验证码：<span className="font-semibold tracking-widest">{devCode}</span>
+                <div className="rounded-md bg-career-primary-soft px-3 py-2 text-xs text-career-primary">
+                  本次验证码：<span className="font-semibold tracking-widest">{devCode}</span>
                 </div>
               )}
 
               {loginError && (
-                <div className="rounded-2xl bg-career-danger-soft px-3 py-2 text-xs text-career-danger">
+                <div className="rounded-md bg-career-danger-soft px-3 py-2 text-xs text-career-danger">
                   {loginError}
                 </div>
               )}
@@ -304,14 +303,14 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
                 <button
                   onClick={handleRequestCode}
                   disabled={loginSubmitting || !phone.trim()}
-                  className="rounded-2xl border border-career-line px-4 py-2 text-xs font-semibold text-career-primary hover:bg-career-primary-soft disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-md border border-career-line px-4 py-2 text-xs font-semibold text-career-primary hover:bg-career-primary-soft disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   获取验证码
                 </button>
                 <button
                   onClick={handleVerifyCode}
                   disabled={loginSubmitting || !phone.trim() || !code.trim()}
-                  className="rounded-2xl bg-career-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-md bg-career-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   登录
                 </button>
@@ -319,7 +318,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
 
               <button
                 onClick={handleGuest}
-                className="w-full rounded-2xl bg-career-surface-muted px-4 py-2 text-xs font-semibold text-career-ink hover:bg-career-primary-soft"
+                className="w-full rounded-md bg-career-surface-muted px-4 py-2 text-xs font-semibold text-career-ink hover:bg-career-primary-soft"
               >
                 先以游客身份体验
               </button>

@@ -18,10 +18,10 @@ const toneClass: Record<Tone, string> = {
 
 export default function DiagnosticBlock({ label, title, tone = 'neutral', children }: DiagnosticBlockProps) {
   return (
-    <section className={`rounded-2xl border p-4 ${toneClass[tone]}`}>
-      <p className="text-[11px] font-semibold tracking-[0.16em] text-career-muted uppercase">{label}</p>
-      <h3 className="mt-1 text-sm font-semibold text-career-ink">{title}</h3>
-      <div className="mt-3 text-sm leading-6 text-career-muted">{children}</div>
+    <section className={`rounded-md border p-3.5 ${toneClass[tone]}`}>
+      <p className="text-[10px] font-semibold tracking-[0.16em] text-career-muted uppercase">{label}</p>
+      <h3 className="mt-1.5 text-sm font-semibold text-career-ink">{title}</h3>
+      <div className="mt-2 text-sm leading-6 text-career-muted">{children}</div>
     </section>
   );
 }

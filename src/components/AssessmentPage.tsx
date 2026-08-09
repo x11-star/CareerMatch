@@ -79,8 +79,8 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
   if (isFinishing) {
     return (
       <div className="mx-auto max-w-md px-4 py-24 text-center">
-        <div className="rounded-3xl border border-career-line bg-career-surface p-8 shadow-xs">
-          <div className="relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-career-primary-soft text-career-primary">
+        <div className="rounded-lg border border-career-line bg-career-surface p-8 ">
+          <div className="relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-lg bg-career-primary-soft text-career-primary">
             <RotateCw className="h-8 w-8 animate-spin" />
           </div>
           <h2 className="text-2xl font-semibold text-career-ink">测评已完成</h2>
@@ -119,7 +119,7 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
           <StatusBanner
             tone="info"
             title="可以先以游客完成测评"
-            description="登录手机号后，结果会保存到你的账号；游客模式下结果保存在本机浏览器。"
+            description="未登录也可以先体验，登录手机号后，结果会保存到你的账号。"
           />
         )}
 
@@ -130,7 +130,7 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
               const isCompleted = currentStageIndex > index;
               const width = isActive ? `${progressInStage}%` : isCompleted ? '100%' : '0%';
               return (
-                <div key={stage.title} className="rounded-2xl border border-career-line bg-career-bg p-3">
+                <div key={stage.title} className="rounded-md border border-career-line bg-career-bg p-3">
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <span className={`text-xs font-semibold ${isActive ? 'text-career-primary' : 'text-career-ink'}`}>{stage.title}</span>
                     <span className="font-mono text-[10px] text-career-muted">{index + 1}</span>
@@ -142,13 +142,13 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
               );
             })}
           </div>
-          <div className="mt-4 rounded-2xl bg-career-primary-soft px-4 py-3 text-xs leading-5 text-career-muted">
+          <div className="mt-4 rounded-md bg-career-primary-soft px-4 py-3 text-xs leading-5 text-career-muted">
             <span className="font-semibold text-career-ink">{currentStage.title}：</span>{currentStage.hint}
           </div>
         </SectionPanel>
 
         <SectionPanel title="当前题目" description="请选择最接近你真实情况的一项；不确定时可以选择中间项。">
-          <div className="rounded-3xl bg-career-bg p-6 sm:p-8">
+          <div className="rounded-lg bg-career-bg p-6 sm:p-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
@@ -169,7 +169,7 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
                 <button
                   key={opt.value}
                   onClick={() => handleSelectOption(opt.value)}
-                  className={`w-full cursor-pointer rounded-2xl border p-4 text-left text-sm font-semibold transition-colors ${
+                  className={`w-full cursor-pointer rounded-md border p-4 text-left text-sm font-semibold transition-colors ${
                     isSelected
                       ? 'border-career-primary bg-career-primary-soft text-career-primary'
                       : 'border-career-line bg-career-surface text-career-ink hover:bg-career-surface-muted'
@@ -191,7 +191,7 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
           <button
             onClick={handlePrev}
             disabled={currentIndex === 0}
-            className={`rounded-xl border px-3 py-1.5 font-medium ${
+            className={`rounded-md border px-3 py-1.5 font-medium ${
               currentIndex === 0
                 ? 'cursor-not-allowed border-career-line text-career-muted/50'
                 : 'cursor-pointer border-career-line text-career-muted hover:bg-career-surface-muted hover:text-career-ink'

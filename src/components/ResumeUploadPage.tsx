@@ -7,6 +7,7 @@ import { saveResume, getLatestResume } from '../lib/userDataStore';
 import PageHeader from './ui/PageHeader';
 import SectionPanel from './ui/SectionPanel';
 import StatusBanner from './ui/StatusBanner';
+import Toast from './ui/Toast';
 
 type UploadState = 'A_IDLE' | 'B_UPLOADING' | 'C_PARSING' | 'D_DONE';
 
@@ -26,6 +27,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
   const [apiParseError, setApiParseError] = useState('');
   const [isApiParsing, setIsApiParsing] = useState(false);
   const [uploadTab, setUploadTab] = useState<'file' | 'text'>('file');
+  const [toast, setToast] = useState<{ title: string; description?: string; tone?: 'info' | 'success' | 'warning' } | null>(null);
   const [editingSection, setEditingSection] = useState<'basic' | 'skills' | 'internships' | 'projects' | 'target' | null>(null);
   const [basicForm, setBasicForm] = useState({ name: '', graduationYear: '', school: '', major: '' });
   const [skillsForm, setSkillsForm] = useState('');
@@ -89,7 +91,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
   async function parseApiError(response: Response): Promise<string> {
     const body = await response.json().catch(() => null);
     if (body?.code === 'AI_CONFIGURATION_MISSING') {
-      return 'AI 服务未配置：请在 .env 中填写 ZHIPU_API_KEY 或 DEEPSEEK_API_KEY 后重启服务。';
+      return 'AI 简历解析暂不可用，请稍后再试。';
     }
     if (body?.code === 'FILE_TOO_LARGE') {
       return '文件超过 8MB。请压缩后重新上传，或粘贴简历文本。';
@@ -199,8 +201,10 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
     if (user) {
       try {
         await saveResume(user, resumeData);
+        setToast({ title: '简历已保存', description: '已保存到你的账号，即将进入测评。', tone: 'success' });
       } catch (e) {
         console.error('Failed to save resume', e);
+        setToast({ title: '保存失败', description: '简历未保存到账号，但可继续进入测评。', tone: 'warning' });
       }
     }
     onConfirm(resumeData);
@@ -272,6 +276,14 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
+      {toast && (
+        <Toast
+          tone={toast.tone || 'info'}
+          title={toast.title}
+          description={toast.description}
+          onDismiss={() => setToast(null)}
+        />
+      )}
       <button id="resume-back-btn" onClick={onBack} className="mb-6 text-sm font-medium text-career-muted hover:text-career-ink">
         ← 返回上一页
       </button>
@@ -281,14 +293,6 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
         title="上传简历"
         description="先建立你的求职材料档案。系统会识别教育背景、技能、项目和目标方向。"
       />
-
-      <div className="mb-6 grid gap-3 md:grid-cols-4">
-        {['PDF / DOCX / TXT / 图片', '单文件不超过 8MB', '扫描 PDF 默认识别前 3 页', user ? '登录后保存到账号' : '游客数据保存在本机'].map((item) => (
-          <div key={item} className="rounded-2xl border border-career-line bg-career-surface px-4 py-3 text-xs font-semibold text-career-muted">
-            {item}
-          </div>
-        ))}
-      </div>
 
       {apiParseError && (
         <div className="mb-5">
@@ -305,46 +309,54 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
       {currentState === 'A_IDLE' && (
         <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
           <SectionPanel title="选择材料" description="上传简历文件，或直接粘贴简历正文。系统只在你发起解析时处理材料。">
-            <div className="mb-5 flex rounded-2xl bg-career-surface-muted p-1">
-              <button type="button" onClick={() => setUploadTab('file')} className={`flex-1 rounded-xl px-3 py-2 text-xs font-semibold ${uploadTab === 'file' ? 'bg-career-surface text-career-ink shadow-xs' : 'text-career-muted'}`}>
+            <div className="mb-5 flex rounded-md bg-career-surface-muted p-1">
+              <button type="button" onClick={() => setUploadTab('file')} className={`flex-1 rounded-xl px-3 py-2 text-xs font-semibold ${uploadTab === 'file' ? 'bg-career-surface text-career-ink' : 'text-career-muted'}`}>
                 上传文件
               </button>
-              <button type="button" onClick={() => setUploadTab('text')} className={`flex-1 rounded-xl px-3 py-2 text-xs font-semibold ${uploadTab === 'text' ? 'bg-career-surface text-career-ink shadow-xs' : 'text-career-muted'}`}>
+              <button type="button" onClick={() => setUploadTab('text')} className={`flex-1 rounded-xl px-3 py-2 text-xs font-semibold ${uploadTab === 'text' ? 'bg-career-surface text-career-ink' : 'text-career-muted'}`}>
                 粘贴文本
               </button>
             </div>
 
             {uploadTab === 'file' ? (
               <label className="block cursor-pointer">
-                <div className="rounded-3xl border border-dashed border-career-line bg-career-bg p-10 text-center transition-colors hover:bg-career-primary-soft/40">
+                <div className="rounded-lg border border-dashed border-career-line bg-career-bg p-10 text-center transition-colors hover:bg-career-primary-soft/40">
                   <Upload className="mx-auto mb-4 h-9 w-9 text-career-primary" />
                   <span className="block text-sm font-semibold text-career-ink">拖拽文件到此处，或点击选择</span>
                   <span className="mt-2 block text-xs leading-5 text-career-muted">支持 .txt / .pdf / .docx / .png / .jpg / .webp，单文件不超过 8MB。</span>
-                  <span className="mt-3 block text-xs leading-5 text-career-muted">图片和扫描 PDF 会先使用本地 OCR 识别，再交给 AI 结构化。</span>
+                  <span className="mt-3 block text-xs leading-5 text-career-muted">图片和扫描 PDF 需要先识别文字，处理时间会稍长。</span>
                 </div>
                 <input id="resume-file-input" type="file" accept=".txt,.pdf,.docx,.png,.jpg,.jpeg,.webp" className="hidden" onChange={handleFileChange} />
               </label>
             ) : (
               <form onSubmit={handleApiParse} className="space-y-4">
+                <label htmlFor="resume-pasted-text" className="block text-xs font-semibold text-career-ink">
+                  简历正文
+                </label>
                 <textarea
+                  id="resume-pasted-text"
                   value={pastedText}
                   onChange={(e) => setPastedText(e.target.value)}
                   placeholder="请在这里复制并粘贴你的完整简历文本。"
                   rows={10}
-                  className="w-full resize-none rounded-2xl border border-career-line bg-career-bg p-4 text-sm leading-6 text-career-ink outline-none transition-colors placeholder:text-career-muted focus:border-career-primary"
+                  aria-describedby="resume-pasted-text-hint"
+                  className="w-full resize-none rounded-md border border-career-line bg-career-bg p-4 text-sm leading-6 text-career-ink outline-none transition-colors placeholder:text-career-muted focus:border-career-primary"
                 />
-                <button type="submit" disabled={!pastedText.trim() || isApiParsing} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-career-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60">
+                <p id="resume-pasted-text-hint" className="text-xs leading-5 text-career-muted">
+                  {pastedText.trim() ? '点击下方按钮启动 AI 解析。' : '需要先粘贴简历文本才能启动解析。'}
+                </p>
+                <button type="submit" disabled={!pastedText.trim() || isApiParsing} className="flex w-full items-center justify-center gap-2 rounded-md bg-career-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60">
                   启动 AI 解析简历 <ArrowRight className="h-4 w-4" />
                 </button>
               </form>
             )}
           </SectionPanel>
 
-          <SectionPanel title="处理说明" description="本阶段只使用已有解析能力，不生成假结果。">
+          <SectionPanel title="处理说明" description="系统只在你发起解析时处理材料，识别结果可以继续编辑。">
             <div className="space-y-3 text-sm leading-6 text-career-muted">
-              <InfoRow title="文件先在后端解析" description="PDF、DOCX、TXT 和图片会经过后端校验和文本提取。" />
-              <InfoRow title="文本交给 AI 结构化" description="AI 服务未配置时会提示缺失，不会返回模拟简历。" />
-              <InfoRow title="保存边界清楚" description={user ? '确认后保存到手机号账号。' : '游客模式下结果保存在本机浏览器。'} />
+              <InfoRow title="先识别简历文字" description="PDF、DOCX、TXT 和图片会经过格式校验和文字提取。" />
+              <InfoRow title="再整理关键信息" description="系统会把教育背景、技能、项目和目标方向整理成可编辑字段。" />
+              <InfoRow title="登录后保存到账号" description={user ? '确认后会保存到你的账号。' : '未登录也可以先体验，登录后再保存到账号。'} />
               <InfoRow title="字段可编辑" description="识别不完整的字段可以在结构化结果中补充。" />
             </div>
           </SectionPanel>
@@ -355,10 +367,10 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
       {currentState === 'C_PARSING' && <ProcessingPanel fileName={fileName} uploadProgress={100} activeStep={parsingStep} />}
 
       {currentState === 'D_DONE' && (
-        <div className="space-y-5">
+        <div className="space-y-8">
           <StatusBanner tone="success" title="简历结构化结果已生成" description="请检查识别出的字段。部分字段未识别时，补充后再进入测评。" />
 
-          <div className="grid gap-5 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-2">
             <SectionPanel title="基本信息" actions={<EditButton onClick={handleEditBasic} />}>
               <InfoGrid items={[
                 ['姓名', showValue(resumeData.name)],
@@ -371,7 +383,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
             <SectionPanel title="技能" actions={<EditButton onClick={handleEditSkills} />}>
               {resumeData.skills.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {resumeData.skills.map((skill) => <span key={skill} className="rounded-xl bg-career-primary-soft px-3 py-1 text-xs font-semibold text-career-primary">{skill}</span>)}
+                  {resumeData.skills.map((skill) => <span key={skill} className="rounded-md bg-career-primary-soft px-2.5 py-1 text-xs font-semibold text-career-primary">{skill}</span>)}
                 </div>
               ) : <MissingText />}
             </SectionPanel>
@@ -395,10 +407,10 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
           <div className="flex flex-col items-start justify-between gap-4 border-t border-career-line pt-5 sm:flex-row sm:items-center">
             <p className="text-xs leading-5 text-career-muted">确认简历信息后进入测评；登录用户会在确认时保存到账号。</p>
             <div className="flex w-full gap-3 sm:w-auto">
-              <button id="resume-reupload-btn" onClick={() => { setResumeData(DEFAULT_RESUME_DATA); setCurrentState('A_IDLE'); }} className="flex-1 rounded-2xl border border-career-line bg-career-surface px-5 py-2.5 text-sm font-semibold text-career-ink hover:bg-career-surface-muted sm:flex-none">
+              <button id="resume-reupload-btn" onClick={() => { setResumeData(DEFAULT_RESUME_DATA); setCurrentState('A_IDLE'); }} className="flex-1 rounded-lg border border-career-line bg-career-surface px-5 py-2.5 text-sm font-semibold text-career-ink hover:bg-career-surface-muted sm:flex-none">
                 重新上传
               </button>
-              <button id="resume-confirm-btn" onClick={handleConfirmClick} className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-career-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 sm:flex-none">
+              <button id="resume-confirm-btn" onClick={handleConfirmClick} className="flex flex-1 items-center justify-center gap-2 rounded-md bg-career-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 sm:flex-none">
                 确认简历，进入测评 <ArrowRight className="h-4 w-4" />
               </button>
             </div>
@@ -419,7 +431,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
         <EditModal title="编辑技能" onClose={() => setEditingSection(null)} onSubmit={handleSaveSkills}>
           <label className="block text-xs font-semibold text-career-ink">
             技能标签
-            <textarea rows={4} value={skillsForm} onChange={(e) => setSkillsForm(e.target.value)} className="mt-1.5 w-full resize-none rounded-2xl border border-career-line bg-career-bg px-4 py-3 text-sm outline-none focus:border-career-primary" placeholder="Java, Python, TypeScript, SQL" />
+            <textarea rows={4} value={skillsForm} onChange={(e) => setSkillsForm(e.target.value)} className="mt-1.5 w-full resize-none rounded-md border border-career-line bg-career-bg px-4 py-3 text-sm outline-none focus:border-career-primary" placeholder="Java, Python, TypeScript, SQL" />
           </label>
         </EditModal>
       )}
@@ -427,28 +439,28 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
       {editingSection === 'internships' && (
         <EditModal title="编辑实习经历" onClose={() => setEditingSection(null)} onSubmit={handleSaveInternships}>
           {internshipsForm.map((intern, idx) => (
-            <div key={idx} className="rounded-2xl border border-career-line bg-career-bg p-4">
+            <div key={idx} className="rounded-md border border-career-line bg-career-bg p-4">
               <div className="mb-3 flex justify-between"><span className="text-xs font-semibold text-career-muted">实习 {idx + 1}</span><button type="button" onClick={() => removeInternshipField(idx)} className="text-xs text-career-danger">删除</button></div>
               <TextInput label="公司名称" value={intern.company} onChange={(value) => updateInternship(internshipsForm, setInternshipsForm, idx, 'company', value)} />
               <TextInput label="担任角色" value={intern.role} onChange={(value) => updateInternship(internshipsForm, setInternshipsForm, idx, 'role', value)} />
               <TextInput label="时间跨度" value={intern.duration} onChange={(value) => updateInternship(internshipsForm, setInternshipsForm, idx, 'duration', value)} />
             </div>
           ))}
-          <button type="button" onClick={addInternshipField} className="w-full rounded-2xl border border-dashed border-career-line py-2 text-xs font-semibold text-career-muted">+ 添加一段实习经历</button>
+          <button type="button" onClick={addInternshipField} className="w-full rounded-md border border-dashed border-career-line py-2 text-xs font-semibold text-career-muted">+ 添加一段实习经历</button>
         </EditModal>
       )}
 
       {editingSection === 'projects' && (
         <EditModal title="编辑项目经历" onClose={() => setEditingSection(null)} onSubmit={handleSaveProjects}>
           {projectsForm.map((project, idx) => (
-            <div key={idx} className="rounded-2xl border border-career-line bg-career-bg p-4">
+            <div key={idx} className="rounded-md border border-career-line bg-career-bg p-4">
               <div className="mb-3 flex justify-between"><span className="text-xs font-semibold text-career-muted">项目 {idx + 1}</span><button type="button" onClick={() => removeProjectField(idx)} className="text-xs text-career-danger">删除</button></div>
               <TextInput label="项目名称" value={project.name} onChange={(value) => updateProject(projectsForm, setProjectsForm, idx, 'name', value)} />
               <TextInput label="担当角色" value={project.role} onChange={(value) => updateProject(projectsForm, setProjectsForm, idx, 'role', value)} />
               <TextInput label="技术栈" value={project.tech} onChange={(value) => updateProject(projectsForm, setProjectsForm, idx, 'tech', value)} />
             </div>
           ))}
-          <button type="button" onClick={addProjectField} className="w-full rounded-2xl border border-dashed border-career-line py-2 text-xs font-semibold text-career-muted">+ 添加一个项目经历</button>
+          <button type="button" onClick={addProjectField} className="w-full rounded-md border border-dashed border-career-line py-2 text-xs font-semibold text-career-muted">+ 添加一个项目经历</button>
         </EditModal>
       )}
 
@@ -485,7 +497,7 @@ function ProcessingPanel({ fileName, uploadProgress, activeStep }: { fileName: s
       </div>
       <div className="grid gap-3 md:grid-cols-4">
         {steps.map((step, index) => (
-          <div key={step} className={`rounded-2xl border p-4 ${index <= activeStep ? 'border-career-primary/30 bg-career-primary-soft' : 'border-career-line bg-career-bg'}`}>
+          <div key={step} className={`rounded-md border p-3.5 ${index <= activeStep ? 'border-career-primary/30 bg-career-primary-soft' : 'border-career-line bg-career-bg'}`}>
             <div className="flex items-center gap-2">
               {index < activeStep ? <CheckCircle2 className="h-4 w-4 text-career-success" /> : <RotateCw className={`h-4 w-4 ${index === activeStep ? 'animate-spin text-career-primary' : 'text-career-muted'}`} />}
               <span className="text-xs font-semibold text-career-ink">{step}</span>
@@ -514,24 +526,24 @@ function MissingText() {
 }
 
 function InfoGrid({ items }: { items: [string, string][] }) {
-  return <div className="grid gap-3 text-sm sm:grid-cols-2">{items.map(([label, value]) => <div key={label} className="rounded-2xl bg-career-bg p-3"><p className="text-xs text-career-muted">{label}</p><p className="mt-1 font-semibold text-career-ink">{value}</p></div>)}</div>;
+  return <div className="divide-y divide-career-line/60">{items.map(([label, value]) => <div key={label} className="flex items-baseline justify-between gap-4 py-2"><p className="text-[10px] font-semibold tracking-[0.14em] text-career-muted uppercase">{label}</p><p className="text-sm font-semibold text-career-ink">{value}</p></div>)}</div>;
 }
 
 function ExperienceList({ items }: { items: { title: string; subtitle: string; meta: string }[] }) {
   const filtered = items.filter((item) => item.title || item.subtitle || item.meta);
   if (filtered.length === 0) return <MissingText />;
-  return <div className="space-y-3">{filtered.map((item, index) => <div key={`${item.title}-${index}`} className="rounded-2xl bg-career-bg p-3 text-sm"><p className="font-semibold text-career-ink">{showValue(item.title)}</p><p className="mt-1 text-xs text-career-muted">{showValue(item.subtitle)}</p><p className="mt-1 text-xs text-career-muted">{showValue(item.meta)}</p></div>)}</div>;
+  return <div className="divide-y divide-career-line/60">{filtered.map((item, index) => <div key={`${item.title}-${index}`} className="py-2.5"><p className="text-sm font-semibold text-career-ink">{showValue(item.title)}</p><p className="mt-0.5 text-xs text-career-muted">{showValue(item.subtitle)}</p><p className="mt-0.5 text-xs text-career-muted">{showValue(item.meta)}</p></div>)}</div>;
 }
 
 function EditModal({ title, children, onClose, onSubmit }: { title: string; children: React.ReactNode; onClose: () => void; onSubmit: (e: React.FormEvent) => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-      <form onSubmit={onSubmit} className="max-h-[85vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-3xl border border-career-line bg-career-surface p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-career-ink/40 p-4">
+      <form onSubmit={onSubmit} className="max-h-[85vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-lg border border-career-line bg-career-surface p-6 shadow-lg">
         <h3 className="text-lg font-semibold text-career-ink">{title}</h3>
         {children}
         <div className="flex justify-end gap-3 border-t border-career-line pt-4">
-          <button type="button" onClick={onClose} className="rounded-2xl bg-career-surface-muted px-4 py-2 text-sm font-semibold text-career-ink">取消</button>
-          <button type="submit" className="rounded-2xl bg-career-primary px-5 py-2 text-sm font-semibold text-white">保存更改</button>
+          <button type="button" onClick={onClose} className="rounded-md bg-career-surface-muted px-4 py-2 text-sm font-semibold text-career-ink">取消</button>
+          <button type="submit" className="rounded-md bg-career-primary px-5 py-2 text-sm font-semibold text-white">保存更改</button>
         </div>
       </form>
     </div>
@@ -539,7 +551,7 @@ function EditModal({ title, children, onClose, onSubmit }: { title: string; chil
 }
 
 function TextInput({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return <label className="block text-xs font-semibold text-career-ink">{label}<input value={value} onChange={(e) => onChange(e.target.value)} className="mt-1.5 w-full rounded-2xl border border-career-line bg-career-bg px-4 py-2 text-sm outline-none focus:border-career-primary" /></label>;
+  return <label className="block text-xs font-semibold text-career-ink">{label}<input value={value} onChange={(e) => onChange(e.target.value)} className="mt-1.5 w-full rounded-md border border-career-line bg-career-bg px-4 py-2 text-sm outline-none focus:border-career-primary" /></label>;
 }
 
 function updateInternship(items: { company: string; role: string; duration: string }[], setItems: (items: { company: string; role: string; duration: string }[]) => void, index: number, key: 'company' | 'role' | 'duration', value: string) {

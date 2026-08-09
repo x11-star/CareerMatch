@@ -66,22 +66,22 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-100 rounded-full text-blue-700 text-xs font-semibold mb-3">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-career-primary-soft border border-career-primary-soft rounded-full text-career-primary text-xs font-semibold mb-3">
           <Sparkles className="w-3.5 h-3.5 animate-pulse" />
           科学测评分析完成
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-slate-900 mb-2">
-          你的性格类型：<span className="text-blue-600">{result.typeTitle}</span>
+        <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-career-ink mb-2">
+          你的性格类型：<span className="text-career-primary">{result.typeTitle}</span>
         </h2>
-        <p className="text-slate-500 text-sm max-w-xl mx-auto leading-relaxed">
+        <p className="text-career-muted text-sm max-w-xl mx-auto leading-relaxed">
           {result.description}
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Left Card: Radar Chart */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs flex flex-col items-center justify-center">
-          <h3 className="mb-6 self-start text-sm font-semibold text-slate-900">
+        <div className="bg-white rounded-md border border-career-line p-6 sm:p-8 flex flex-col items-center justify-center">
+          <h3 className="mb-6 self-start text-sm font-semibold text-career-ink">
             大五人格科学量表
           </h3>
 
@@ -94,7 +94,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
                   key={idx}
                   points={points}
                   fill="none"
-                  stroke="#E2E8F0"
+                  stroke="#E4E7EB"
                   strokeWidth="1"
                 />
               ))}
@@ -109,7 +109,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
                     y1={center}
                     x2={x}
                     y2={y}
-                    stroke="#E2E8F0"
+                    stroke="#E4E7EB"
                     strokeWidth="1.5"
                     strokeDasharray="2 2"
                   />
@@ -120,7 +120,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
               <polygon
                 points={avgPath}
                 fill="rgba(148, 163, 184, 0.15)"
-                stroke="#94A3B8"
+                stroke="#475569"
                 strokeWidth="1.5"
                 strokeDasharray="3 3"
               />
@@ -129,7 +129,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
               <polygon
                 points={userPath}
                 fill="rgba(37, 99, 235, 0.2)"
-                stroke="#2563EB"
+                stroke="#1E3A5F"
                 strokeWidth="2.5"
               />
 
@@ -140,7 +140,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
                   cx={p.x}
                   cy={p.y}
                   r="4"
-                  fill="#2563EB"
+                  fill="#1E3A5F"
                   stroke="#FFFFFF"
                   strokeWidth="1.5"
                 />
@@ -165,13 +165,13 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
           </div>
 
           {/* Legend */}
-          <div className="mt-4 flex gap-6 text-xs text-slate-500 font-medium">
+          <div className="mt-4 flex gap-6 text-xs text-career-muted font-medium">
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 bg-blue-500/20 border border-blue-600 rounded-sm inline-block" />
+              <span className="w-3 h-3 bg-career-primary/20 border border-career-primary rounded-sm inline-block" />
               <span>你的得分</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="w-3 h-3 bg-slate-100 border border-slate-400 border-dashed rounded-sm inline-block" />
+              <span className="w-3 h-3 bg-career-surface-muted border border-slate-400 border-dashed rounded-sm inline-block" />
               <span>全国同龄平均</span>
             </div>
           </div>
@@ -180,19 +180,19 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
         {/* Right Card: Holland & Industry Fit */}
         <div className="space-y-6">
           {/* Fit Progress */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-            <h3 className="mb-4 text-sm font-semibold text-slate-900">
+          <div className="bg-white rounded-md border border-career-line p-6">
+            <h3 className="mb-4 text-sm font-semibold text-career-ink">
               两大求职赛道适配度
             </h3>
             <div className="space-y-4">
               <div>
-                <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1.5">
+                <div className="flex justify-between text-xs font-semibold text-career-ink mb-1.5">
                   <span className="flex items-center gap-1.5 text-purple-700">
                     🏛️ 央国企适配度
                   </span>
                   <span>{result.industryFit.stateOwned}%</span>
                 </div>
-                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2 w-full bg-career-surface-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-purple-600 rounded-full"
                     style={{ width: `${result.industryFit.stateOwned}%` }}
@@ -201,15 +201,15 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
               </div>
 
               <div>
-                <div className="flex justify-between text-xs font-semibold text-slate-700 mb-1.5">
-                  <span className="flex items-center gap-1.5 text-blue-600">
+                <div className="flex justify-between text-xs font-semibold text-career-ink mb-1.5">
+                  <span className="flex items-center gap-1.5 text-career-primary">
                     💻 互联网适配度
                   </span>
                   <span>{result.industryFit.internet}%</span>
                 </div>
-                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2 w-full bg-career-surface-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-blue-600 rounded-full"
+                    className="h-full bg-career-primary rounded-full"
                     style={{ width: `${result.industryFit.internet}%` }}
                   />
                 </div>
@@ -218,18 +218,18 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
           </div>
 
           {/* Holland Interests */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+          <div className="bg-white rounded-md border border-career-line p-6">
             <div className="flex items-center gap-2 mb-3.5">
-              <Compass className="w-5 h-5 text-blue-600" />
-              <h3 className="text-sm font-bold text-slate-900">
-                霍兰德职业兴趣代码：<span className="text-blue-600 font-mono font-bold text-base">{result.hollandCode}</span>
+              <Compass className="w-5 h-5 text-career-primary" />
+              <h3 className="text-sm font-bold text-career-ink">
+                霍兰德职业兴趣代码：<span className="text-career-primary font-mono font-bold text-base">{result.hollandCode}</span>
               </h3>
             </div>
             <div className="flex flex-wrap gap-2">
               {result.hollandTags.map((tag, idx) => (
                 <span
                   key={idx}
-                  className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200/50"
+                  className="px-2.5 py-1 bg-career-surface-muted text-career-ink text-xs font-semibold rounded-lg border border-career-line/50"
                 >
                   {tag}
                 </span>
@@ -240,12 +240,12 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
       </div>
 
       {/* Full Width Card: AI Deep Interpretation */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs mt-8">
-        <h3 className="mb-4 flex items-center gap-1.5 text-sm font-semibold text-slate-900">
-          <Shield className="w-4 h-4 text-blue-600" />
+      <div className="bg-white rounded-md border border-career-line p-6 sm:p-8 mt-8">
+        <h3 className="mb-4 flex items-center gap-1.5 text-sm font-semibold text-career-ink">
+          <Shield className="w-4 h-4 text-career-primary" />
           AI 深度人格与求职性向解读
         </h3>
-        <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6">
+        <p className="text-sm text-career-ink leading-relaxed bg-career-surface-muted p-4 rounded-xl border border-career-line mb-6">
           {result.deepInterpretation.summary}
         </p>
 
@@ -265,7 +265,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
         <button
           id="see-matches-btn"
           onClick={onSeeMatches}
-          className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-blue-200/50 transition-all cursor-pointer transform hover:-translate-y-0.5 active:scale-98 flex items-center justify-center gap-2 group"
+          className="w-full sm:w-auto px-8 py-4 bg-career-primary hover:bg-career-primary text-white font-semibold rounded-xl shadow-lg hover:shadow-blue-200/50 transition-all cursor-pointer transform hover:-translate-y-0.5 active:scale-98 flex items-center justify-center gap-2 group"
         >
           查看匹配岗位推荐
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -273,7 +273,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
         <button
           id="share-personality-btn"
           onClick={onShare}
-          className="w-full sm:w-auto px-6 py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl border border-slate-200 transition-all cursor-pointer flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-6 py-4 bg-career-surface-muted hover:bg-career-surface-muted text-career-ink font-semibold rounded-xl border border-career-line transition-all cursor-pointer flex items-center justify-center gap-2"
         >
           <Share2 className="w-4 h-4" />
           分享性格画像

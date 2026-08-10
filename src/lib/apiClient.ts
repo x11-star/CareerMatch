@@ -36,6 +36,12 @@ async function requestBlob(path: string, init: RequestInit = {}): Promise<BlobDo
     const body = await response.json().catch(() => null);
     throw parseApiErrorBody(response.status, body);
   }
+  // Guard against a proxy/gateway returning 200 with a non-PDF body (login wall, error HTML):
+  // without this check the blob would be saved as a corrupt .pdf.
+  const contentType = response.headers.get('Content-Type') || '';
+  if (!contentType.includes('application/pdf')) {
+    throw { status: response.status, code: 'UNEXPECTED_CONTENT_TYPE', message: `导出失败:服务器返回了非 PDF 内容(${contentType || '未知类型'})` };
+  }
   const blob = await response.blob();
   return { blob, fileName: parseContentDispositionFileName(response.headers.get('Content-Disposition')) };
 }

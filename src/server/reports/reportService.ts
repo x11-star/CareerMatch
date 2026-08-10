@@ -71,6 +71,10 @@ export function createReportService(deps: ReportServiceDeps = {}): ReportService
         throw new ReportError('REPORT_TOO_LARGE', '报告内容过大,无法生成 PDF');
       }
       const buffer = await pdfRenderer(html);
+      // NOTE: this guard runs AFTER rendering, so an oversized report still pays the Chromium
+      // render cost before being rejected. The HTML guard (MAX_HTML_BYTES) is the primary bound
+      // and catches the common case early; this is a backstop for pathological outputs that
+      // render larger than their HTML (e.g. heavy rasterization).
       if (buffer.byteLength > MAX_PDF_BYTES) {
         throw new ReportError('REPORT_TOO_LARGE', '报告内容过大,无法生成 PDF');
       }

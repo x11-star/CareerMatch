@@ -21,7 +21,7 @@ import { toPersonalityResult } from "./mappers/assessmentMapper";
 import { toPosition } from "./mappers/positionMapper";
 import { stableJsonHash } from "./matching/hash";
 import { defaultReportService, buildContentDisposition } from "./reports/reportService";
-import { toHttpReportError } from "./reports/reportErrors";
+import { toHttpReportError, ReportError } from "./reports/reportErrors";
 
 type AiService = ReturnType<typeof createAiService>;
 
@@ -261,6 +261,11 @@ export function createApp(options: CreateAppOptions = {}) {
     } catch (error) {
       if (error instanceof HttpError) {
         return res.status(error.status).json({ code: error.code, error: error.message });
+      }
+      // ReportError (missing data / render failure / too large) is a known, user-facing error;
+      // only truly unexpected throws need a stack trace for debugging.
+      if (!(error instanceof ReportError)) {
+        console.error("[/api/reports/export] unexpected error:", error);
       }
       const httpError = toHttpReportError(error);
       return res.status(httpError.status).json(httpError.body);

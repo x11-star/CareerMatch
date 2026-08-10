@@ -103,6 +103,25 @@ function testExamFallbackWhenEmpty() {
   }
 }
 
+function testTagsAreBenefitNotPersonality() {
+  // tags must be industry benefit tags (六险二金/期权...), NOT a duplicate of fitPersonality
+  // (personality tags). This guards against the semantic regression where both fields held
+  // personalityTags and searching "六险二金" matched nothing.
+  const benefitSet = new Set([
+    '六险二金','落户机会','编制保障','晋升通道','年终奖','职业培训',
+    '期权激励','扁平管理','免费三餐','快速晋升','算力资源','论文发表',
+    '项目奖金','住房补贴','技术双通道','员工折扣','轮岗机会','海外培训','股权激励',
+  ]);
+  for (const p of MOCK_POSITIONS) {
+    assert.ok(p.tags.length > 0, `${p.title} tags empty`);
+    for (const t of p.tags) {
+      assert.ok(benefitSet.has(t), `${p.title} has non-benefit tag: ${t}`);
+    }
+    // tags and fitPersonality must not be the same array content
+    assert.notDeepEqual(p.tags, p.fitPersonality, `${p.title} tags duplicates fitPersonality`);
+  }
+}
+
 function testTypeDerivation() {
   for (const p of MOCK_POSITIONS) {
     assert.ok(p.type === 'state-owned' || p.type === 'internet', `bad type: ${p.type}`);
@@ -152,6 +171,7 @@ const tests: Array<{ name: string; fn: () => void }> = [
   { name: 'testCompanyRotatesWithinIndustry', fn: testCompanyRotatesWithinIndustry },
   { name: 'testUniqueCompanyTitleCityTuples', fn: testUniqueCompanyTitleCityTuples },
   { name: 'testExamFallbackWhenEmpty', fn: testExamFallbackWhenEmpty },
+  { name: 'testTagsAreBenefitNotPersonality', fn: testTagsAreBenefitNotPersonality },
   { name: 'testTypeDerivation', fn: testTypeDerivation },
   { name: 'testIdsUnique', fn: testIdsUnique },
   { name: 'testTypeShape', fn: testTypeShape },

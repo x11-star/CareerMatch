@@ -36,9 +36,11 @@ function storage() {
   return window.localStorage;
 }
 
-// v1 fetch-all: callers pass a large pageSize (400) to load the whole catalog in one request
-// rather than paginating client-side. This silently truncates if the catalog ever exceeds pageSize
+// v1 fetch-all: callers pass ALL_POSITIONS_PAGE_SIZE to load the whole catalog in one request
+// rather than paginating client-side. This silently truncates if the catalog ever exceeds it
 // (currently 346 < 400). If the catalog grows past ~400, switch these call sites to real paging.
+export const ALL_POSITIONS_PAGE_SIZE = 400;
+
 export async function getPositions(pageSize = 50): Promise<Position[]> {
   try {
     return (await api.listPositions({ pageSize })).positions;

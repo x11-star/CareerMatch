@@ -2,30 +2,25 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Search, MapPin, ChevronRight, Briefcase, Filter, X, SlidersHorizontal, GraduationCap, Coins } from 'lucide-react';
 import { MOCK_POSITIONS } from '../data';
 import { Position } from '../types';
-import { getPositions } from '../lib/userDataStore';
+import { getPositions, ALL_POSITIONS_PAGE_SIZE } from '../lib/userDataStore';
 
 interface PositionBrowserPageProps {
   onSelectPosition: (id: string) => void;
 }
 
 // Helper to parse salary range like "年薪20-35万" or "月薪15k-25k" into an annual salary (in ten-thousands RMB)
-function parseSalaryToAnnual(salaryStr: string): number {
-  if (!salaryStr || salaryStr === '面议') return 0;
-  
+function parseSalaryBounds(salaryStr: string): { min: number; max: number } {
+  if (!salaryStr || salaryStr === '面议') return { min: 0, max: 0 };
   const match = salaryStr.match(/(\d+)-(\d+)/);
-  if (!match) return 0;
-  
-  const min = parseInt(match[1]);
-  const max = parseInt(match[2]);
-  const avg = (min + max) / 2;
-  
+  if (!match) return { min: 0, max: 0 };
+  let min = parseInt(match[1]);
+  let max = parseInt(match[2]);
+  // k / 月薪 -> annualize (≈14 months). v2 data uses 万年薪 directly (no conversion).
   if (salaryStr.includes('k') || salaryStr.includes('月薪')) {
-    // 14 months of package is standard for tech/private
-    return (avg * 14) / 10;
-  } else if (salaryStr.includes('万')) {
-    return avg;
+    min = Math.round((min * 14) / 10);
+    max = Math.round((max * 14) / 10);
   }
-  return 0;
+  return { min, max };
 }
 
 export default function PositionBrowserPage({ onSelectPosition }: PositionBrowserPageProps) {
@@ -49,7 +44,7 @@ export default function PositionBrowserPage({ onSelectPosition }: PositionBrowse
   useEffect(() => {
     async function loadPositions() {
       try {
-        const data = await getPositions(400);
+        const data = await getPositions(ALL_POSITIONS_PAGE_SIZE);
         setPositions(data);
       } catch (e) {
         console.error('Failed to fetch positions:', e);
@@ -142,14 +137,15 @@ export default function PositionBrowserPage({ onSelectPosition }: PositionBrowse
       list = list.filter((p) => p.city === selectedCity);
     }
 
-    // Salary Filter
+    // Salary Filter — a position matches a bucket when its [min,max] range overlaps the bucket
+    // (so a 30-60万年薪 role counts as both "30-50" and "50+", not dropped by averaging).
     if (selectedSalary !== 'all') {
       list = list.filter((p) => {
-        const annual = parseSalaryToAnnual(p.salaryRange);
-        if (selectedSalary === '10-20') return annual >= 10 && annual < 20;
-        if (selectedSalary === '20-30') return annual >= 20 && annual < 30;
-        if (selectedSalary === '30-50') return annual >= 30 && annual < 50;
-        if (selectedSalary === '50+') return annual >= 50;
+        const { min, max } = parseSalaryBounds(p.salaryRange);
+        if (selectedSalary === '10-20') return min < 20 && max >= 10;
+        if (selectedSalary === '20-30') return min < 30 && max >= 20;
+        if (selectedSalary === '30-50') return min < 50 && max >= 30;
+        if (selectedSalary === '50+') return max >= 50;
         return true;
       });
     }

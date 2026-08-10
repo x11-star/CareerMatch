@@ -15,7 +15,7 @@ import ShareModal from './components/ShareModal';
 import { MOCK_POSITIONS } from './data';
 import { ResumeData, PersonalityResult, Position } from './types';
 import { useAuth } from './context/AuthContext';
-import { getLatestResume, getLatestAssessment, getPositions } from './lib/userDataStore';
+import { getLatestResume, getLatestAssessment, getPositions, ALL_POSITIONS_PAGE_SIZE } from './lib/userDataStore';
 
 type ViewType = 'landing' | 'upload' | 'assessment' | 'assessment-result' | 'results' | 'detail' | 'browser' | 'profile';
 
@@ -33,7 +33,7 @@ export default function App() {
   useEffect(() => {
     async function loadPositions() {
       try {
-        const dbPositions = await getPositions(400);
+        const dbPositions = await getPositions(ALL_POSITIONS_PAGE_SIZE);
         if (dbPositions && dbPositions.length > 0) {
           setPositions(dbPositions);
         }

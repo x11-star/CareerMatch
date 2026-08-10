@@ -3,7 +3,7 @@ import { ArrowRight, Filter, Heart, Landmark, Laptop, RefreshCw } from 'lucide-r
 import { MOCK_POSITIONS } from '../data';
 import { Position, ResumeData, PersonalityResult } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { getPositions, getFavorites, toggleFavorite } from '../lib/userDataStore';
+import { getPositions, getFavorites, toggleFavorite, ALL_POSITIONS_PAGE_SIZE } from '../lib/userDataStore';
 import { hasRealResumeData } from '../lib/resumeState';
 import PageHeader from './ui/PageHeader';
 import EmptyState from './ui/EmptyState';
@@ -26,7 +26,7 @@ export default function MatchResultsPage({ onSelectPosition, onRetake, resumeDat
 
   useEffect(() => {
     async function loadData() {
-      const dbPositions = await getPositions(400);
+      const dbPositions = await getPositions(ALL_POSITIONS_PAGE_SIZE);
       setPositions(dbPositions);
       if (user) {
         try {

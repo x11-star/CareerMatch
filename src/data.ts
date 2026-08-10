@@ -32,6 +32,21 @@ const REPRESENTATIVE_CITIES: Record<string, string[]> = {
 
 const EXAM_FALLBACK = '重点准备专业知识、综合行测及逻辑推理，提前了解目标企业业务版图。';
 
+// Benefit/perk tags by industry (distinct from fitPersonality which holds personality tags).
+// v2 has no benefit field, so these are industry-typical perks that distinguish e.g. 央国企
+// (六险二金/编制/落户) from 互联网 (期权/扁平管理) — real distinctions, not fabricated per-role.
+const BENEFIT_TAGS: Record<string, string[]> = {
+  '央国企': ['六险二金', '落户机会', '编制保障', '晋升通道'],
+  '金融/咨询': ['六险二金', '年终奖', '职业培训', '落户机会'],
+  '互联网': ['期权激励', '扁平管理', '免费三餐', '快速晋升'],
+  'AI/科技': ['期权激励', '算力资源', '论文发表', '快速晋升'],
+  '半导体/硬件': ['项目奖金', '住房补贴', '六险二金', '技术双通道'],
+  '快消/零售': ['年终奖', '员工折扣', '轮岗机会', '海外培训'],
+  '通用': ['六险二金', '晋升通道', '职业培训', '落户机会'],
+  '生物医药': ['项目奖金', '六险二金', '论文发表', '股权激励'],
+  '其他': ['六险二金', '晋升通道', '职业培训'],
+};
+
 function countStars(s: string): number {
   return (s.match(/⭐/g) || []).length;
 }
@@ -88,7 +103,7 @@ export const MOCK_POSITIONS: Position[] = (() => {
       personalityMatch: 0,
       salaryRange,
       difficultyRating: starCount,
-      tags: raw.personalityTags || ['尽责性高', '情绪稳定'],
+      tags: BENEFIT_TAGS[industry] || BENEFIT_TAGS['其他'],
       summary: workStyle,
       responsibilities: raw.responsibilities || [],
       requirements: raw.hardSkills || [],

@@ -43,7 +43,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
     personalityMatchExplanation: string;
     whyExcellent: string;
   } | null>(null);
-  const [isLoadingMatch, setIsLoadingMatch] = useState(false);
+  const [isLoadingMatch, setIsLoadingMatch] = useState(true);
   const [matchError, setMatchError] = useState('');
 
   async function parseMatchApiError(response: Response): Promise<string> {

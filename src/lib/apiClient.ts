@@ -17,9 +17,16 @@ async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> 
   return body as T;
 }
 
+export interface BlobDownload {
+  blob: Blob;
+  // Filename extracted from the server's Content-Disposition header (if present) so the browser
+  // save dialog uses the server-sanitized name rather than a generic fallback.
+  fileName: string | null;
+}
+
 // Requests a binary blob (e.g. PDF). On failure the server responds with JSON, so we parse the
 // error body and throw a structured ApiErrorShape instead of returning a corrupt blob.
-async function requestBlob(path: string, init: RequestInit = {}): Promise<Blob> {
+async function requestBlob(path: string, init: RequestInit = {}): Promise<BlobDownload> {
   const response = await fetch(path, {
     ...init,
     credentials: 'include',
@@ -29,7 +36,19 @@ async function requestBlob(path: string, init: RequestInit = {}): Promise<Blob> 
     const body = await response.json().catch(() => null);
     throw parseApiErrorBody(response.status, body);
   }
-  return response.blob();
+  const blob = await response.blob();
+  return { blob, fileName: parseContentDispositionFileName(response.headers.get('Content-Disposition')) };
+}
+
+// Parses filename="..." (or filename*=UTF-8''...) from a Content-Disposition header. Returns null
+// when absent or unparseable so the caller can fall back to a default name.
+function parseContentDispositionFileName(header: string | null): string | null {
+  if (!header) return null;
+  const star = /filename\*=(?:UTF-8'')?([^;]+)/i.exec(header);
+  if (star) return decodeURIComponent(star[1].trim().replace(/^"|"$/g, ''));
+  const plain = /filename="?([^";]+)"?/i.exec(header);
+  if (plain) return plain[1].trim();
+  return null;
 }
 
 export const api = {

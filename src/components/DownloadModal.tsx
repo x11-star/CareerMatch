@@ -19,12 +19,13 @@ export default function DownloadModal({ positionId, onClose }: DownloadModalProp
     if (!positionId || state.kind === 'loading') return;
     setState({ kind: 'loading' });
     try {
-      const blob = await api.exportPositionReport(positionId);
+      const { blob, fileName } = await api.exportPositionReport(positionId);
       // Trigger a real browser download. This only happens after the server confirms the PDF body.
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = extractFileName(blob) || '岗位诊断报告.pdf';
+      // Prefer the server-sanitized filename from Content-Disposition; fall back to a generic name.
+      link.download = fileName || '岗位诊断报告.pdf';
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -82,10 +83,4 @@ export default function DownloadModal({ positionId, onClose }: DownloadModalProp
       </div>
     </div>
   );
-}
-
-// The server sets Content-Disposition with the real filename; fetch/Blob doesn't expose headers
-// on the blob helper, so fall back to a generic name. (The download attribute is a hint only.)
-function extractFileName(_blob: Blob): string | null {
-  return null;
 }

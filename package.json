@@ -20,7 +20,8 @@
     "test:db": "tsx tests/db/run-tests.ts",
     "test:auth": "tsx tests/auth/run-tests.ts",
     "test:api": "tsx tests/api/run-tests.ts",
-    "test:frontend": "tsx tests/frontend/run-tests.ts"
+    "test:frontend": "tsx tests/frontend/run-tests.ts",
+    "test:reports": "tsx tests/reports/run-tests.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -34,6 +35,7 @@
     "motion": "^12.23.24",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^6.2.108",
+    "playwright": "^1.62.1",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "tesseract.js": "^7.0.0",

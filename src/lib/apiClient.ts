@@ -17,6 +17,46 @@ async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> 
   return body as T;
 }
 
+export interface BlobDownload {
+  blob: Blob;
+  // Filename extracted from the server's Content-Disposition header (if present) so the browser
+  // save dialog uses the server-sanitized name rather than a generic fallback.
+  fileName: string | null;
+}
+
+// Requests a binary blob (e.g. PDF). On failure the server responds with JSON, so we parse the
+// error body and throw a structured ApiErrorShape instead of returning a corrupt blob.
+async function requestBlob(path: string, init: RequestInit = {}): Promise<BlobDownload> {
+  const response = await fetch(path, {
+    ...init,
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(init.headers || {}) },
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw parseApiErrorBody(response.status, body);
+  }
+  // Guard against a proxy/gateway returning 200 with a non-PDF body (login wall, error HTML):
+  // without this check the blob would be saved as a corrupt .pdf.
+  const contentType = response.headers.get('Content-Type') || '';
+  if (!contentType.includes('application/pdf')) {
+    throw { status: response.status, code: 'UNEXPECTED_CONTENT_TYPE', message: `导出失败:服务器返回了非 PDF 内容(${contentType || '未知类型'})` };
+  }
+  const blob = await response.blob();
+  return { blob, fileName: parseContentDispositionFileName(response.headers.get('Content-Disposition')) };
+}
+
+// Parses filename="..." (or filename*=UTF-8''...) from a Content-Disposition header. Returns null
+// when absent or unparseable so the caller can fall back to a default name.
+function parseContentDispositionFileName(header: string | null): string | null {
+  if (!header) return null;
+  const star = /filename\*=(?:UTF-8'')?([^;]+)/i.exec(header);
+  if (star) return decodeURIComponent(star[1].trim().replace(/^"|"$/g, ''));
+  const plain = /filename="?([^";]+)"?/i.exec(header);
+  if (plain) return plain[1].trim();
+  return null;
+}
+
 export const api = {
   getMe: () => requestJson<{ user: any }>('/api/me'),
   requestLoginCode: (phone: string) => requestJson<{ ok: true; devCode?: string; expiresInSeconds: number }>('/api/auth/request-code', {
@@ -60,4 +100,6 @@ export const api = {
     body: JSON.stringify(payload),
   }),
   matchPosition: (input: any) => requestJson<any>('/api/match-position', { method: 'POST', body: JSON.stringify(input) }),
+  exportPositionReport: (positionId: string) =>
+    requestBlob('/api/reports/export', { method: 'POST', body: JSON.stringify({ positionId }) }),
 };

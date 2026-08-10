@@ -250,10 +250,12 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
           </div>
         </section>
 
-        {/* 导出边界:降权脚注 */}
-        <p className="border-t border-career-line pt-4 text-xs leading-5 text-career-muted">
-          复制分享链接是真功能;PDF 导出第六阶段开放。当前阶段先保证在线诊断报告真实、可读、可复查。
-        </p>
+        {/* 导出 PDF:打开下载弹窗,后端生成自包含 PDF */}
+        <div className="flex justify-end border-t border-career-line pt-4">
+          <button onClick={() => onOpenModal('download')} className="flex items-center gap-1.5 rounded-md bg-career-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:opacity-90">
+            导出 PDF 报告
+          </button>
+        </div>
       </div>
     </div>
   );

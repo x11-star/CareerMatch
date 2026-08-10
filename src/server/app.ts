@@ -10,7 +10,7 @@ import { registerResumeRoutes } from "./routes/resumeRoutes";
 import { registerAssessmentRoutes } from "./routes/assessmentRoutes";
 import { registerPositionRoutes } from "./routes/positionRoutes";
 import { registerFavoriteRoutes } from "./routes/favoriteRoutes";
-import { getOptionalAuth } from "./http/authMiddleware";
+import { getOptionalAuth, requireAuth } from "./http/authMiddleware";
 import { HttpError } from "./http/errors";
 import { getLatestResumeByUserId } from "./repositories/resumesRepository";
 import { getLatestAssessmentByUserId } from "./repositories/assessmentsRepository";
@@ -20,6 +20,8 @@ import { toResumeData } from "./mappers/resumeMapper";
 import { toPersonalityResult } from "./mappers/assessmentMapper";
 import { toPosition } from "./mappers/positionMapper";
 import { stableJsonHash } from "./matching/hash";
+import { defaultReportService, buildContentDisposition } from "./reports/reportService";
+import { toHttpReportError, ReportError } from "./reports/reportErrors";
 
 type AiService = ReturnType<typeof createAiService>;
 
@@ -192,6 +194,80 @@ export function createApp(options: CreateAppOptions = {}) {
       return res.json({ reply });
     } catch (error) {
       const httpError = toHttpAiError(error);
+      return res.status(httpError.status).json(httpError.body);
+    }
+  });
+
+  app.post("/api/reports/export", async (req, res) => {
+    try {
+      const user = await requireAuth(req);
+
+      const positionId = String(req.body?.positionId || "");
+      if (!positionId) {
+        throw new HttpError(400, "POSITION_REQUIRED", "缺少岗位 ID");
+      }
+
+      const resume = await getLatestResumeByUserId(user.id);
+      if (!resume) {
+        throw new HttpError(409, "RESUME_MISSING", "请先上传并确认简历后再导出报告");
+      }
+
+      const assessment = await getLatestAssessmentByUserId(user.id);
+      if (!assessment) {
+        throw new HttpError(409, "ASSESSMENT_MISSING", "请先完成职业测评后再导出报告");
+      }
+
+      const positionRecord = await getPositionById(positionId);
+      if (!positionRecord) {
+        throw new HttpError(404, "POSITION_NOT_FOUND", "岗位不存在");
+      }
+
+      const mappedResume = toResumeData(resume);
+      const mappedAssessment = toPersonalityResult(assessment);
+      const mappedPosition = toPosition(positionRecord);
+      const resumeHash = stableJsonHash(mappedResume);
+      const assessmentHash = stableJsonHash(mappedAssessment);
+      const cached = await findCachedMatchResult({
+        userId: user.id,
+        resumeId: resume.id,
+        assessmentId: assessment.id,
+        positionId: positionRecord.id,
+        resumeHash,
+        assessmentHash,
+      });
+      if (!cached) {
+        throw new HttpError(409, "MATCH_NOT_CACHED", "请先打开岗位诊断页生成匹配结果");
+      }
+
+      const result = await defaultReportService.exportPositionReport({
+        userId: user.id,
+        resume: mappedResume,
+        assessment: mappedAssessment,
+        matchResult: {
+          resumeMatch: cached.resumeMatch,
+          personalityMatch: cached.personalityMatch,
+          overallMatch: cached.overallMatch,
+          resumeMatchExplanation: cached.resumeMatchExplanation,
+          personalityMatchExplanation: cached.personalityMatchExplanation,
+          whyExcellent: cached.whyExcellent,
+        },
+        position: mappedPosition,
+        positionId: positionRecord.id,
+      });
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", buildContentDisposition(result.fileName));
+      return res.status(200).send(result.buffer);
+    } catch (error) {
+      if (error instanceof HttpError) {
+        return res.status(error.status).json({ code: error.code, error: error.message });
+      }
+      // ReportError (missing data / render failure / too large) is a known, user-facing error;
+      // only truly unexpected throws need a stack trace for debugging.
+      if (!(error instanceof ReportError)) {
+        console.error("[/api/reports/export] unexpected error:", error);
+      }
+      const httpError = toHttpReportError(error);
       return res.status(httpError.status).json(httpError.body);
     }
   });

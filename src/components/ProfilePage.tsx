@@ -161,7 +161,7 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
             );
           })}
           <div className="rounded-md border border-career-line bg-career-surface-muted px-4 py-3 text-xs font-semibold text-career-muted">
-            PDF 导出第六阶段开放
+            PDF 报告可在岗位诊断报告页导出
           </div>
         </div>
 

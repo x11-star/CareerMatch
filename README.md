@@ -109,6 +109,22 @@ npm run test:db
 
 未配置 `TEST_DATABASE_URL` 时，`test:db` 会输出 `test:db skipped: TEST_DATABASE_URL is not configured` 并以 0 退出，避免没有本机 PostgreSQL 的环境被阻塞。配置 `TEST_DATABASE_URL` 后，测试脚本会把 Prisma datasource 指向测试库并清理测试表；不要把 `TEST_DATABASE_URL` 配成开发库。
 
+### PDF 诊断报告导出（第六阶段）
+
+第六阶段起，岗位诊断报告页支持导出真实 PDF（不再有"假下载成功"提示）。
+
+- **接口**：`POST /api/reports/export`，请求体 `{ "positionId": string }`，返回 `application/pdf` 或 JSON 错误。
+- **必须登录**：未登录返回 401（游客没有持久化简历/测评，无法导出）。
+- **只读缓存匹配**：导出不会调用 AI，只读取 `findCachedMatchResult` 缓存的匹配结果。如果还没生成匹配结果，返回 409 `MATCH_NOT_CACHED`，提示"请先打开岗位诊断页生成匹配结果"。
+- **依赖 Playwright Chromium**：后端用 Playwright 把自包含 HTML 渲染成 PDF。首次导出会自动下载 Chromium；离线/受限网络环境请预先执行 `npx playwright install chromium`，或设置 `PLAYWRIGHT_BROWSERS_PATH` 指向已安装目录。
+- **报告范围**：报告数据限本人 `userId`（简历、测评、匹配结果均按用户隔离），内容镜像岗位诊断页（结论 / 证据 / 行动建议），纯数据、不含营销文案。
+
+报告模块测试（无需数据库、不启动真实浏览器，使用可注入的 fake renderer）：
+
+```bash
+npm run test:reports
+```
+
 ### 手机号开发验证码登录
 
 第四阶段后，登录用户路径使用本项目后端 API + PostgreSQL，不再使用 Firebase Auth/Firestore。

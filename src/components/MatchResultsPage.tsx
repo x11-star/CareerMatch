@@ -173,7 +173,7 @@ export default function MatchResultsPage({ onSelectPosition, onRetake, resumeDat
         )}
 
         <p className="border-t border-career-line pt-4 text-xs leading-5 text-career-muted">
-          当前阶段先完成在线诊断。PDF 报告导出将在第六阶段开放。
+          点击岗位进入诊断报告页可查看匹配维度、证据与行动建议，并导出 PDF 报告。
         </p>
       </div>
       )}

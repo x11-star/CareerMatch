@@ -72,12 +72,18 @@ export async function seedPositions(client: Prisma.TransactionClient = prisma): 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     if (process.argv.includes('--reset')) {
-      // Clear old position data (and FK dependents) before re-seeding, so stale rows from a
-      // previous seed (e.g. the old fake 346) don't accumulate alongside the new 346.
-      // Run inside a transaction with the seed so a seed failure rolls back the clears (otherwise
-      // a partial seed would leave the DB empty).
-      // WARNING: --reset deletes ALL users' favorites and match results, not just old positions.
-      // Run on a fresh dev DB or accept the loss.
+      // --reset is DESTRUCTIVE: it deletes ALL users' favorites and match results (not just old
+      // positions), inside a transaction with the re-seed so a seed failure rolls back the clears.
+      // Require an explicit --confirm so a stray `--reset` doesn't silently destroy user data on a
+      // shared/staging DB. Run on a fresh dev DB or accept the loss.
+      if (!process.argv.includes('--confirm')) {
+        console.error(
+          'ERROR: --reset deletes ALL favorites and match results across ALL users.\n' +
+          'Add --confirm to proceed, e.g. `npx tsx prisma/seed.ts --reset --confirm`. Aborting.',
+        );
+        process.exit(1);
+      }
+      console.warn('WARNING: --reset --confirm — deleting ALL favorites, match results, and positions, then re-seeding.');
       const result = await prisma.$transaction(async (tx) => {
         await tx.matchResult.deleteMany();
         await tx.favorite.deleteMany();

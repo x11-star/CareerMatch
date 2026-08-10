@@ -36,12 +36,6 @@ function countStars(s: string): number {
   return (s.match(/⭐/g) || []).length;
 }
 
-// Convert "助理工程师(0-2年)" -> "助理工程师：0-2年" so PositionDetailPage's split('：')
-// renders role (bold) + duration (muted). Honest: duration comes from real v2 data.
-function careerPathItem(segment: string): string {
-  return segment.trim().replace(/\(([^)]+)\)$/, '：$1');
-}
-
 export const MOCK_POSITIONS: Position[] = (() => {
   const rawPositions = (v2Data as { positions: any[] }).positions || [];
   const industryIndex: Record<string, number> = {};
@@ -61,8 +55,8 @@ export const MOCK_POSITIONS: Position[] = (() => {
     const starCount = raw.entryDifficulty ? countStars(raw.entryDifficulty) : 3;
 
     const careerPath: string[] = raw.developmentPath
-      ? String(raw.developmentPath).split('→').map(careerPathItem).filter(Boolean)
-      : ['初级(0-2年)：0-2年', '中级(2-5年)：2-5年'];
+      ? String(raw.developmentPath).split('→').map((s: string) => s.trim()).filter(Boolean)
+      : ['初级(0-2年)', '中级(2-5年)', '高级(5年以上)'];
 
     const timeline: string[] = raw.recruitmentTimeline
       ? String(raw.recruitmentTimeline).split('→').map((s: string) => s.trim()).filter(Boolean)

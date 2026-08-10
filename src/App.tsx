@@ -33,7 +33,7 @@ export default function App() {
   useEffect(() => {
     async function loadPositions() {
       try {
-        const dbPositions = await getPositions();
+        const dbPositions = await getPositions(400);
         if (dbPositions && dbPositions.length > 0) {
           setPositions(dbPositions);
         }

@@ -48,15 +48,15 @@ function testDifficultyIsStarCount() {
   assert.equal(algo!.difficultyRating, 5);
 }
 
-function testCareerPathHasColonForDuration() {
-  // careerPath entries WITH a (year) suffix become "角色：年限" so PositionDetailPage's split('：')
-  // renders role+duration. The final segment is often a terminal role with no year (e.g.
-  // "部门经理/总监") — that's honest real data, so only assert the colon format on segments
-  // that originally carried a parenthetical.
+function testCareerPathNonEmpty() {
+  // careerPath mirrors v2.developmentPath split on '→'. No component renders it today, but the
+  // data is stored in the DB; assert it's non-empty and segments are non-empty strings so the
+  // value is real and usable if a future UI surfaces it.
   for (const p of MOCK_POSITIONS) {
-    // At least one segment must carry the colon form (non-terminal roles have years).
-    const withColon = p.careerPath.filter((item) => /.+：.+/.test(item));
-    assert.ok(withColon.length > 0, `${p.title} has no role：duration segments`);
+    assert.ok(p.careerPath.length > 0, `${p.title} careerPath empty`);
+    for (const item of p.careerPath) {
+      assert.ok(item.length > 0, `${p.title} has empty careerPath segment`);
+    }
   }
 }
 
@@ -147,7 +147,7 @@ const tests: Array<{ name: string; fn: () => void }> = [
   { name: 'testAllMatchScoresAreZero', fn: testAllMatchScoresAreZero },
   { name: 'testSalaryRangeFormat', fn: testSalaryRangeFormat },
   { name: 'testDifficultyIsStarCount', fn: testDifficultyIsStarCount },
-  { name: 'testCareerPathHasColonForDuration', fn: testCareerPathHasColonForDuration },
+  { name: 'testCareerPathNonEmpty', fn: testCareerPathNonEmpty },
   { name: 'testCompanyIsRepresentative', fn: testCompanyIsRepresentative },
   { name: 'testCompanyRotatesWithinIndustry', fn: testCompanyRotatesWithinIndustry },
   { name: 'testUniqueCompanyTitleCityTuples', fn: testUniqueCompanyTitleCityTuples },

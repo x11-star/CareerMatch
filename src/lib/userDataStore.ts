@@ -36,9 +36,9 @@ function storage() {
   return window.localStorage;
 }
 
-export async function getPositions(): Promise<Position[]> {
+export async function getPositions(pageSize = 50): Promise<Position[]> {
   try {
-    return (await api.listPositions({ pageSize: 50 })).positions;
+    return (await api.listPositions({ pageSize })).positions;
   } catch {
     return MOCK_POSITIONS;
   }

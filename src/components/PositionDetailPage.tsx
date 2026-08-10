@@ -115,7 +115,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
       <PageHeader
         eyebrow="Position diagnosis"
         title="岗位诊断报告"
-        description={`${position.company} · ${position.title} · ${position.city}`}
+        description={`代表性·${position.company} · ${position.title} · ${position.city}`}
         primaryAction={<button onClick={() => onOpenModal('share')} className="rounded-md border border-career-line bg-career-surface px-4 py-2 text-sm font-semibold text-career-ink">复制分享链接</button>}
         secondaryAction={<button onClick={() => setIsFavorite(!isFavorite)} className="rounded-md border border-career-line bg-career-surface px-4 py-2 text-sm font-semibold text-career-ink"><Heart className={`mr-1 inline h-4 w-4 ${isFavorite ? 'fill-career-danger text-career-danger' : ''}`} />{isFavorite ? '已收藏' : '收藏岗位'}</button>}
         meta={<div className="flex flex-wrap gap-2 text-xs text-career-muted"><span>{position.type === 'state-owned' ? '央国企' : '互联网'}</span><span>·</span><span>{position.salaryRange}</span><span>·</span><span>难度 {position.difficultyRating}/5</span></div>}

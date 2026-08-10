@@ -1,240 +1,121 @@
 import { Position, AssessmentQuestion, PersonalityResult, ResumeData } from './types';
-import rawData from './positions_raw.json';
+import v2Data from '../prisma/positions-v2.json';
+
+// Representative employers/cities per industry. The v2 dataset is role-TYPE level (not tied to a
+// specific company/city — sourceCompanies/sourceCities are empty), so we pair each position with
+// a real, recognizable representative employer for its industry. This is labeled "代表性" in the
+// UI; we never claim "管培生@字节" is a real specific posting. Pools reuse the real company names
+// that already existed in the old generator.
+const REPRESENTATIVE_COMPANIES: Record<string, string[]> = {
+  '央国企': ['国家电网有限公司', '中国移动通信集团', '中国电信集团', '中国航天科技集团 (CASC)', '中国建筑集团 (CSCEC)', '中国石油化工集团 (SINOPEC)', '中粮集团有限公司', '中国邮政集团'],
+  '金融/咨询': ['中国工商银行 (ICBC)', '中国建设银行 (CCB)', '招商银行 (CMB)', '中信证券 (CITIC)', '中金公司 (CICC)', '普华永道 (PwC)', '德勤 (Deloitte)', '麦肯锡咨询 (McKinsey)'],
+  '互联网': ['字节跳动 (ByteDance)', '腾讯科技 (Tencent)', '阿里巴巴 (Alibaba)', '美团 (Meituan)', '小红书 (RED)', '网易游戏 (NetEase)', '米哈游 (miHoYo)', '哔哩哔哩 (Bilibili)'],
+  'AI/科技': ['华为技术有限公司', '比亚迪股份有限公司', '智谱AI', '月之暗面 (Moonshot)', '科大讯飞', '商汤科技', '百度 (Baidu)', 'MiniMax'],
+  '半导体/硬件': ['中芯国际 (SMIC)', '长江存储', '紫光展锐', '寒武纪科技', '地平线机器人', '立讯精密', '歌尔股份', '韦尔股份'],
+  '快消/零售': ['宝洁 (P&G)', '联合利华 (Unilever)', "欧莱雅 (L'Oreal)", '玛氏食品 (Mars)', '农夫山泉', '百事食品'],
+  '通用': ['字节跳动 (ByteDance)', '腾讯科技 (Tencent)', '阿里巴巴 (Alibaba)', '美团 (Meituan)', '中国建筑集团 (CSCEC)', '中国工商银行 (ICBC)', '国家电网有限公司', '普华永道 (PwC)'],
+  '生物医药': ['药明康德', '恒瑞医药', '中国医药集团', '迈瑞医疗', '百济神州'],
+  '其他': ['中国建筑集团 (CSCEC)', '比亚迪股份有限公司', '顺丰控股', '京东集团 (JD)', '中国中车集团'],
+};
+
+const REPRESENTATIVE_CITIES: Record<string, string[]> = {
+  '央国企': ['北京', '上海', '南京', '武汉', '西安', '成都'],
+  '金融/咨询': ['北京', '上海', '深圳'],
+  '互联网': ['北京', '上海', '深圳', '杭州', '广州', '成都'],
+  'AI/科技': ['北京', '上海', '深圳', '杭州', '合肥'],
+  '半导体/硬件': ['上海', '深圳', '北京', '武汉', '西安'],
+  '快消/零售': ['上海', '广州', '北京'],
+  '通用': ['北京', '上海', '深圳', '杭州', '成都', '南京', '武汉', '广州'],
+  '生物医药': ['上海', '北京', '苏州', '武汉'],
+  '其他': ['北京', '上海', '深圳', '广州', '杭州'],
+};
+
+const EXAM_FALLBACK = '重点准备专业知识、综合行测及逻辑推理，提前了解目标企业业务版图。';
+
+function countStars(s: string): number {
+  return (s.match(/⭐/g) || []).length;
+}
+
+// Convert "助理工程师(0-2年)" -> "助理工程师：0-2年" so PositionDetailPage's split('：')
+// renders role (bold) + duration (muted). Honest: duration comes from real v2 data.
+function careerPathItem(segment: string): string {
+  return segment.trim().replace(/\(([^)]+)\)$/, '：$1');
+}
 
 export const MOCK_POSITIONS: Position[] = (() => {
-  const expanded: Position[] = [];
-  const rawPositions = rawData.positions || [];
-  let idCounter = 1;
+  const rawPositions = (v2Data as { positions: any[] }).positions || [];
+  const industryIndex: Record<string, number> = {};
 
-  rawPositions.forEach((raw: any, catIdx: number) => {
-    const parentName = raw.name || '';
-    const parentCategory = raw.category || '技术类';
-    const parentIndustry = raw.industry || '通用';
-    const aliases = raw.aliases || [];
-    
-    // We want to generate exactly 346 positions in total.
-    // 33 categories. 16 categories will have 11 positions, 17 will have 10 positions.
-    const targetCount = catIdx < 16 ? 11 : 10;
+  const mapped: Position[] = rawPositions.map((raw: any): Position => {
+    const industry: string = raw.industry || '其他';
+    const idx = (industryIndex[industry] = (industryIndex[industry] ?? -1) + 1);
+    const companyPool = REPRESENTATIVE_COMPANIES[industry] || REPRESENTATIVE_COMPANIES['其他'];
+    const cityPool = REPRESENTATIVE_CITIES[industry] || REPRESENTATIVE_CITIES['其他'];
+    const company = companyPool[idx % companyPool.length];
+    const city = cityPool[idx % cityPool.length];
 
-    // Define company pools
-    let companyPool: string[] = [];
-    let isSoe = false;
+    const isStateOwned = industry === '央国企' || industry === '金融/咨询';
+    const type: Position['type'] = isStateOwned ? 'state-owned' : 'internet';
 
-    if (parentIndustry === '央国企' || parentName.includes('电网') || parentName.includes('央企') || parentName.includes('航天') || parentName.includes('国企')) {
-      isSoe = true;
+    const salaryRange = `${raw.salaryRange[0]}-${raw.salaryRange[1]}${raw.salaryUnit || '万年薪'}`;
+    const starCount = raw.entryDifficulty ? countStars(raw.entryDifficulty) : 3;
+
+    const careerPath: string[] = raw.developmentPath
+      ? String(raw.developmentPath).split('→').map(careerPathItem).filter(Boolean)
+      : ['初级(0-2年)：0-2年', '中级(2-5年)：2-5年'];
+
+    const timeline: string[] = raw.recruitmentTimeline
+      ? String(raw.recruitmentTimeline).split('→').map((s: string) => s.trim()).filter(Boolean)
+      : ['9月网申', '10-11月笔试', '11-12月面试', '12月录用'];
+
+    const exam = raw.examPrepNotes || EXAM_FALLBACK;
+    const softSkills: string[] = raw.softSkills || ['沟通表达能力', '团队协同', '快速适应'];
+    const workStyle: string = raw.workStyleDescription || '该岗位具有良好的发展前景，适合有志于该领域长期发展的同学。';
+    const interview = `难度${starCount}星：${workStyle}。面试重点考查岗位核心职责与软实力（${softSkills.slice(0, 2).join('、')}）的体现。`;
+
+    let salaryDetail = `首年约${salaryRange}（基本薪金+绩效奖金）。${workStyle}`;
+    const comparison: string = raw.soeVsInternetComparison || '';
+    if (comparison && comparison !== '不适用') {
+      salaryDetail += ` 赛道对比：${comparison}`;
     }
 
-    const soeCompanies = [
-      '国家电网有限公司', '中国移动通信集团', '中国电信集团', '中国联通集团',
-      '中国航天科技集团 (CASC)', '中国航天科工集团', '中国中车集团', '中国建筑集团 (CSCEC)',
-      '中国中铁股份有限公司', '中国石油化工集团 (SINOPEC)', '中国石油天然气集团 (CNPC)',
-      '中国海洋石油集团', '中国第一汽车集团', '东风汽车集团', '国家能源投资集团',
-      '中粮集团有限公司', '中国邮政集团', '中国商用飞机有限责任公司 (COMAC)',
-      '中国远洋海运集团 (COSCO)', '招商局集团 (China Merchants)'
-    ];
-
-    const techCompanies = [
-      '华为技术有限公司', '比亚迪股份有限公司', '小米集团', '大疆创新 (DJI)',
-      '百度 (Baidu)', '腾讯科技 (Tencent)', '字节跳动 (ByteDance)', '智谱AI',
-      '月之暗面 (Moonshot)', 'MiniMax', '百川智能', '科大讯飞', '商汤科技',
-      '寒武纪科技', '中芯国际 (SMIC)', '长江存储', '极氪汽车', '蔚来汽车'
-    ];
-
-    const financialSoeCompanies = [
-      '中国工商银行 (ICBC)', '中国建设银行 (CCB)', '中国银行 (BOC)', '中国农业银行 (ABC)',
-      '招商银行 (CMB)', '交通银行', '中信证券 (CITIC)', '中金公司 (CICC)',
-      '华泰证券', '国泰君安证券', '中信建投证券', '中国人寿保险'
-    ];
-
-    const financeConsultingPrivate = [
-      '普华永道 (PwC)', '德勤 (Deloitte)', '毕马威 (KPMG)', '安永 (EY)',
-      '麦肯锡咨询 (McKinsey)', '波士顿咨询 (BCG)', '贝恩咨询 (Bain)', '鼎晖投资', '红杉中国'
-    ];
-
-    const internetCompanies = [
-      '字节跳动 (ByteDance)', '腾讯科技 (Tencent)', '阿里巴巴 (Alibaba)', '美团 (Meituan)',
-      '拼多多 (PDD)', '小红书 (RED)', '网易游戏 (NetEase)', '米哈游 (miHoYo)',
-      '快手 (Kuaishou)', '携程集团 (Ctrip)', '哔哩哔哩 (Bilibili)', '京东集团 (JD)',
-      '滴滴出行 (Didi)', '唯品会', '希音 (SHEIN)', '同程旅行'
-    ];
-
-    const hwSemiconductorCompanies = [
-      '中芯国际 (SMIC)', '长江存储', '紫光展锐', '寒武纪科技', '联发科 (MediaTek)',
-      '地平线机器人', '兆易创新', '立讯精密', '歌尔股份', '韦尔股份'
-    ];
-
-    const fmcgCompanies = [
-      '宝洁 (P&G)', '联合利华 (Unilever)', '欧莱雅 (L\'Oreal)', '雅诗兰黛',
-      '玛氏食品 (Mars)', '百事食品', '可口可乐', '雀巢 (Nestle)', '农夫山泉', '百威啤酒'
-    ];
-
-    let selectedIndustry = '其他';
-    let subIndustryPool: string[] = [];
-
-    if (parentIndustry === '互联网' || parentCategory === '产品类' || parentCategory === '运营类') {
-      companyPool = internetCompanies;
-      selectedIndustry = '互联网';
-      subIndustryPool = ['电商与本地生活', '社交 with 文娱', '游戏开发', '工具与SaaS'];
-    } else if (parentIndustry === 'AI/科技' || parentName.includes('算法') || parentName.includes('模型')) {
-      companyPool = techCompanies;
-      selectedIndustry = 'AI/科技';
-      subIndustryPool = ['大模型与NLP', '计算机视觉', '深度学习与算法', '智能硬件'];
-    } else if (parentIndustry === '央国企' || parentName.includes('电网') || parentName.includes('航天')) {
-      companyPool = soeCompanies;
-      selectedIndustry = '央国企';
-      isSoe = true;
-      subIndustryPool = ['能源与电网', '通信与运营商', '基建与地产', '交通与装备制造'];
-    } else if (parentIndustry === '金融/咨询' || parentName.includes('财务') || parentName.includes('会计') || parentName.includes('精算') || parentName.includes('审计')) {
-      companyPool = [...financialSoeCompanies, ...financeConsultingPrivate];
-      selectedIndustry = '金融/咨询';
-      subIndustryPool = ['商业银行', '证券公司', '咨询与审计', '投资基金'];
-    } else if (parentName.includes('硬件') || parentName.includes('嵌入式') || parentName.includes('结构') || parentName.includes('机械') || parentName.includes('半导体') || parentName.includes('芯片') || parentName.includes('工艺')) {
-      companyPool = hwSemiconductorCompanies;
-      selectedIndustry = '半导体/硬件';
-      subIndustryPool = ['芯片与集成电路', '智能硬件与物联网', '整车与新能源'];
-    } else if (parentName.includes('快消') || parentName.includes('零售') || parentName.includes('营销') || parentName.includes('销售')) {
-      companyPool = fmcgCompanies;
-      selectedIndustry = '快消/零售';
-      subIndustryPool = ['个护美妆', '食品饮料', '时尚零售'];
-    } else {
-      if (isSoe) {
-        companyPool = soeCompanies;
-        selectedIndustry = '央国企';
-        subIndustryPool = ['通信与运营商', '基建与地产'];
-      } else {
-        companyPool = [...internetCompanies, ...techCompanies];
-        selectedIndustry = '互联网';
-        subIndustryPool = ['电商与本地生活', '社交 with 文娱'];
-      }
-    }
-
-    const soeCities = ['北京', '上海', '南京', '武汉', '西安', '成都', '广州', '沈阳', '长沙', '苏州'];
-    const internetCities = ['北京', '上海', '深圳', '杭州', '广州', '成都', '武汉', '南京', '苏州', '合肥'];
-
-    for (let i = 0; i < targetCount; i++) {
-      let title = parentName;
-      if (i > 0 && aliases.length > 0) {
-        title = aliases[(i - 1) % aliases.length];
-      } else if (i > 0) {
-        const prefixes = ['高级', '初级', '资深', '助理', '研发', '平台', '核心', '储备'];
-        const pfx = prefixes[(i - 1) % prefixes.length];
-        title = `${pfx}${parentName}`;
-      }
-
-      const company = companyPool[(i + catIdx) % companyPool.length];
-      const currentIsSoe = isSoe || financialSoeCompanies.includes(company) || soeCompanies.includes(company);
-      const type = currentIsSoe ? 'state-owned' : 'internet';
-      const currentIndustry = currentIsSoe && selectedIndustry !== '金融/咨询' ? '央国企' : selectedIndustry;
-
-      const cityPool = currentIsSoe ? soeCities : internetCities;
-      const city = cityPool[(i * 3 + catIdx * 7) % cityPool.length];
-      const subIndustry = subIndustryPool[i % subIndustryPool.length] || '其他';
-      
-      let categoryName = parentCategory;
-      let subCategory = '其他';
-      
-      if (parentCategory === '技术类') {
-        if (title.includes('算法') || title.includes('模型') || title.includes('智能')) {
-          subCategory = '算法与人工智能';
-        } else if (title.includes('测试') || title.includes('安全')) {
-          subCategory = '测试与安全';
-        } else {
-          subCategory = '开发 (Java/C++/Go/前端)';
-        }
-      } else if (parentCategory === '产品类') {
-        if (title.includes('AI') || title.includes('智能')) {
-          subCategory = 'AI产品经理';
-        } else if (title.includes('策划') || title.includes('策略')) {
-          subCategory = '产品策划/策略';
-        } else {
-          subCategory = '产品经理';
-        }
-      } else if (parentCategory === '职能类' || parentCategory === '金融财务类') {
-        if (title.includes('人力') || title.includes('招聘') || title.includes('HR')) {
-          subCategory = '人力资源';
-        } else if (title.includes('财务') || title.includes('会计') || title.includes('审计') || title.includes('税务')) {
-          subCategory = '财务会计';
-        } else {
-          subCategory = '综合管理/管培生';
-        }
-      } else if (parentCategory === '运营类') {
-        if (title.includes('新媒体') || title.includes('内容') || title.includes('文案')) {
-          subCategory = '新媒体与内容运营';
-        } else if (title.includes('电商') || title.includes('品类') || title.includes('平台')) {
-          subCategory = '平台/电商运营';
-        } else {
-          subCategory = '活动/用户运营';
-        }
-      }
-
-      let salaryRangeStr = '面议';
-      if (raw.salaryRange && Array.isArray(raw.salaryRange) && raw.salaryRange.length === 2) {
-        const minScale = 0.85 + (i % 5) * 0.08;
-        const min = Math.round(raw.salaryRange[0] * minScale);
-        const max = Math.round(raw.salaryRange[1] * minScale);
-        const unit = raw.salaryUnit || 'k';
-        salaryRangeStr = `${min}-${max}${unit}`;
-      }
-
-      const timeline = raw.recruitmentTimeline ? raw.recruitmentTimeline.split('→').map((s: string) => s.trim()) : ['9月网申', '10-11月在线笔试', '11-12月面试考核', '12月录取录用'];
-      const exam = raw.examPrepNotes || '重点准备专业知识、综合行测及逻辑推理等内容，提前了解企业业务版图。';
-      const interview = currentIsSoe 
-        ? '多对一结构化面试，考查专业能力与国企适配度，重点看重责任心、严谨度及坚守岗位的职业态度。'
-        : '连连技术/业务个面，深挖简历项目，考查实时手写代码或商业 case 分析，要求极高的自驱力与逻辑表达。';
-
-      const requirements = raw.hardSkills && raw.hardSkills.length > 0 ? raw.hardSkills : ['相关理工科/商科专业背景', '掌握行业核心技术工具与理论方法'];
-      const softSkills = raw.softSkills && raw.softSkills.length > 0 ? raw.softSkills : ['沟通表达能力', '团队协同自驱力', '快速适应能力'];
-
-      const overallMatch = 80 + Math.floor(Math.sin(idCounter) * 10 + 5);
-      const resumeMatch = 78 + Math.floor(Math.cos(idCounter) * 10 + 5);
-      const personalityMatch = 82 + Math.floor(Math.sin(idCounter + 1) * 10 + 5);
-
-      const difficultyRating = raw.entryDifficulty ? raw.entryDifficulty.replace(/[^⭐]/g, '').length : 3;
-      const tags = raw.personalityTags || ['六险二金', '落户机会', '晋升通道'];
-      const summary = raw.workStyleDescription || '该岗位具有良好的发展前景和完善的培训机制，适合有志于该领域长期发展的同学。';
-      const careerPath = raw.developmentPath ? raw.developmentPath.split('→').map((s: string) => s.trim()) : ['助理专员', '中级专员', '骨干专家', '团队主管'];
-
-      expanded.push({
-        id: `pos-${String(idCounter++).padStart(4, '0')}`,
-        title,
-        company,
-        city,
-        type,
-        industry: currentIndustry,
-        category: categoryName,
-        subIndustry,
-        subCategory,
-        overallMatch,
-        resumeMatch,
-        personalityMatch,
-        salaryRange: salaryRangeStr,
-        difficultyRating,
-        tags,
-        summary,
-        responsibilities: raw.responsibilities || [],
-        requirements,
-        softSkills,
-        salaryDetail: raw.workStyleDescription || `首年约${salaryRangeStr}（基本薪金+绩效奖金），提供全额社会保障、优渥福利待遇以及完善的企业配套体系。`,
-        careerPath,
-        fitPersonality: raw.personalityTags || ['尽责性高', '情绪稳定'],
-        howToPrepare: {
-          timeline,
-          exam,
-          interview
-        },
-        relatedJobs: []
-      });
-    }
+    return {
+      id: raw.id,
+      title: raw.name,
+      company,
+      city,
+      type,
+      industry,
+      category: raw.category,
+      subIndustry: undefined,
+      subCategory: undefined,
+      overallMatch: 0,
+      resumeMatch: 0,
+      personalityMatch: 0,
+      salaryRange,
+      difficultyRating: starCount,
+      tags: raw.personalityTags || ['尽责性高', '情绪稳定'],
+      summary: workStyle,
+      responsibilities: raw.responsibilities || [],
+      requirements: raw.hardSkills || [],
+      softSkills,
+      salaryDetail,
+      careerPath,
+      fitPersonality: raw.personalityTags || ['尽责性高', '情绪稳定'],
+      howToPrepare: { timeline, exam, interview },
+      relatedJobs: [],
+    };
   });
 
-  expanded.forEach((pos) => {
-    const matchCandidates = expanded.filter((p) => p.id !== pos.id);
-    const sameCategory = matchCandidates.filter((p) => p.category === pos.category);
-    const selected = sameCategory.length >= 3 ? sameCategory : matchCandidates;
+  // relatedJobs: pick up to 3 same-category titles (fallback any). Deterministic, no fake data.
+  mapped.forEach((pos) => {
+    const candidates = mapped.filter((p) => p.id !== pos.id);
+    const sameCategory = candidates.filter((p) => p.category === pos.category);
+    const selected = sameCategory.length >= 3 ? sameCategory : candidates;
     pos.relatedJobs = selected.slice(0, 3).map((p) => p.title);
   });
 
-  return expanded;
+  return mapped;
 })();
 
 export const MOCK_QUESTIONS: AssessmentQuestion[] = [

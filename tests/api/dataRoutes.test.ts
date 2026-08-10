@@ -32,7 +32,7 @@ async function login(app: ReturnType<typeof createApp>) {
   return cookie;
 }
 
-async function reset() {
+async function reset(): Promise<string> {
   await prisma.matchResult.deleteMany();
   await prisma.favorite.deleteMany();
   await prisma.resume.deleteMany();
@@ -41,10 +41,24 @@ async function reset() {
   await prisma.smsCode.deleteMany();
   await prisma.user.deleteMany({ where: { phone: '13388888888' } });
   await prisma.position.upsert(mapPositionForSeed(MOCK_POSITIONS[0]));
+  // The DB row gets a Prisma cuid id (different from MOCK_POSITIONS[0].id). Return the real DB id
+  // so the favorite test uses a valid FK target.
+  const seeded = await prisma.position.findUnique({
+    where: {
+      company_title_city: {
+        company: MOCK_POSITIONS[0].company,
+        title: MOCK_POSITIONS[0].title,
+        city: MOCK_POSITIONS[0].city,
+      },
+    },
+    select: { id: true },
+  });
+  assert(seeded, 'seeded position not found');
+  return seeded.id;
 }
 
 async function testProfileResumeAssessmentAndFavorites() {
-  await reset();
+  const positionId = await reset();
   const app = createApp();
   const cookie = await login(app);
 
@@ -101,10 +115,10 @@ async function testProfileResumeAssessmentAndFavorites() {
   assert.equal(positions.status, 200);
   assert.equal(positionBody.positions.length, 1);
 
-  const favorite = await request(app, `/api/favorites/${MOCK_POSITIONS[0].id}`, { method: 'POST', headers: { cookie } });
+  const favorite = await request(app, `/api/favorites/${positionId}`, { method: 'POST', headers: { cookie } });
   assert.equal(favorite.status, 200);
   const favorites = await request(app, '/api/favorites', { headers: { cookie } });
-  assert.deepEqual((await favorites.json()).positionIds, [MOCK_POSITIONS[0].id]);
+  assert.deepEqual((await favorites.json()).positionIds, [positionId]);
 }
 
 const tests = [testProfileResumeAssessmentAndFavorites];

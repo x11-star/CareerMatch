@@ -49,7 +49,7 @@ export default function PositionBrowserPage({ onSelectPosition }: PositionBrowse
   useEffect(() => {
     async function loadPositions() {
       try {
-        const data = await getPositions();
+        const data = await getPositions(400);
         setPositions(data);
       } catch (e) {
         console.error('Failed to fetch positions:', e);
@@ -84,25 +84,16 @@ export default function PositionBrowserPage({ onSelectPosition }: PositionBrowse
     setSelectedSubCategory('all');
   };
 
-  const industries = ['互联网', '央国企', 'AI/科技', '金融/咨询', '半导体/硬件', '快消/零售', '其他'];
-  
-  const subIndustriesMap: Record<string, string[]> = {
-    '互联网': ['电商与本地生活', '社交与文娱', '游戏开发', '工具与SaaS'],
-    '央国企': ['能源与电网', '通信与运营商', '基建与地产', '交通与装备制造'],
-    'AI/科技': ['大模型与NLP', '计算机视觉', '深度学习与算法', '智能硬件'],
-    '金融/咨询': ['商业银行', '证券公司', '咨询与审计', '投资基金'],
-    '半导体/硬件': ['芯片与集成电路', '智能硬件与物联网', '整车与新能源'],
-    '快消/零售': ['个护美妆', '食品饮料', '时尚零售']
-  };
+  const industries = ['互联网', '央国企', 'AI/科技', '金融/咨询', '半导体/硬件', '快消/零售', '通用', '生物医药', '其他'];
 
-  const categories = ['技术类', '产品类', '职能类', '运营类', '其他'];
+  // v2 data has no sub-industry/sub-category breakdown (positions are role-type level), so these
+  // maps are intentionally empty — the sub-filter chip rows don't render, and cards show
+  // industry + category only.
+  const subIndustriesMap: Record<string, string[]> = {};
 
-  const subCategoriesMap: Record<string, string[]> = {
-    '技术类': ['开发 (Java/C++/Go/前端)', '算法与人工智能', '测试与安全'],
-    '产品类': ['产品经理', 'AI产品经理', '产品策划/策略'],
-    '职能类': ['人力资源', '财务会计', '综合管理/管培生'],
-    '运营类': ['新媒体与内容运营', '平台/电商运营', '活动/用户运营']
-  };
+  const categories = ['技术类', '产品类', '职能类', '运营类', '工程技术类', '市场/销售类', '金融财务类', '数据/战略类', '科研类', '供应链类', '设计类', '法务合规类', '其他'];
+
+  const subCategoriesMap: Record<string, string[]> = {};
 
   const cities = ['北京', '上海', '深圳', '广州', '杭州', '南京', '成都', '西安', '武汉'];
 
@@ -469,8 +460,8 @@ export default function PositionBrowserPage({ onSelectPosition }: PositionBrowse
               >
                 <div>
                   <div className="flex justify-between items-start gap-2 mb-3">
-                    <span className="text-xs font-extrabold text-slate-400 tracking-tight line-clamp-1">
-                      {pos.company}
+                    <span title="代表性雇主，非具体在招岗位" className="text-xs font-extrabold text-slate-400 tracking-tight line-clamp-1">
+                      代表性·{pos.company}
                     </span>
                     <span className={`text-[9px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
                       pos.type === 'state-owned' 
@@ -487,10 +478,10 @@ export default function PositionBrowserPage({ onSelectPosition }: PositionBrowse
                   {/* Category Pill Tag Display */}
                   <div className="flex flex-wrap gap-1 mt-3">
                     <span className="text-[10px] bg-career-surface-muted text-career-muted font-bold px-2 py-0.5 rounded-md">
-                      {pos.industry} / {pos.subIndustry}
+                      {pos.industry} / {pos.category}
                     </span>
                     <span className="text-[10px] bg-indigo-50 text-indigo-600 font-bold px-2 py-0.5 rounded-md">
-                      {pos.subCategory || pos.category}
+                      {'★'.repeat(pos.difficultyRating)}
                     </span>
                   </div>
 

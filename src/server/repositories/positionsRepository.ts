@@ -12,7 +12,7 @@ export type PositionFilters = {
   pageSize?: number;
 };
 
-export const MAX_POSITION_PAGE_SIZE = 50;
+export const MAX_POSITION_PAGE_SIZE = 500;
 
 function normalizePage(page?: number) {
   return Math.max(1, Math.floor(page || 1));

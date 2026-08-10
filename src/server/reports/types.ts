@@ -13,6 +13,12 @@ export interface ReportPositionHeader {
   summary: string;
 }
 
+export interface ReportApplicant {
+  name: string; // resume.name
+  school: string; // resume.school
+  major: string; // resume.major
+}
+
 export type DiagnosisTone = 'success' | 'warning' | 'error';
 
 export interface ReportConclusion {
@@ -60,6 +66,7 @@ export interface ReportActions {
 }
 
 export interface ReportData {
+  applicant: ReportApplicant;
   position: ReportPositionHeader;
   conclusion: ReportConclusion;
   dimensions: ReportDimensions;

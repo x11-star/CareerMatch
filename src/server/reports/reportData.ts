@@ -111,6 +111,11 @@ export function assembleReportData(input: AssembleReportDataInput): ReportData {
   const hasExperience = Boolean(resume.internships?.length || resume.projects?.length);
 
   return {
+    applicant: {
+      name: resume.name,
+      school: resume.school || '',
+      major: resume.major || '',
+    },
     position: {
       company: position.company,
       title: position.title,

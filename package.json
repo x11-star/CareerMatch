@@ -13,6 +13,7 @@
     "lint": "tsc --noEmit",
     "test:ai": "tsx tests/ai/run-tests.ts",
     "test:files": "tsx tests/files/run-tests.ts",
+    "test:data": "tsx tests/data/run-tests.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",

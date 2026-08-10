@@ -1,6 +1,6 @@
 import type express from 'express';
 import { sendHttpError } from '../http/errors';
-import { countPositions, getPositionById, listPositions } from '../repositories/positionsRepository';
+import { countPositions, getPositionById, listPositions, MAX_POSITION_PAGE_SIZE } from '../repositories/positionsRepository';
 import { toPosition } from '../mappers/positionMapper';
 
 export function registerPositionRoutes(app: express.Express) {
@@ -18,7 +18,7 @@ export function registerPositionRoutes(app: express.Express) {
         pageSize,
       };
       const [positions, total] = await Promise.all([listPositions(filters), countPositions(filters)]);
-      return res.json({ positions: positions.map(toPosition), total, page: Math.max(1, Math.floor(page || 1)), pageSize: Math.min(50, Math.max(1, Math.floor(pageSize || 20))) });
+      return res.json({ positions: positions.map(toPosition), total, page: Math.max(1, Math.floor(page || 1)), pageSize: Math.min(MAX_POSITION_PAGE_SIZE, Math.max(1, Math.floor(pageSize || 20))) });
     } catch (error) {
       return sendHttpError(res, error);
     }

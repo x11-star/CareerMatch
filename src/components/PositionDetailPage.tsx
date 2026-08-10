@@ -43,7 +43,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
     personalityMatchExplanation: string;
     whyExcellent: string;
   } | null>(null);
-  const [isLoadingMatch, setIsLoadingMatch] = useState(false);
+  const [isLoadingMatch, setIsLoadingMatch] = useState(true);
   const [matchError, setMatchError] = useState('');
 
   async function parseMatchApiError(response: Response): Promise<string> {
@@ -99,8 +99,9 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
     return () => { active = false; };
   }, [user, position, resumeData, personalityResult]);
 
-  const score = matchResult?.overallMatch ?? position.overallMatch;
+  const score = matchResult?.overallMatch ?? 0;
   const scoreTone = diagnosisTone(score);
+  const hasMatch = matchResult !== null;
   const resumeSkills = useMemo(() => new Set((resumeData?.skills || []).map((skill) => skill.toLowerCase())), [resumeData]);
   const metRequirements = position.requirements.filter((req) => resumeSkillsHasRequirement(resumeSkills, req));
   const missingRequirements = position.requirements.filter((req) => !resumeSkillsHasRequirement(resumeSkills, req));
@@ -115,7 +116,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
       <PageHeader
         eyebrow="Position diagnosis"
         title="岗位诊断报告"
-        description={`${position.company} · ${position.title} · ${position.city}`}
+        description={`代表性·${position.company} · ${position.title} · ${position.city}`}
         primaryAction={<button onClick={() => onOpenModal('share')} className="rounded-md border border-career-line bg-career-surface px-4 py-2 text-sm font-semibold text-career-ink">复制分享链接</button>}
         secondaryAction={<button onClick={() => setIsFavorite(!isFavorite)} className="rounded-md border border-career-line bg-career-surface px-4 py-2 text-sm font-semibold text-career-ink"><Heart className={`mr-1 inline h-4 w-4 ${isFavorite ? 'fill-career-danger text-career-danger' : ''}`} />{isFavorite ? '已收藏' : '收藏岗位'}</button>}
         meta={<div className="flex flex-wrap gap-2 text-xs text-career-muted"><span>{position.type === 'state-owned' ? '央国企' : '互联网'}</span><span>·</span><span>{position.salaryRange}</span><span>·</span><span>难度 {position.difficultyRating}/5</span></div>}
@@ -129,23 +130,37 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
         <section className="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
           <div>
             <p className="text-[11px] font-semibold tracking-[0.16em] text-career-muted uppercase">诊断结论</p>
-            <div className="mt-3 flex items-baseline gap-3">
-              <span className="text-5xl font-bold tabular-nums tracking-tight text-career-ink">{score}<span className="text-2xl font-semibold text-career-muted">%</span></span>
-              <span className={`text-sm font-semibold ${scoreTone === 'success' ? 'text-career-success' : scoreTone === 'warning' ? 'text-career-warning' : 'text-career-danger'}`}>{diagnosisLabel(score)}</span>
-            </div>
-            <p className="mt-3 text-base leading-7 text-career-ink">{diagnosisSentence(score)}</p>
-            <p className="mt-2 text-sm leading-6 text-career-muted">
-              {missingRequirements.length > 0 ? `准备优先级:先补关键差距(${missingRequirements.slice(0, 2).join('、')})。` : '准备优先级:重点整理项目证据和面试表达。'}
-            </p>
+            {hasMatch ? (
+              <>
+                <div className="mt-3 flex items-baseline gap-3">
+                  <span className="text-5xl font-bold tabular-nums tracking-tight text-career-ink">{score}<span className="text-2xl font-semibold text-career-muted">%</span></span>
+                  <span className={`text-sm font-semibold ${scoreTone === 'success' ? 'text-career-success' : scoreTone === 'warning' ? 'text-career-warning' : 'text-career-danger'}`}>{diagnosisLabel(score)}</span>
+                </div>
+                <p className="mt-3 text-base leading-7 text-career-ink">{diagnosisSentence(score)}</p>
+                <p className="mt-2 text-sm leading-6 text-career-muted">
+                  {missingRequirements.length > 0 ? `准备优先级:先补关键差距(${missingRequirements.slice(0, 2).join('、')})。` : '准备优先级:重点整理项目证据和面试表达。'}
+                </p>
+              </>
+            ) : (
+              <p className="mt-3 text-sm leading-6 text-career-muted">
+                {isLoadingMatch ? '正在生成匹配结果,完成后显示诊断分数与维度。' : '匹配结果暂不可用,请确认 AI 服务配置后重试,或先在岗位诊断页生成匹配结果。'}
+              </p>
+            )}
           </div>
           <div className="lg:border-l lg:border-career-line lg:pl-8">
             <p className="mb-3 text-[11px] font-semibold tracking-[0.16em] text-career-muted uppercase">匹配维度</p>
-            <MatchDimensionsChart
-              resumeMatch={matchResult?.resumeMatch ?? position.resumeMatch}
-              personalityMatch={matchResult?.personalityMatch ?? position.personalityMatch}
-              overallMatch={score}
-            />
-            <p className="mt-3 text-xs leading-5 text-career-muted">对照推荐线 80% 与谨慎线 65%;分数不是唯一结论。</p>
+            {hasMatch ? (
+              <>
+                <MatchDimensionsChart
+                  resumeMatch={matchResult!.resumeMatch}
+                  personalityMatch={matchResult!.personalityMatch}
+                  overallMatch={score}
+                />
+                <p className="mt-3 text-xs leading-5 text-career-muted">对照推荐线 80% 与谨慎线 65%;分数不是唯一结论。</p>
+              </>
+            ) : (
+              <p className="text-sm leading-6 text-career-muted">匹配维度图在生成匹配结果后显示。</p>
+            )}
           </div>
         </section>
 

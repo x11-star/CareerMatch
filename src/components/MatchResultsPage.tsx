@@ -3,7 +3,7 @@ import { ArrowRight, Filter, Heart, Landmark, Laptop, RefreshCw } from 'lucide-r
 import { MOCK_POSITIONS } from '../data';
 import { Position, ResumeData, PersonalityResult } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { getPositions, getFavorites, toggleFavorite } from '../lib/userDataStore';
+import { getPositions, getFavorites, toggleFavorite, ALL_POSITIONS_PAGE_SIZE } from '../lib/userDataStore';
 import { hasRealResumeData } from '../lib/resumeState';
 import PageHeader from './ui/PageHeader';
 import EmptyState from './ui/EmptyState';
@@ -20,13 +20,13 @@ export default function MatchResultsPage({ onSelectPosition, onRetake, resumeDat
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'state-owned' | 'internet'>('state-owned');
   const [cityFilter, setCityFilter] = useState<string>('all');
-  const [salarySort, setSalarySort] = useState<string>('match');
+  const [salarySort, setSalarySort] = useState<string>('salary-high');
   const [favorites, setFavorites] = useState<Record<string, boolean>>({});
   const [positions, setPositions] = useState<Position[]>(MOCK_POSITIONS);
 
   useEffect(() => {
     async function loadData() {
-      const dbPositions = await getPositions();
+      const dbPositions = await getPositions(ALL_POSITIONS_PAGE_SIZE);
       setPositions(dbPositions);
       if (user) {
         try {
@@ -61,15 +61,14 @@ export default function MatchResultsPage({ onSelectPosition, onRetake, resumeDat
   const filteredPositions = useMemo(() => {
     let list = positions.filter((p) => p.type === activeTab);
     if (cityFilter !== 'all') list = list.filter((p) => p.city.includes(cityFilter));
-    if (salarySort === 'match') {
-      list = [...list].sort((a, b) => b.overallMatch - a.overallMatch);
-    } else if (salarySort === 'resume') {
-      list = [...list].sort((a, b) => b.resumeMatch - a.resumeMatch);
-    } else if (salarySort === 'personality') {
-      list = [...list].sort((a, b) => b.personalityMatch - a.personalityMatch);
-    } else if (salarySort === 'salary-high') {
+    if (salarySort === 'salary-high') {
       const getSalaryHigh = (range: string) => Number(range.match(/(\d+)-?(\d+)?万/)?.[2] || range.match(/(\d+)/)?.[1] || 0);
       list = [...list].sort((a, b) => getSalaryHigh(b.salaryRange) - getSalaryHigh(a.salaryRange));
+    } else if (salarySort === 'salary-low') {
+      const getSalaryLow = (range: string) => Number(range.match(/(\d+)-?(\d+)?万/)?.[1] || 0);
+      list = [...list].sort((a, b) => getSalaryLow(a.salaryRange) - getSalaryLow(b.salaryRange));
+    } else if (salarySort === 'difficulty') {
+      list = [...list].sort((a, b) => b.difficultyRating - a.difficultyRating);
     }
     return list;
   }, [positions, activeTab, cityFilter, salarySort]);
@@ -145,10 +144,9 @@ export default function MatchResultsPage({ onSelectPosition, onRetake, resumeDat
               ))}
             </div>
             <select value={salarySort} onChange={(e) => setSalarySort(e.target.value)} className="rounded-md border border-career-line bg-career-bg px-3 py-2 text-xs font-semibold text-career-ink outline-none">
-              <option value="match">综合匹配</option>
-              <option value="resume">硬条件</option>
-              <option value="personality">性格适配</option>
-              <option value="salary-high">薪资</option>
+              <option value="salary-high">薪资高到低</option>
+              <option value="salary-low">薪资低到高</option>
+              <option value="difficulty">难度高到低</option>
             </select>
           </div>
 
@@ -196,12 +194,12 @@ const PositionRow: React.FC<{ position: Position; isFavorite: boolean; onToggleF
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-xs text-career-muted">
-            <span>{position.company}</span><span>·</span><span>{position.city}</span><span>·</span><span>{position.type === 'state-owned' ? '央国企' : '互联网'}</span><span>·</span><span>{position.salaryRange}</span>
+            <span>代表性·{position.company}</span><span>·</span><span>{position.city}</span><span>·</span><span>{position.type === 'state-owned' ? '央国企' : '互联网'}</span><span>·</span><span>{position.salaryRange}</span>
           </div>
           <h3 className="mt-2 text-lg font-semibold text-career-ink">{position.title}</h3>
           <p className="mt-2 line-clamp-2 text-sm leading-6 text-career-muted">{position.summary}</p>
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
-            <span className="rounded-md bg-career-success-soft px-2 py-1 font-semibold text-career-ink">{diagnosisLabel(position.overallMatch)} · {position.overallMatch}%</span>
+            <span className="rounded-md bg-career-success-soft px-2 py-1 font-semibold text-career-ink">难度 {'★'.repeat(position.difficultyRating)}</span>
             {gaps.map((gap) => <span key={gap} className="rounded-md bg-career-warning-soft px-2 py-1 text-career-ink">主要差距:{gap}</span>)}
           </div>
         </div>
@@ -216,8 +214,3 @@ const PositionRow: React.FC<{ position: Position; isFavorite: boolean; onToggleF
   );
 };
 
-function diagnosisLabel(score: number) {
-  if (score >= 80) return '推荐';
-  if (score >= 65) return '谨慎';
-  return '不建议';
-}

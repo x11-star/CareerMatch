@@ -29,7 +29,10 @@ export default function DownloadModal({ positionId, onClose }: DownloadModalProp
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
+      // Defer revoke: some browsers read the blob URL asynchronously after click(), so revoking
+      // immediately can abort the save or yield a 0-byte file. 1s is enough for the download to
+      // start without leaking the object URL for long.
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
       onClose();
     } catch (err: any) {
       setState({ kind: 'error', message: err?.message || '导出失败,请稍后重试。' });

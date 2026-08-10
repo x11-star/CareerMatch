@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { createReportService, sanitizeFileName } from '../../src/server/reports/reportService';
+import { createReportService, sanitizeFileName, buildContentDisposition } from '../../src/server/reports/reportService';
 import { assembleReportData } from '../../src/server/reports/reportData';
 import type { ReportData, PositionInput } from '../../src/server/reports/types';
 import type { MatchResult } from '../../src/server/ai/types';
@@ -162,12 +162,28 @@ async function testSanitizesFileName() {
   assert.ok(sanitizeFileName(long, 'id').length < long.length);
 }
 
+async function testContentDispositionIsAsciiSafeAndDecodable() {
+  // Node's res.setHeader rejects non-ASCII bytes (ERR_INVALID_CHAR), so the header value must
+  // be 7-bit clean in its filename= part while still carrying the real CJK name via filename*=
+  // (RFC 5987), which the client decodes back to the original.
+  const name = '诊断报告_示例科技_pos-0001.pdf';
+  const header = buildContentDisposition(name);
+  // entire header value is ASCII-safe (no raw CJK bytes)
+  assert.ok(/^[^\x80-\xFF]*$/.test(header), 'header must be 7-bit clean');
+  // filename*= carries the percent-encoded original
+  assert.ok(header.includes(`filename*=UTF-8''${encodeURIComponent(name)}`), 'filename* RFC 5987');
+  // ASCII fallback present (non-ASCII replaced, not the raw CJK)
+  assert.ok(/filename="[^"]*"/.test(header), 'ascii filename fallback');
+  assert.ok(!/filename="诊断/.test(header), 'ascii fallback must not contain raw CJK');
+}
+
 const tests = [
   testHappyPath,
   testPropagatesResumeMissing,
   testPropagatesAssessmentMissing,
   testPropagatesMatchNotCached,
   testSanitizesFileName,
+  testContentDispositionIsAsciiSafeAndDecodable,
 ];
 
 for (const test of tests) {

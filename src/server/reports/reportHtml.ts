@@ -16,6 +16,18 @@ function list(items: string[]): string {
   return `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
 }
 
+// Like list() but caps the visible rows (mirroring PositionDetailPage's slice(0,4) for missing
+// requirements) so a position with many hard-skill gaps cannot overflow the fixed A4 grid. A
+// trailing "等 N 项" note records how many were elided.
+function cappedList(items: string[], cap: number): string {
+  if (items.length === 0) return list(items);
+  const shown = items.slice(0, cap);
+  const rest = items.length - shown.length;
+  const rows = shown.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
+  const note = rest > 0 ? `<li class="muted">等 ${rest} 项</li>` : '';
+  return `<ul>${rows}${note}</ul>`;
+}
+
 const TONE_COLOR: Record<string, string> = {
   success: '#1f7a3a',
   warning: '#9a6a00',
@@ -80,6 +92,7 @@ export function buildReportHtml(data: ReportData): string {
   ul { margin: 0; padding-left: 16px; }
   ul.empty { color: var(--muted); }
   li { margin: 2px 0; font-size: 11px; }
+  li.muted { color: var(--muted); list-style: none; margin-left: -16px; }
   .gap { border-top: 1px solid var(--line); padding-top: 4px; }
   .gap-label { display: block; font-size: 9px; letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase; }
   .gap-value { display: block; font-size: 11px; }
@@ -121,7 +134,7 @@ export function buildReportHtml(data: ReportData): string {
     <div class="grid-3">
       <div><h3>已满足</h3>${list(data.evidence.met)}</div>
       <div><h3>部分满足</h3>${list(data.evidence.partial)}</div>
-      <div><h3>缺失 / 待证明</h3>${list(data.evidence.missing)}</div>
+      <div><h3>缺失 / 待证明</h3>${cappedList(data.evidence.missing, 4)}</div>
     </div>
     <div class="grid-2" style="margin-top:12px">
       <div><h3>性格适配点</h3>${list(data.evidence.fitPersonality)}</div>

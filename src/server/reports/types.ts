@@ -39,7 +39,7 @@ export interface ReportEvidence {
   partial: string[]; // position.softSkills.slice(0, 3)
   missing: string[]; // position.requirements not covered
   fitPersonality: string[]; // position.fitPersonality
-  risk: string; // personality-aware risk sentence
+  risk: string; // fixed advisory sentence mirroring PositionDetailPage's risk line
   whyExcellent: string; // matchResult.whyExcellent
 }
 

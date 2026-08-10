@@ -140,9 +140,11 @@ export function assembleReportData(input: AssembleReportDataInput): ReportData {
       partial: (position.softSkills || []).slice(0, 3),
       missing,
       fitPersonality: position.fitPersonality || [],
-      risk: assessment
-        ? '如果岗位节奏或反馈密度与你的测评倾向不同,需要提前准备适应策略。'
-        : '还没有职业测评,暂不能判断岗位环境风险。',
+      // Mirrors PositionDetailPage's risk line. assessment is guaranteed non-null here
+      // (a null assessment throws AssessmentMissingError above), so this is a fixed advisory
+      // sentence rather than a per-profile derivation. Kept identical to the on-screen report
+      // so the PDF and the page agree.
+      risk: '如果岗位节奏或反馈密度与你的测评倾向不同,需要提前准备适应策略。',
       whyExcellent: matchResult.whyExcellent,
     },
     actions: {

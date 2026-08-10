@@ -20,7 +20,7 @@ import { toResumeData } from "./mappers/resumeMapper";
 import { toPersonalityResult } from "./mappers/assessmentMapper";
 import { toPosition } from "./mappers/positionMapper";
 import { stableJsonHash } from "./matching/hash";
-import { defaultReportService } from "./reports/reportService";
+import { defaultReportService, buildContentDisposition } from "./reports/reportService";
 import { toHttpReportError } from "./reports/reportErrors";
 
 type AiService = ReturnType<typeof createAiService>;
@@ -256,7 +256,7 @@ export function createApp(options: CreateAppOptions = {}) {
       });
 
       res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${result.fileName}"`);
+      res.setHeader("Content-Disposition", buildContentDisposition(result.fileName));
       return res.status(200).send(result.buffer);
     } catch (error) {
       if (error instanceof HttpError) {

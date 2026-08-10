@@ -113,12 +113,26 @@ function testHeaderHasNameAndGeneratedAt() {
   assert.ok(/\d{4}-\d{2}-\d{2}/.test(html), 'generated date');
 }
 
+function testMissingListCapped() {
+  // A position with many hard-skill gaps must not render an unbounded list (would overflow the
+  // fixed A4 grid). Mirrors PositionDetailPage's slice(0,4) + records the elided count.
+  const data = buildData();
+  data.evidence.missing = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+  const html = buildReportHtml(data);
+  // exactly the first 4 as <li>...</li> plus an "等 3 项" note
+  assert.ok(html.includes('<li>a</li>'));
+  assert.ok(html.includes('<li>d</li>'));
+  assert.ok(!html.includes('<li>e</li>'), '5th item must be elided');
+  assert.ok(html.includes('等 3 项'), 'elided count note');
+}
+
 const tests = [
   testContainsAllFields,
   testSelfContained,
   testEscapesUserInput,
   testThreeSections,
   testHeaderHasNameAndGeneratedAt,
+  testMissingListCapped,
 ];
 
 for (const test of tests) {

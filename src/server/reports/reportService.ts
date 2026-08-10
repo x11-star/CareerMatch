@@ -41,6 +41,16 @@ export function sanitizeFileName(company: string, positionId: string): string {
   return `诊断报告_${safeCompany}_${safeId}.pdf`;
 }
 
+// Builds a Content-Disposition header value that is safe to pass to Node's res.setHeader, which
+// rejects non-ASCII bytes with ERR_INVALID_CHAR. Per RFC 5987 we send filename*=UTF-8''<pct-enc>
+// (decoded by parseContentDispositionFileName on the client) plus an ASCII-only filename= fallback
+// for older clients. The fallback replaces non-ASCII with '_' so the header stays 7-bit clean.
+export function buildContentDisposition(fileName: string): string {
+  const asciiFallback = fileName.replace(/[^\x20-\x7E]+/g, '_').replace(/"/g, '');
+  const encoded = encodeURIComponent(fileName);
+  return `attachment; filename="${asciiFallback}"; filename*=UTF-8''${encoded}`;
+}
+
 export function createReportService(deps: ReportServiceDeps = {}): ReportService {
   const pdfRenderer = deps.pdfRenderer || renderPdf;
   const dataAssembler = deps.dataAssembler || assembleReportData;

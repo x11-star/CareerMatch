@@ -171,7 +171,7 @@ export default function App() {
 
       {/* Modals */}
       {activeModal === 'download' && (
-        <DownloadModal onClose={() => handleOpenModal(null)} />
+        <DownloadModal positionId={currentPosition?.id ?? null} onClose={() => handleOpenModal(null)} />
       )}
       {activeModal === 'share' && (
         <ShareModal onClose={() => handleOpenModal(null)} />

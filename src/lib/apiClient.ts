@@ -17,6 +17,21 @@ async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> 
   return body as T;
 }
 
+// Requests a binary blob (e.g. PDF). On failure the server responds with JSON, so we parse the
+// error body and throw a structured ApiErrorShape instead of returning a corrupt blob.
+async function requestBlob(path: string, init: RequestInit = {}): Promise<Blob> {
+  const response = await fetch(path, {
+    ...init,
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...(init.headers || {}) },
+  });
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw parseApiErrorBody(response.status, body);
+  }
+  return response.blob();
+}
+
 export const api = {
   getMe: () => requestJson<{ user: any }>('/api/me'),
   requestLoginCode: (phone: string) => requestJson<{ ok: true; devCode?: string; expiresInSeconds: number }>('/api/auth/request-code', {
@@ -60,4 +75,6 @@ export const api = {
     body: JSON.stringify(payload),
   }),
   matchPosition: (input: any) => requestJson<any>('/api/match-position', { method: 'POST', body: JSON.stringify(input) }),
+  exportPositionReport: (positionId: string) =>
+    requestBlob('/api/reports/export', { method: 'POST', body: JSON.stringify({ positionId }) }),
 };

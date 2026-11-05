@@ -51,7 +51,6 @@ export function registerAuthRoutes(app: express.Express) {
       clearAuthCookie(res);
       return res.json({ ok: true });
     } catch (error) {
-      clearAuthCookie(res);
       return sendHttpError(res, error);
     }
   });

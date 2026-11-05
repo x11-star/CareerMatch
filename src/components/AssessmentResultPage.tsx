@@ -1,16 +1,18 @@
 import React from 'react';
 import { Shield, Sparkles, ArrowRight, Share2, Compass, Check } from 'lucide-react';
-import { DEFAULT_PERSONALITY_RESULT } from '../data';
+import EmptyState from './ui/EmptyState';
 import { PersonalityResult } from '../types';
 
 interface AssessmentResultPageProps {
   onSeeMatches: () => void;
   onShare: () => void;
   personalityResult?: PersonalityResult | null;
+  reviewOnly?: boolean;
 }
 
-export default function AssessmentResultPage({ onSeeMatches, onShare, personalityResult }: AssessmentResultPageProps) {
-  const result = personalityResult || DEFAULT_PERSONALITY_RESULT;
+export default function AssessmentResultPage({ onSeeMatches, onShare, personalityResult, reviewOnly = false }: AssessmentResultPageProps) {
+  if (!personalityResult) return <div className="mx-auto max-w-4xl p-6"><EmptyState title="还没有职业测评" description="完成并保存测评后，再查看自己的结果。" action={<a href="#view=assessment">完成测评</a>} /></div>;
+  const result = personalityResult;
 
   // Custom SVG Radar Chart Calculation (5 Dimensions)
   const dimensions = result.radarScores;
@@ -43,7 +45,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
   const userPoints = dimensions.map((d, i) => getCoordinates(i, d.score));
   const userPath = userPoints.map((p) => `${p.x},${p.y}`).join(' ');
 
-  const avgPoints = dimensions.map((d, i) => getCoordinates(i, d.avg));
+  const avgPoints = dimensions.map((d, i) => getCoordinates(i, 70));
   const avgPath = avgPoints.map((p) => `${p.x},${p.y}`).join(' ');
 
   // Text placements
@@ -54,7 +56,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
     const y = center + r * Math.sin(angle);
     
     // Text adjustments for alignment
-    let textAnchor = 'middle';
+    let textAnchor: 'middle' | 'start' | 'end' = 'middle';
     if (Math.cos(angle) > 0.1) textAnchor = 'start';
     if (Math.cos(angle) < -0.1) textAnchor = 'end';
     
@@ -65,10 +67,12 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
+      {!reviewOnly && <header className="mb-6"><h1 className="text-3xl font-semibold text-career-ink">测评结果</h1><p className="mt-3 text-sm text-career-muted">测评已完成，先看看自己的工作偏好，再继续查看岗位推荐。</p><button onClick={onSeeMatches} className="mt-4 rounded-md bg-career-primary px-5 py-3 text-sm font-semibold text-white">继续查看岗位推荐</button></header>}
+      <p className="mb-6 text-sm leading-6 text-career-muted">自编工作偏好探索测评：内部得分范围 40–100，中点参考 70；不是全国常模或录用概率。兴趣标签由规则推断，建议结合实际经历验证。</p>
       <div className="text-center mb-10">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-career-primary-soft border border-career-primary-soft rounded-full text-career-primary text-xs font-semibold mb-3">
           <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-          科学测评分析完成
+          工作偏好整理完成
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-career-ink mb-2">
           你的性格类型：<span className="text-career-primary">{result.typeTitle}</span>
@@ -82,7 +86,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
         {/* Left Card: Radar Chart */}
         <div className="bg-white rounded-md border border-career-line p-6 sm:p-8 flex flex-col items-center justify-center">
           <h3 className="mb-6 self-start text-sm font-semibold text-career-ink">
-            大五人格科学量表
+            大五维度自我探索
           </h3>
 
           {/* SVG Radar */}
@@ -172,7 +176,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 bg-career-surface-muted border border-slate-400 border-dashed rounded-sm inline-block" />
-              <span>全国同龄平均</span>
+              <span>量表中点参考（70）</span>
             </div>
           </div>
         </div>
@@ -182,19 +186,19 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
           {/* Fit Progress */}
           <div className="bg-white rounded-md border border-career-line p-6">
             <h3 className="mb-4 text-sm font-semibold text-career-ink">
-              两大求职赛道适配度
+              工作环境偏好参考
             </h3>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-xs font-semibold text-career-ink mb-1.5">
-                  <span className="flex items-center gap-1.5 text-purple-700">
-                    🏛️ 央国企适配度
+                  <span className="flex items-center gap-1.5 text-career-primary">
+                    稳定流程环境
                   </span>
                   <span>{result.industryFit.stateOwned}%</span>
                 </div>
                 <div className="h-2 w-full bg-career-surface-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-purple-600 rounded-full"
+                    className="h-full bg-career-primary rounded-full"
                     style={{ width: `${result.industryFit.stateOwned}%` }}
                   />
                 </div>
@@ -203,7 +207,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
               <div>
                 <div className="flex justify-between text-xs font-semibold text-career-ink mb-1.5">
                   <span className="flex items-center gap-1.5 text-career-primary">
-                    💻 互联网适配度
+                    快速变化环境
                   </span>
                   <span>{result.industryFit.internet}%</span>
                 </div>
@@ -243,7 +247,7 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
       <div className="bg-white rounded-md border border-career-line p-6 sm:p-8 mt-8">
         <h3 className="mb-4 flex items-center gap-1.5 text-sm font-semibold text-career-ink">
           <Shield className="w-4 h-4 text-career-primary" />
-          AI 深度人格与求职性向解读
+          工作偏好解读
         </h3>
         <p className="text-sm text-career-ink leading-relaxed bg-career-surface-muted p-4 rounded-xl border border-career-line mb-6">
           {result.deepInterpretation.summary}
@@ -261,13 +265,13 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
       </div>
 
       {/* CTAs */}
-      <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+      {!reviewOnly && <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
         <button
           id="see-matches-btn"
           onClick={onSeeMatches}
           className="w-full sm:w-auto px-8 py-4 bg-career-primary hover:bg-career-primary text-white font-semibold rounded-xl shadow-lg hover:shadow-blue-200/50 transition-all cursor-pointer transform hover:-translate-y-0.5 active:scale-98 flex items-center justify-center gap-2 group"
         >
-          查看匹配岗位推荐
+          继续查看岗位推荐
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
         </button>
         <button
@@ -276,9 +280,9 @@ export default function AssessmentResultPage({ onSeeMatches, onShare, personalit
           className="w-full sm:w-auto px-6 py-4 bg-career-surface-muted hover:bg-career-surface-muted text-career-ink font-semibold rounded-xl border border-career-line transition-all cursor-pointer flex items-center justify-center gap-2"
         >
           <Share2 className="w-4 h-4" />
-          分享性格画像
+          分享工具首页
         </button>
-      </div>
+      </div>}
     </div>
   );
 }

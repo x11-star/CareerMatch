@@ -35,6 +35,11 @@ export function createAiService(providers: AiProvider[] = [createZhipuProvider()
     matchPosition(input: MatchPositionInput) {
       return callWithFallback(providers, (provider) => provider.matchPosition(input));
     },
+    matchPositionWithMetadata(input: MatchPositionInput) {
+      return callWithFallback(providers, async provider => ({
+        ...await provider.matchPosition(input), provider: provider.name, model: provider.model || 'not-reported',
+      }));
+    },
     chatAboutPosition(input: PositionChatInput) {
       return callWithFallback(providers, (provider) => provider.chatAboutPosition(input));
     },

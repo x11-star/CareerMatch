@@ -1,7 +1,11 @@
 import type { Position as PrismaPosition } from '@prisma/client';
 import type { Position } from '../../types';
+import { CAREER_CATALOG } from '../../catalog';
 
 export function toPosition(record: PrismaPosition): Position {
+  // Upgrade earlier seeded career rows at the API boundary without deleting favorites or reports.
+  const career = CAREER_CATALOG.find(p => p.id === record.id || (p.title === record.title && p.industry === record.industry));
+  if (career) return { ...career, id: record.id };
   return {
     id: record.id,
     title: record.title,

@@ -31,6 +31,7 @@ try {
   await import('./authRoutes.test');
   await import('./dataRoutes.test');
   await import('./matchPosition.test');
+  await import('./recommendationRoutes.test');
 } finally {
   const { prisma } = await import('../../src/server/db/prisma');
   await prisma.$disconnect();

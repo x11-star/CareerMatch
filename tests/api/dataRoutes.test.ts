@@ -1,3 +1,5 @@
+import { MOCK_QUESTIONS } from '../../src/data';
+import { calculatePersonalityResult } from '../../src/lib/assessmentHelper';
 import assert from 'node:assert/strict';
 import { prisma } from '../../src/server/db/prisma';
 import { createApp } from '../../src/server/app';
@@ -75,6 +77,9 @@ async function testProfileResumeAssessmentAndFavorites() {
     headers: { 'Content-Type': 'application/json', cookie },
     body: JSON.stringify({
       resume: {
+        _warnings: ['OCR warning'],
+        id: 'client-chosen-id',
+        userId: 'another-user',
         name: '张三',
         school: '南京大学',
         major: '软件工程',
@@ -91,6 +96,7 @@ async function testProfileResumeAssessmentAndFavorites() {
 
   const latestResume = await request(app, '/api/resumes/latest', { headers: { cookie } });
   assert.equal((await latestResume.json()).resume.name, '张三');
+  assert.equal(await prisma.resume.count({ where: { id: 'client-chosen-id' } }), 0);
 
   const assessmentResponse = await request(app, '/api/assessments', {
     method: 'POST',
@@ -105,10 +111,14 @@ async function testProfileResumeAssessmentAndFavorites() {
         hollandTags: ['现实型'],
         deepInterpretation: { summary: '适合稳健路径', advantages: ['执行力'] },
       },
-      scores: { 1: 5 },
+      scores: Object.fromEntries(MOCK_QUESTIONS.map(q => [q.id, 5])),
     }),
   });
   assert.equal(assessmentResponse.status, 200);
+  const savedAssessment = await assessmentResponse.json();
+  assert.equal(savedAssessment.assessment.personalityResult.typeTitle, calculatePersonalityResult(Object.fromEntries(MOCK_QUESTIONS.map(q => [q.id, 5]))).typeTitle);
+  const invalid = await request(app, '/api/assessments', { method: 'POST', headers: { 'Content-Type': 'application/json', cookie }, body: JSON.stringify({ scores: { 1: 5 }, personalityResult: { typeTitle: '伪造结果' } }) });
+  assert.equal(invalid.status, 400);
 
   const positions = await request(app, '/api/positions?pageSize=1');
   const positionBody = await positions.json();
@@ -119,6 +129,22 @@ async function testProfileResumeAssessmentAndFavorites() {
   assert.equal(favorite.status, 200);
   const favorites = await request(app, '/api/favorites', { headers: { cookie } });
   assert.deepEqual((await favorites.json()).positionIds, [positionId]);
+  const owner = await prisma.user.findUniqueOrThrow({ where: { phone: '13388888888' } });
+  const other = await prisma.user.upsert({ where: { phone: '13900000999' }, create: { phone: '13900000999' }, update: {} });
+  const ownedResume = await prisma.resume.findFirstOrThrow({ where: { userId: owner.id } });
+  const ownedAssessment = await prisma.assessment.findFirstOrThrow({ where: { userId: owner.id } });
+  const { id: _resumeId, createdAt: _created, updatedAt: _updated, ...resumeFields } = ownedResume;
+  const { id: _assessmentId, createdAt: _assessmentCreated, ...assessmentFields } = ownedAssessment;
+  await prisma.resume.create({ data: { ...resumeFields, userId: other.id } });
+  await prisma.assessment.create({ data: { ...assessmentFields, userId: other.id } });
+  assert.equal((await request(app, '/api/resumes', { method: 'DELETE' })).status, 401);
+  assert.equal((await request(app, '/api/assessments', { method: 'DELETE' })).status, 401);
+  assert.equal((await request(app, '/api/resumes', { method: 'DELETE', headers: { cookie } })).status, 200);
+  assert.equal((await request(app, '/api/assessments', { method: 'DELETE', headers: { cookie } })).status, 200);
+  assert.equal(await prisma.resume.count({ where: { userId: owner.id } }), 0);
+  assert.equal(await prisma.assessment.count({ where: { userId: owner.id } }), 0);
+  assert.equal(await prisma.resume.count({ where: { userId: other.id } }), 1);
+  assert.equal(await prisma.assessment.count({ where: { userId: other.id } }), 1);
 }
 
 const tests = [testProfileResumeAssessmentAndFavorites];

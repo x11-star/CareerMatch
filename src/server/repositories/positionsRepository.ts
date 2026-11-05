@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import { runDb } from '../db/errors';
 import { prisma } from '../db/prisma';
+import { CAREER_CATALOG } from '../../catalog';
 
 export type PositionFilters = {
   q?: string;
@@ -58,6 +59,10 @@ export function countPositions(filters: PositionFilters = {}) {
   return runDb(() => prisma.position.count({ where: buildWhere(filters) }));
 }
 
-export function getPositionById(positionId: string) {
-  return runDb(() => prisma.position.findUnique({ where: { id: positionId } }));
+export async function getPositionById(positionId: string) {
+  const record = await runDb(() => prisma.position.findUnique({ where: { id: positionId } }));
+  if (record) return record;
+  const career = CAREER_CATALOG.find(p => p.id === positionId);
+  if (!career) return null;
+  return runDb(() => prisma.position.findFirst({ where: { title: career.title, industry: career.industry } }));
 }

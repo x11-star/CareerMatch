@@ -41,19 +41,15 @@ export function toHttpAiError(error: unknown): {
   body: { error: string; code: AiErrorCode | 'UNKNOWN_ERROR'; provider?: string };
 } {
   if (error instanceof AiConfigurationError) {
-    return { status: 503, body: { error: error.message, code: error.code } };
+    return { status: 503, body: { error: '自动读取暂时不可用。你可以先手动填写简历信息，继续查看职业推荐。', code: error.code } };
   }
 
   if (error instanceof AiError) {
     return {
       status: 502,
-      body: { error: error.message, code: error.code, provider: error.provider },
+      body: { error: '暂时没能完成分析。请稍后重试，你已保存的材料不会受到影响。', code: error.code, provider: error.provider },
     };
   }
 
-  if (error instanceof Error) {
-    return { status: 500, body: { error: error.message, code: 'UNKNOWN_ERROR' } };
-  }
-
-  return { status: 500, body: { error: '未知 AI 服务错误', code: 'UNKNOWN_ERROR' } };
+  return { status: 500, body: { error: '分析时出了点问题。请稍后重试。', code: 'UNKNOWN_ERROR' } };
 }

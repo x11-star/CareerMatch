@@ -39,7 +39,8 @@ const TONE_COLOR: Record<string, string> = {
 // Inline <style> only; system CJK font stack so Chinese renders correctly without bundled fonts.
 export function buildReportHtml(data: ReportData): string {
   const toneColor = TONE_COLOR[data.conclusion.tone] || '#1E3A5F';
-  const date = data.generatedAt.slice(0, 10);
+  const generatedTime = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date(data.generatedAt));
+  const date = generatedTime.slice(0, 10);
 
   const gaps = data.actions.gaps
     .map((g) => `<div class="gap"><span class="gap-label">${escapeHtml(g.label)}</span><span class="gap-value">${escapeHtml(g.value)}</span></div>`)
@@ -74,6 +75,8 @@ export function buildReportHtml(data: ReportData): string {
   .report-header .meta { color: var(--muted); font-size: 11px; }
   .report-header .meta span { margin-right: 12px; }
   section { margin-bottom: 18px; }
+  section:last-of-type { break-before: page; }
+  .grid-2, .grid-3, .grid-4 { break-inside: avoid; }
   h2.section-title {
     font-size: 14px; color: var(--ink);
     border-left: 3px solid var(--ink); padding-left: 8px; margin: 0 0 8px;
@@ -133,11 +136,11 @@ export function buildReportHtml(data: ReportData): string {
     <h2 class="section-title">证据</h2>
     <div class="grid-3">
       <div><h3>已满足</h3>${list(data.evidence.met)}</div>
-      <div><h3>部分满足</h3>${list(data.evidence.partial)}</div>
+      <div><h3>软技能待验证</h3>${list(data.evidence.partial)}</div>
       <div><h3>缺失 / 待证明</h3>${cappedList(data.evidence.missing, 4)}</div>
     </div>
     <div class="grid-2" style="margin-top:12px">
-      <div><h3>性格适配点</h3>${list(data.evidence.fitPersonality)}</div>
+      <div><h3>职业偏好参考</h3>${list(data.evidence.fitPersonality)}</div>
       <div><h3>风险点</h3><p style="font-size:11px;margin:4px 0">${escapeHtml(data.evidence.risk)}</p></div>
     </div>
     <div class="why" style="margin-top:12px">
@@ -149,16 +152,17 @@ export function buildReportHtml(data: ReportData): string {
 
   <section>
     <h2 class="section-title">行动建议</h2>
+    <p>以下为通用准备建议；技能证据按关键词对照，不是已经验证的胜任结论。</p>
     <div class="grid-4" style="margin-bottom:12px">${gaps}</div>
     <div class="grid-3">${timeline}</div>
     <div class="grid-3" style="margin-top:12px">
-      <div><h3>可能被问的问题</h3>${list(data.actions.interview.questions)}</div>
+      <div><h3>面试练习问题（非企业真题）</h3>${list(data.actions.interview.questions)}</div>
       <div><h3>笔试或技能准备</h3><p style="font-size:11px;margin:4px 0">${escapeHtml(data.actions.interview.exam)}</p></div>
       <div><h3>项目复盘重点</h3><p style="font-size:11px;margin:4px 0">${escapeHtml(data.actions.interview.projectRecap)}</p></div>
     </div>
   </section>
 
-  <div class="footer">本报告由精准职达生成,内容基于缓存匹配结果,仅供求职参考。生成时间 ${escapeHtml(data.generatedAt.slice(0, 19).replace('T', ' '))}。</div>
+  <div class="footer">本报告由精准职达生成,内容基于缓存匹配结果,仅供求职参考。生成时间 ${escapeHtml(generatedTime)}（北京时间）。</div>
 </div>
 </body>
 </html>`;

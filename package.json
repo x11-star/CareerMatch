@@ -22,7 +22,10 @@
     "test:auth": "tsx tests/auth/run-tests.ts",
     "test:api": "tsx tests/api/run-tests.ts",
     "test:frontend": "tsx tests/frontend/run-tests.ts",
-    "test:reports": "tsx tests/reports/run-tests.ts"
+    "test:reports": "tsx tests/reports/run-tests.ts",
+    "test:e2e": "tsx tests/e2e/database-flow.test.ts && tsx tests/e2e/recommendation-flow.test.ts",
+    "test:e2e:recommendations": "tsx tests/e2e/recommendation-flow.test.ts",
+    "test:e2e:upload": "tsx tests/e2e/resume-upload-error.test.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -45,6 +48,8 @@
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.0",
     "prisma": "^6.19.3",

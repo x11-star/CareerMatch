@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { api } from '../lib/apiClient';
-import { buildGuestImportPayload, type AppUser } from '../lib/userDataStore';
+import { buildGuestImportPayload, clearPrivateSessionData, type AppUser } from '../lib/userDataStore';
 
 type UserProfile = {
   id: string;
@@ -14,6 +14,8 @@ type UserProfile = {
 interface AuthContextType {
   user: AppUser | null;
   loading: boolean;
+  sessionError: string;
+  authNotice: string;
   userProfile: UserProfile | null;
   isGuest: boolean;
   requestLoginCode: (phone: string) => Promise<{ devCode?: string }>;
@@ -34,10 +36,10 @@ function createGuestProfile(guestUid: string): UserProfile {
   return {
     id: guestUid,
     phone: null,
-    name: '访客学子',
-    school: '未填写学校',
-    major: '未填写专业',
-    graduationYear: '2027',
+    name: null,
+    school: null,
+    major: null,
+    graduationYear: null,
   };
 }
 
@@ -63,14 +65,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sessionError, setSessionError] = useState('');
+  const [authNotice, setAuthNotice] = useState('');
+  const authEpoch = useRef(0);
 
   const refreshMe = async () => {
+    const epoch = ++authEpoch.current;
+    setLoading(true);
+    setSessionError('');
     try {
       const result = await api.getMe();
+      if (epoch !== authEpoch.current) return;
       setUser(toAppUser(result.user));
       setUserProfile(result.user);
     } catch (error: any) {
-      if (error?.status !== 401) console.error('Failed to refresh user session:', error);
+      if (epoch !== authEpoch.current) return;
+      if (error?.status !== 401) {
+        setSessionError('暂时无法确认登录状态，请重新连接后再试。');
+        setUser(null);
+        setUserProfile(null);
+        return;
+      }
       const guestUid = localStorage.getItem('guest_uid');
       if (guestUid) {
         setUser({ id: guestUid, phone: null, isGuest: true });
@@ -79,11 +94,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setUserProfile(null);
       }
-    }
+    } finally { if (epoch === authEpoch.current) setLoading(false); }
   };
 
   useEffect(() => {
-    refreshMe().finally(() => setLoading(false));
+    refreshMe();
   }, []);
 
   const requestLoginCode = async (phone: string) => {
@@ -98,9 +113,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(toAppUser(result.user));
       setUserProfile(result.user);
       const guestImportPayload = buildGuestImportPayload(localStorage);
-      if (guestImportPayload && window.confirm('检测到当前浏览器有游客简历、测评或收藏数据，是否同步到手机号账号？')) {
-        await api.importLocalData(guestImportPayload);
-        await refreshMe();
+      if (guestImportPayload && window.confirm('检测到当前浏览器有游客简历、测评、求职偏好或收藏数据，是否同步到手机号账号？')) {
+        try { await api.importLocalData(guestImportPayload); await refreshMe(); }
+        catch { setAuthNotice('已登录，但游客材料未同步。原材料仍保留在此浏览器，请重试同步或重新上传。'); }
       }
     } finally {
       setLoading(false);
@@ -108,9 +123,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const loginAsGuest = () => {
+    authEpoch.current++;
+    setSessionError('');
     let guestUid = localStorage.getItem('guest_uid');
     if (!guestUid) {
-      guestUid = `guest_${Math.random().toString(36).substring(2, 15)}`;
+      guestUid = `guest_${crypto.randomUUID()}`;
       localStorage.setItem('guest_uid', guestUid);
     }
     setUser({ id: guestUid, phone: null, isGuest: true });
@@ -118,18 +135,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    setLoading(true);
-    try {
-      if (user && !user.isGuest) await api.logout();
-      setUser(null);
-      setUserProfile(null);
-    } catch (error) {
-      console.error('Logout failed:', error);
-      setUser(null);
-      setUserProfile(null);
-    } finally {
-      setLoading(false);
-    }
+    // Keep the session visible on failure so retry is possible; don't claim a server logout.
+    if (user && !user.isGuest) await api.logout();
+    authEpoch.current++;
+    if (user) { try { clearPrivateSessionData(user.id); } catch {} }
+    setUser(null);
+    setUserProfile(null);
   };
 
   const updateProfile = async (data: Partial<UserProfile>) => {
@@ -162,13 +173,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const deleteAccount = async (code: string) => {
     await api.deleteAccount(code);
-    await logout();
+    authEpoch.current++;
+    if (user) { try { clearPrivateSessionData(user.id); } catch {} }
+    setUser(null);
+    setUserProfile(null);
   };
 
   return (
     <AuthContext.Provider value={{
       user,
       loading,
+      sessionError,
+      authNotice,
       userProfile,
       isGuest: Boolean(user?.isGuest),
       requestLoginCode,

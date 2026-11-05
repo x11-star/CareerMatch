@@ -2,7 +2,7 @@
 
 ## Current Visual State
 
-当前界面以 Tailwind + React 组件为主，使用 Inter、Space Grotesk、JetBrains Mono。主色偏蓝，背景为 slate/white，组件大量使用圆角卡片、渐变 hero、阴影和装饰性 blur。首页仍有未支撑数据宣称，例如“已有 2,348 位高校同学”。整体观感接近通用 AI SaaS 模板。
+2026-10-11：深蓝主色、纸面背景、Inter/Noto Sans SC；职业库和候选列表采用可操作的条目列表。公共链接只分享职业资料，私人材料留在账号/游客档案。后续视觉修改以当前界面为准，以下设计原则保留为约束。
 
 ## Desired Design Direction
 

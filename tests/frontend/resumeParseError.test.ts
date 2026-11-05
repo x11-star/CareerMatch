@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { resumeParseErrorMessage } from '../../src/lib/resumeParseError';
+import { toHttpAiError, AiConfigurationError, AiProviderError } from '../../src/server/ai/errors';
+assert.match(resumeParseErrorMessage('FILE_PARSE_FAILED', 422), /重新导出|粘贴/);
+assert.match(resumeParseErrorMessage('AI_CONFIGURATION_MISSING', 503), /手动填写/);
+assert(!resumeParseErrorMessage('unexpected backend details', 500).includes('unexpected'));
+assert(!resumeParseErrorMessage(undefined, 500).includes('HTTP'));
+assert.match(resumeParseErrorMessage(undefined, 413), /8MB/);
+assert.match(resumeParseErrorMessage(undefined, 429), /稍等/);
+assert(!toHttpAiError(new AiConfigurationError()).body.error.includes('KEY'));
+assert(!toHttpAiError(new AiProviderError('zhipu', 'fetch failed')).body.error.includes('fetch'));
+assert(!toHttpAiError(new Error('English internal error')).body.error.includes('English'));
+console.log('resumeParseError.test.ts: actionable Chinese errors and internal-detail filtering passed');

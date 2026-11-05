@@ -60,11 +60,7 @@ export function createAuthService(options: AuthOptions = {}) {
     },
 
     async logout(sessionToken: string) {
-      try {
-        await deleteSessionByTokenHash(hashSessionToken(sessionToken));
-      } catch {
-        // Logout remains idempotent from the route perspective.
-      }
+      await deleteSessionByTokenHash(hashSessionToken(sessionToken));
       return { ok: true as const };
     },
 

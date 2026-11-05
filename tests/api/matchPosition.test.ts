@@ -5,6 +5,7 @@ import { mapPositionForSeed } from '../../prisma/seed';
 import { MOCK_POSITIONS } from '../../src/data';
 
 const fakeAiService = {
+  async matchPositionWithMetadata() { return { ...await fakeAiService.matchPosition(), provider: 'zhipu', model: 'fixture-only' }; },
   async parseResume() { throw new Error('not used'); },
   async chatAboutPosition() { return 'not used'; },
   async matchPosition() {

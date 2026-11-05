@@ -3,8 +3,16 @@ import { requireAuth } from '../http/authMiddleware';
 import { sendHttpError } from '../http/errors';
 import { createResume, getLatestResumeByUserId, updateLatestResumeByUserId } from '../repositories/resumesRepository';
 import { toResumeCreateInput, toResumeData } from '../mappers/resumeMapper';
+import { prisma } from '../db/prisma';
 
 export function registerResumeRoutes(app: express.Express) {
+  app.delete('/api/resumes', async (req, res) => {
+    try {
+      const user = await requireAuth(req);
+      await prisma.resume.deleteMany({ where: { userId: user.id } });
+      return res.json({ ok: true });
+    } catch (error) { return sendHttpError(res, error); }
+  });
   app.get('/api/resumes/latest', async (req, res) => {
     try {
       const user = await requireAuth(req);

@@ -51,6 +51,7 @@ export function createZhipuProvider(options: ProviderOptions = {}): AiProvider {
 
   return {
     name: 'zhipu',
+    model,
     isConfigured: () => Boolean(apiKey),
     async parseResume(input: ResumeParseInput) {
       const content = await complete(buildResumeParsePrompt(input));

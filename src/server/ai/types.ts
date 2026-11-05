@@ -36,6 +36,7 @@ export interface PositionChatInput {
 
 export interface AiProvider {
   name: AiProviderName;
+  model?: string;
   isConfigured(): boolean;
   parseResume(input: ResumeParseInput): Promise<ResumeData>;
   matchPosition(input: MatchPositionInput): Promise<MatchResult>;

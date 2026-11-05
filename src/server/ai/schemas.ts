@@ -1,5 +1,6 @@
 import type { ResumeData } from '../../types';
 import type { MatchResult } from './types';
+import { normalizeQualifications } from '../../lib/careerPreferences';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -107,6 +108,7 @@ export function validateResumeData(value: unknown): ResumeData {
     projects: requireObjectArray(value, 'projects', ['name', 'role', 'tech']),
     inferredDirection: requireString(value, 'inferredDirection'),
     targetCities: requireStringArray(value, 'targetCities'),
+    ...(value.qualifications === undefined ? {} : { qualifications: normalizeQualifications(value.qualifications) }),
   };
 }
 

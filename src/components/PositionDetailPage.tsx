@@ -1,14 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Heart } from 'lucide-react';
 import { Position, ResumeData, PersonalityResult } from '../types';
 import { useAuth } from '../context/AuthContext';
 import PageHeader from './ui/PageHeader';
 import StatusBanner from './ui/StatusBanner';
 import MatchDimensionsChart from './ui/MatchDimensionsChart';
+import { getFavorites, toggleFavorite } from '../lib/userDataStore';
+import { interviewPracticeQuestions } from '../catalog';
 
 interface PositionDetailPageProps {
   position: Position;
   onBack: () => void;
+  backLabel?: string;
   onOpenModal: (modalType: 'download' | 'share' | null) => void;
   resumeData?: ResumeData;
   personalityResult?: PersonalityResult | null;
@@ -32,9 +35,15 @@ function diagnosisSentence(score: number) {
   return '当前匹配度较低，建议优先考虑更贴近背景的岗位。';
 }
 
-export default function PositionDetailPage({ position, onBack, onOpenModal, resumeData, personalityResult }: PositionDetailPageProps) {
+export default function PositionDetailPage({ position, onBack, backLabel = '返回推荐结果', onOpenModal, resumeData, personalityResult }: PositionDetailPageProps) {
   const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteReady, setFavoriteReady] = useState(false);
+  const [favoritePending, setFavoritePending] = useState(false);
+  const favoriteLock = useRef(false);
+  const [favoriteError, setFavoriteError] = useState('');
+  const [revision, setRevision] = useState(0);
+  const [favoriteRevision, setFavoriteRevision] = useState(0);
   const [matchResult, setMatchResult] = useState<{
     resumeMatch: number;
     personalityMatch: number;
@@ -56,28 +65,18 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
     async function fetchMatch() {
+      setMatchResult(null);
       setIsLoadingMatch(true);
       setMatchError('');
-
-      const cacheKey = `match_${user?.isGuest ? 'guest' : user?.id || 'none'}_${position.id}_${resumeData?.name || 'guest'}`;
-      const cached = sessionStorage.getItem(cacheKey);
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          if (active) {
-            setMatchResult(parsed);
-            setIsLoadingMatch(false);
-          }
-          return;
-        } catch (e) {
-          console.warn('Failed to parse cached match, re-fetching:', e);
-        }
-      }
+      if (!user || !resumeData || !personalityResult) { setIsLoadingMatch(false); return; }
 
       try {
         const response = await fetch('/api/match-position', {
           method: 'POST',
+          signal: controller.signal,
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(user && !user.isGuest ? { positionId: position.id } : { resumeData, personalityResult, position }),
         });
@@ -85,10 +84,8 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
         const data = await response.json();
         if (active) {
           setMatchResult(data);
-          sessionStorage.setItem(cacheKey, JSON.stringify(data));
         }
       } catch (err: any) {
-        console.error('Failed to run AI match:', err);
         if (active) setMatchError(err.message || '获取 AI 相性匹配评估失败');
       } finally {
         if (active) setIsLoadingMatch(false);
@@ -96,8 +93,27 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
     }
 
     fetchMatch();
+    return () => { active = false; controller.abort(); };
+  }, [user?.id, user?.isGuest, position, resumeData, personalityResult, revision]);
+
+  useEffect(() => {
+    let active = true;
+    setIsFavorite(false);
+    setFavoriteReady(false);
+    setFavoriteError('');
+    if (user) getFavorites(user).then(ids => { if (active) { setIsFavorite(ids.includes(position.id)); setFavoriteReady(true); } })
+      .catch((error: any) => { if (active) setFavoriteError(error?.message || '收藏读取失败。'); });
     return () => { active = false; };
-  }, [user, position, resumeData, personalityResult]);
+  }, [user?.id, user?.isGuest, position.id, favoriteRevision]);
+  async function handleFavorite() {
+    if (!user || !favoriteReady || favoriteLock.current) return;
+    favoriteLock.current = true;
+    setFavoritePending(true);
+    setFavoriteError('');
+    try { setIsFavorite(await toggleFavorite(user, position.id)); }
+    catch (error: any) { setFavoriteError(error?.message || '收藏未保存，请重试。'); }
+    finally { favoriteLock.current = false; setFavoritePending(false); }
+  }
 
   const score = matchResult?.overallMatch ?? 0;
   const scoreTone = diagnosisTone(score);
@@ -110,21 +126,23 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <button onClick={onBack} className="mb-6 flex cursor-pointer items-center gap-1 text-sm font-medium text-career-muted transition-colors hover:text-career-ink">
-        <ArrowLeft className="h-4 w-4" /> 返回推荐结果
+        <ArrowLeft className="h-4 w-4" /> {backLabel}
       </button>
 
       <PageHeader
         eyebrow="Position diagnosis"
         title="岗位诊断报告"
-        description={`代表性·${position.company} · ${position.title} · ${position.city}`}
-        primaryAction={<button onClick={() => onOpenModal('share')} className="rounded-md border border-career-line bg-career-surface px-4 py-2 text-sm font-semibold text-career-ink">复制分享链接</button>}
-        secondaryAction={<button onClick={() => setIsFavorite(!isFavorite)} className="rounded-md border border-career-line bg-career-surface px-4 py-2 text-sm font-semibold text-career-ink"><Heart className={`mr-1 inline h-4 w-4 ${isFavorite ? 'fill-career-danger text-career-danger' : ''}`} />{isFavorite ? '已收藏' : '收藏岗位'}</button>}
-        meta={<div className="flex flex-wrap gap-2 text-xs text-career-muted"><span>{position.type === 'state-owned' ? '央国企' : '互联网'}</span><span>·</span><span>{position.salaryRange}</span><span>·</span><span>难度 {position.difficultyRating}/5</span></div>}
+        description={`${position.title} · ${position.industry || '职业类型'} · ${position.category || '职业参考'}`}
+        primaryAction={<button onClick={() => onOpenModal('share')} className="rounded-md border border-career-line bg-career-surface px-4 py-2 text-sm font-semibold text-career-ink">分享职业链接</button>}
+        secondaryAction={<button disabled={!user || !favoriteReady || favoritePending} onClick={handleFavorite} className="rounded-md border border-career-line bg-career-surface px-4 py-2 text-sm font-semibold text-career-ink disabled:opacity-50"><Heart className={`mr-1 inline h-4 w-4 ${isFavorite ? 'fill-career-danger text-career-danger' : ''}`} />{favoritePending ? '保存中' : isFavorite ? '已收藏' : '收藏职业'}</button>}
+        meta={<div className="space-y-2 text-xs leading-5 text-career-muted"><p>职业类型参考，不绑定企业、招聘城市或福利。参考年薪 {position.salaryRange} · 参考难度 {position.difficultyRating}/5</p><p>薪资与准备资料来自模型整理，未经招聘公告逐条核验。</p></div>}
       />
 
       <div className="space-y-10">
         {isLoadingMatch && <StatusBanner tone="pending" title="正在生成 AI 匹配解释" description="系统正在比对简历、测评和岗位要求，处理时间可能需要几秒。" />}
-        {matchError && <StatusBanner tone="warning" title="AI 诊断解释暂不可用" description={matchError} />}
+        {(!user || !resumeData || !personalityResult) && <StatusBanner tone="info" title="还没有完整的诊断材料" description="可以先查看职业资料；上传并保存简历、完成测评后再生成个人诊断。" action={<a href={!resumeData ? '#view=upload' : '#view=assessment'}>补充材料</a>} />}
+        {matchError && <StatusBanner tone="warning" title="AI 诊断解释暂不可用" description={matchError} action={<button onClick={() => setRevision(n => n + 1)}>重新生成</button>} />}
+        {favoriteError && <StatusBanner tone="warning" title="收藏操作未完成" description={favoriteError} action={!favoriteReady ? <button onClick={() => setFavoriteRevision(n => n + 1)}>重新读取收藏</button> : undefined} />}
 
         {/* 结论段:hero-metric + 匹配维度图 */}
         <section className="grid gap-8 lg:grid-cols-[1fr_1.1fr] lg:items-center">
@@ -177,7 +195,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
               </ul>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-career-ink">部分满足</h3>
+              <h3 className="text-sm font-semibold text-career-ink">软技能待验证</h3>
               <ul className="mt-2 divide-y divide-career-line/60">
                 {position.softSkills.slice(0, 3).map((item) => <li key={item} className="py-2 text-sm text-career-ink">{item}</li>)}
                 {position.softSkills.length === 0 && <li className="py-2 text-sm text-career-muted">暂无软技能数据</li>}
@@ -193,7 +211,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
 
           <div className="mt-6 grid gap-x-10 gap-y-6 md:grid-cols-2">
             <div>
-              <h3 className="text-sm font-semibold text-career-ink">性格适配点</h3>
+              <h3 className="text-sm font-semibold text-career-ink">职业偏好参考</h3>
               <ul className="mt-2 divide-y divide-career-line/60">
                 {(position.fitPersonality.length > 0 ? position.fitPersonality : [personalityResult?.typeTitle || '完成测评后生成更明确的适配点']).map((item) => <li key={item} className="py-2 text-sm text-career-ink">{item}</li>)}
               </ul>
@@ -216,7 +234,7 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
         {/* 行动段:差距 + 补救建议 + 面试准备,可扫读的行动清单 */}
         <section>
           <h2 className="text-lg font-semibold text-career-ink">行动建议</h2>
-          <p className="mt-1 text-sm text-career-muted">差距用于制定行动,不用于否定当前背景;按时间窗口安排。</p>
+          <p className="mt-1 text-sm text-career-muted">以下为通用准备建议，不是 AI 个性化行动方案。技能匹配仅按关键词对照，需要补充经历证据。</p>
 
           <div className="mt-5 grid gap-x-10 gap-y-2 md:grid-cols-4">
             {[
@@ -249,9 +267,9 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
 
           <div className="mt-8 grid gap-x-10 gap-y-6 md:grid-cols-3">
             <div>
-              <h3 className="text-sm font-semibold text-career-ink">可能被问的问题</h3>
+              <h3 className="text-sm font-semibold text-career-ink">面试练习问题（非企业真题）</h3>
               <ul className="mt-2 divide-y divide-career-line/60">
-                {(position.howToPrepare.timeline?.length ? position.howToPrepare.timeline : ['请说明你最能证明岗位能力的项目']).map((item) => <li key={item} className="py-2 text-sm text-career-ink">{item}</li>)}
+                {interviewPracticeQuestions(position).map((item) => <li key={item} className="py-2 text-sm text-career-ink">{item}</li>)}
               </ul>
             </div>
             <div>
@@ -278,5 +296,5 @@ export default function PositionDetailPage({ position, onBack, onOpenModal, resu
 
 function resumeSkillsHasRequirement(skills: Set<string>, requirement: string) {
   const normalized = requirement.toLowerCase();
-  return Array.from(skills).some((skill) => normalized.includes(skill) || skill.includes(normalized));
+  return Boolean(normalized.trim()) && Array.from(skills).some((skill) => skill.trim() && (normalized.includes(skill) || skill.includes(normalized)));
 }

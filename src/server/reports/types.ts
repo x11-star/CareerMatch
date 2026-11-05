@@ -107,7 +107,7 @@ export interface PositionInput {
   title: string;
   company: string;
   city: string;
-  type: 'state-owned' | 'internet';
+  type: 'state-owned' | 'internet' | 'role-type';
   salaryRange: string;
   summary: string;
   requirements: string[];

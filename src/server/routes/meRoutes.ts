@@ -9,6 +9,10 @@ import { createAssessment } from '../repositories/assessmentsRepository';
 import { addFavorite } from '../repositories/favoritesRepository';
 import { toAssessmentCreateInput } from '../mappers/assessmentMapper';
 import { toResumeCreateInput } from '../mappers/resumeMapper';
+import { normalizeCatalogPreferences } from '../../lib/careerPreferences';
+import { CAREER_CATALOG } from '../../catalog';
+import { prisma } from '../db/prisma';
+import { HttpError } from '../http/errors';
 
 function publicUser(user: {
   id: string;
@@ -59,6 +63,11 @@ export function registerMeRoutes(app: express.Express) {
       let resumeImported = false;
       let assessmentImported = false;
       let favoritesImported = 0;
+      let importedPreferences = null;
+      if (req.body?.preferences !== undefined) {
+        try { importedPreferences = normalizeCatalogPreferences(req.body.preferences, CAREER_CATALOG); }
+        catch { throw new HttpError(400, 'INVALID_PREFERENCES', '游客偏好格式不正确。'); }
+      }
 
       if (req.body?.resume) {
         const input = toResumeCreateInput(req.body.resume);
@@ -80,7 +89,8 @@ export function registerMeRoutes(app: express.Express) {
         }
       }
 
-      return res.json({ imported: { resume: resumeImported, assessment: assessmentImported, favorites: favoritesImported } });
+      if (importedPreferences) await prisma.user.update({ where: { id: user.id }, data: { preferences: { ...importedPreferences } } });
+      return res.json({ imported: { resume: resumeImported, assessment: assessmentImported, favorites: favoritesImported, preferences: Boolean(importedPreferences) } });
     } catch (error) {
       return sendHttpError(res, error);
     }

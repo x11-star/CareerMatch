@@ -109,6 +109,14 @@ async function testThrowsConfigurationErrorWhenNoProvidersConfigured() {
 }
 
 const tests = [
+  async function testMetadataTracksFallbackProvider() {
+    const fallback = { ...provider('deepseek', true, 'success'), model: 'fixture-model' };
+    const service = createAiService([provider('zhipu', true, 'fail'), fallback]);
+    const result = await service.matchPositionWithMetadata(matchInput);
+    assert.equal(result.provider, 'deepseek');
+    assert.equal(result.model, 'fixture-model');
+    assert.equal(result.overallMatch, 74);
+  },
   testUsesZhipuFirstWhenConfigured,
   testFallsBackToDeepSeekWhenZhipuFails,
   testSkipsUnconfiguredProviders,

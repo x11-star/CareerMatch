@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, RotateCw, Save } from 'lucide-react';
 import { MOCK_QUESTIONS } from '../data';
@@ -9,6 +9,7 @@ import { saveAssessment } from '../lib/userDataStore';
 import PageHeader from './ui/PageHeader';
 import SectionPanel from './ui/SectionPanel';
 import StatusBanner from './ui/StatusBanner';
+import { readAssessmentDraft, draftKey } from '../lib/assessmentDraft';
 
 interface AssessmentPageProps {
   onComplete: (result: PersonalityResult) => void;
@@ -17,8 +18,13 @@ interface AssessmentPageProps {
 
 export default function AssessmentPage({ onComplete, onExit }: AssessmentPageProps) {
   const { user } = useAuth();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [draft] = useState(() => readAssessmentDraft(sessionStorage, user?.id || 'none'));
+  const [currentIndex, setCurrentIndex] = useState(draft.currentIndex);
+  const [answers, setAnswers] = useState<Record<number, number>>(draft.answers);
+  const [saveError, setSaveError] = useState('');
+  const saving = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const [isFinishing, setIsFinishing] = useState(false);
   const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('left');
 
@@ -44,30 +50,37 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
 
   const currentStage = stages[currentStageIndex];
 
-  const handleSelectOption = (value: number) => {
+  const handleSelectOption = async (value: number) => {
+    if (saving.current) return;
     const updatedAnswers = { ...answers, [currentQuestion.id]: value };
     setAnswers(updatedAnswers);
-
-    setTimeout(async () => {
-      if (currentIndex < totalQuestions - 1) {
+    setSaveError('');
+    try { sessionStorage.setItem(draftKey(user?.id || 'none'), JSON.stringify({ answers: updatedAnswers })); }
+    catch { setSaveError('草稿未能保存到此标签页，请保持页面打开。'); }
+    if (currentIndex < totalQuestions - 1) {
         setSlideDirection('left');
         setCurrentIndex(currentIndex + 1);
-      } else {
-        setIsFinishing(true);
-        const result = calculatePersonalityResult(updatedAnswers);
-        if (user) {
-          try {
-            await saveAssessment(user, result, updatedAnswers);
-          } catch (e) {
-            console.error('Failed to save assessment', e);
-          }
-        }
-        setTimeout(() => {
-          onComplete(result);
-        }, 2200);
-      }
-    }, 250);
+    } else await finish(updatedAnswers);
   };
+  async function finish(updatedAnswers: Record<number, number>) {
+    if (saving.current) return;
+    if (MOCK_QUESTIONS.some(q => !updatedAnswers[q.id])) { setSaveError('请先完成所有题目。'); return; }
+    saving.current = true;
+    setIsFinishing(true);
+    setSaveError('');
+    try {
+      const result = calculatePersonalityResult(updatedAnswers);
+      await saveAssessment(user, result, updatedAnswers);
+      // Draft cleanup is best effort after a confirmed save, not a reason to report save failure.
+      try { sessionStorage.removeItem(draftKey(user?.id || 'none')); } catch {}
+      if (mounted.current) onComplete(result);
+    } catch (error: any) { setSaveError(error?.message || '测评未保存，请重试；答案仍保留。'); }
+    finally { saving.current = false; setIsFinishing(false); }
+  }
+  function saveAndExit() {
+    try { sessionStorage.setItem(draftKey(user?.id || 'none'), JSON.stringify({ answers })); onExit(); }
+    catch { setSaveError('草稿未保存，暂未退出。请重试或保持页面打开。'); }
+  }
 
   const handlePrev = () => {
     if (currentIndex > 0) {
@@ -83,16 +96,8 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
           <div className="relative mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-lg bg-career-primary-soft text-career-primary">
             <RotateCw className="h-8 w-8 animate-spin" />
           </div>
-          <h2 className="text-2xl font-semibold text-career-ink">测评已完成</h2>
-          <p className="mt-3 text-sm leading-6 text-career-muted">正在整理你的职业画像，随后进入诊断结果。</p>
-          <div className="mt-6 h-1.5 overflow-hidden rounded-full bg-career-surface-muted">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: '100%' }}
-              transition={{ duration: 2 }}
-              className="h-full rounded-full bg-career-primary"
-            />
-          </div>
+          <h2 className="text-2xl font-semibold text-career-ink">正在保存测评</h2>
+          <p className="mt-3 text-sm leading-6 text-career-muted">保存成功后进入结果页。</p>
         </div>
       </div>
     );
@@ -108,9 +113,9 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
       </button>
 
       <PageHeader
-        eyebrow="Assessment"
+        eyebrow="第二步 · 性格测评"
         title="完成职业测评"
-        description="这部分用于判断岗位环境、协作方式和职业兴趣是否匹配。"
+        description="回答工作习惯与偏好相关的问题，完成后查看自己的结果，再继续了解推荐方向。"
         meta={<span className="text-xs font-semibold text-career-muted">第 {currentIndex + 1} / {totalQuestions} 题</span>}
       />
 
@@ -119,9 +124,11 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
           <StatusBanner
             tone="info"
             title="可以先以游客完成测评"
-            description="未登录也可以先体验，登录手机号后，结果会保存到你的账号。"
+            description="选择游客体验后，结果会保存在此浏览器；登录后可选择同步到账号。"
           />
         )}
+        <p className="text-xs leading-5 text-career-muted">答案草稿只保留在当前标签页，刷新或保存退出后可继续。完整游客结果保存在此浏览器，可在我的档案清除。</p>
+        {saveError && <div role="alert"><StatusBanner tone="error" title="测评尚未完成保存" description={saveError} action={currentIndex === totalQuestions - 1 ? <button onClick={() => finish(answers)}>重新保存测评</button> : undefined} /></div>}
 
         <SectionPanel title="测评进度" description="四组问题共同构成岗位适配判断依据，分数不会作为唯一结论。">
           <div className="grid gap-3 sm:grid-cols-4">
@@ -200,7 +207,7 @@ export default function AssessmentPage({ onComplete, onExit }: AssessmentPagePro
             上一题
           </button>
 
-          <button onClick={onExit} className="flex cursor-pointer items-center gap-1 text-career-muted hover:text-career-ink">
+          <button onClick={saveAndExit} className="flex cursor-pointer items-center gap-1 text-career-muted hover:text-career-ink">
             <Save className="h-3.5 w-3.5" /> 保存并退出
           </button>
         </div>

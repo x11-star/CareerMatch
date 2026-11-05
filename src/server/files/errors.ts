@@ -22,7 +22,7 @@ export class UnsupportedFileTypeError extends FileParseError {
 }
 
 export class FileTooLargeError extends FileParseError {
-  constructor(message = '文件超过 8MB 限制，请压缩后重新上传。') {
+  constructor(message = '文件超过 8MB。请压缩后重新上传，或直接粘贴简历文字。') {
     super(message, 'FILE_TOO_LARGE');
     this.name = 'FileTooLargeError';
   }
@@ -46,21 +46,24 @@ export function toHttpFileError(error: unknown): {
   status: number;
   body: { error: string; code: FileParseErrorCode | 'UNKNOWN_FILE_ERROR' };
 } {
+  const messages: Record<FileParseErrorCode, string> = {
+    UNSUPPORTED_FILE_TYPE: '这个文件格式暂不支持。请上传 PDF、Word（DOCX）、TXT 或图片。',
+    FILE_TOO_LARGE: '文件超过 8MB。请压缩后重新上传，或直接粘贴简历文字。',
+    EMPTY_EXTRACTED_TEXT: '没有读到简历文字。请换一份清晰的文件，或直接粘贴文字。',
+    FILE_PARSE_FAILED: '没能读取这份文件。请重新导出后上传，或直接粘贴简历文字。',
+  };
   if (error instanceof UnsupportedFileTypeError) {
-    return { status: 415, body: { error: error.message, code: error.code } };
+    return { status: 415, body: { error: messages[error.code], code: error.code } };
   }
   if (error instanceof FileTooLargeError) {
-    return { status: 413, body: { error: error.message, code: error.code } };
+    return { status: 413, body: { error: messages[error.code], code: error.code } };
   }
   if (error instanceof Error && (error as any).type === 'entity.too.large') {
     const fileTooLargeError = new FileTooLargeError();
-    return { status: 413, body: { error: fileTooLargeError.message, code: fileTooLargeError.code } };
+    return { status: 413, body: { error: messages[fileTooLargeError.code], code: fileTooLargeError.code } };
   }
   if (error instanceof FileParseError) {
-    return { status: 422, body: { error: error.message, code: error.code } };
+    return { status: 422, body: { error: messages[error.code], code: error.code } };
   }
-  if (error instanceof Error) {
-    return { status: 500, body: { error: error.message, code: 'UNKNOWN_FILE_ERROR' } };
-  }
-  return { status: 500, body: { error: '未知文件解析错误', code: 'UNKNOWN_FILE_ERROR' } };
+  return { status: 500, body: { error: '读取简历时出了点问题。请稍后重试，或先手动填写简历信息。', code: 'UNKNOWN_FILE_ERROR' } };
 }

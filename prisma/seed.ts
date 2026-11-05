@@ -6,6 +6,7 @@ import { prisma } from '../src/server/db/prisma';
 
 export function mapPositionForSeed(position: Position): Prisma.PositionUpsertArgs {
   const data = {
+    id: position.id,
     title: position.title,
     company: position.company,
     city: position.city,
@@ -29,13 +30,7 @@ export function mapPositionForSeed(position: Position): Prisma.PositionUpsertArg
   } satisfies Prisma.PositionUncheckedCreateInput;
 
   return {
-    where: {
-      company_title_city: {
-        company: position.company,
-        title: position.title,
-        city: position.city,
-      },
-    },
+    where: { id: position.id },
     create: data,
     update: data,
   };
@@ -46,18 +41,13 @@ export async function seedPositions(client: Prisma.TransactionClient = prisma): 
   let updated = 0;
 
   for (const position of MOCK_POSITIONS) {
-    const existing = await client.position.findUnique({
-      where: {
-        company_title_city: {
-          company: position.company,
-          title: position.title,
-          city: position.city,
-        },
-      },
+    const existing = await client.position.findFirst({
+      where: { OR: [{ id: position.id }, { title: position.title, industry: position.industry }] },
       select: { id: true },
     });
 
-    await client.position.upsert(mapPositionForSeed(position));
+    // Preserve IDs of previously seeded rows and their user references; do not reset tables.
+    await client.position.upsert(mapPositionForSeed({ ...position, id: existing?.id || position.id }));
 
     if (existing) {
       updated += 1;

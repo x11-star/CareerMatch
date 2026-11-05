@@ -1,3 +1,4 @@
+import DialogFrame from './ui/DialogFrame';
 import React, { useState } from 'react';
 import { BrainCircuit, Edit2, FileText, Heart, KeyRound, LogOut, Phone, Save, Settings, User, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -6,20 +7,61 @@ import PageHeader from './ui/PageHeader';
 import SectionPanel from './ui/SectionPanel';
 import EmptyState from './ui/EmptyState';
 import { formatProfileCompleteness } from '../lib/profileCompleteness';
+import { clearGuestData, deleteMaterials, getFavorites, getPositions, ALL_POSITIONS_PAGE_SIZE } from '../lib/userDataStore';
+import type { Position } from '../types';
+import StatusBanner from './ui/StatusBanner';
 
 interface ProfilePageProps {
   onNavigate: (view: string) => void;
   onOpenModal: (modalType: 'download' | 'share' | null) => void;
   resumeData?: ResumeData;
   personalityResult?: PersonalityResult | null;
+  onSelectPosition: (id: string) => void;
+  onDataChanged: () => void;
 }
 
 type ProfileTab = 'profile' | 'resume' | 'assessment' | 'favorites' | 'security';
 
-export default function ProfilePage({ onNavigate, resumeData, personalityResult }: ProfilePageProps) {
+export default function ProfilePage({ onNavigate, resumeData, personalityResult, onSelectPosition, onDataChanged }: ProfilePageProps) {
   const { user, userProfile, updateProfile, logout, requestChangePhoneCode, verifyChangePhoneCode, requestDeleteAccountCode, deleteAccount } = useAuth();
   const [activeSubTab, setActiveSubTab] = useState<ProfileTab>('profile');
   const [isEditing, setIsEditing] = useState(false);
+  const [actionError, setActionError] = useState('');
+  const [materialBusy, setMaterialBusy] = useState(false);
+  const [favoritePositions, setFavoritePositions] = useState<Position[]>([]);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [favoriteError, setFavoriteError] = useState('');
+  const [favoriteRevision, setFavoriteRevision] = useState(0);
+  React.useEffect(() => {
+    let active = true;
+    setFavoritePositions([]);
+    if (activeSubTab !== 'favorites' || !user) return;
+    setFavoriteLoading(true);
+    setFavoriteError('');
+    Promise.all([getFavorites(user), getPositions(ALL_POSITIONS_PAGE_SIZE)]).then(([ids, positions]) => {
+      if (active) setFavoritePositions(positions.filter(p => ids.includes(p.id)));
+    }).catch((error: any) => { if (active) setFavoriteError(error?.message || '收藏读取失败，请重试。'); })
+      .finally(() => { if (active) setFavoriteLoading(false); });
+    return () => { active = false; };
+  }, [activeSubTab, user?.id, user?.isGuest, favoriteRevision]);
+  async function handleLogout() {
+    setActionError('');
+    try { await logout(); onNavigate('landing'); }
+    catch (error: any) { setActionError(error?.message || '退出失败，请重试。'); }
+  }
+  async function handleDeleteMaterial(kind: 'resume' | 'assessment') {
+    if (!user || materialBusy || !window.confirm(`确定删除你的全部${kind === 'resume' ? '简历' : '测评'}记录及关联诊断吗？此操作无法恢复。`)) return;
+    setMaterialBusy(true);
+    setActionError('');
+    try { await deleteMaterials(user, kind); onDataChanged(); }
+    catch (error: any) { setActionError(error?.message || '删除未完成，请重试。'); }
+    finally { setMaterialBusy(false); }
+  }
+  async function handleClearGuest() {
+    if (!user?.isGuest || !window.confirm('清除当前游客的简历、测评、求职偏好、草稿、资料和收藏吗？此操作无法恢复。')) return;
+    try { clearGuestData(user.id); await logout(); onNavigate('landing'); }
+    catch { setActionError('部分游客资料未能清除，请重试。'); }
+  }
 
   const [changePhoneOpen, setChangePhoneOpen] = useState(false);
   const [newPhone, setNewPhone] = useState('');
@@ -71,8 +113,8 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
     try {
       await updateProfile(editForm);
       setIsEditing(false);
-    } catch (err) {
-      console.error('Failed to save profile', err);
+    } catch (err: any) {
+      setActionError(err?.message || '资料未保存，请重试。');
     }
   };
 
@@ -134,8 +176,9 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <PageHeader eyebrow="Profile file" title="我的档案" description="管理你的资料、简历、测评、收藏和隐私设置。" />
+      {actionError && <div role="alert" className="mb-6"><StatusBanner tone="error" title="操作未完成" description={actionError} /></div>}
 
-      <SectionPanel className="mb-8" title="账号摘要" actions={<button onClick={handleEditClick} className="inline-flex items-center gap-1 rounded-md bg-career-primary px-4 py-2 text-xs font-semibold text-white"><Edit2 className="h-3.5 w-3.5" />编辑资料</button>}>
+      <SectionPanel className="mb-8" title="账号摘要" actions={<button onClick={handleEditClick} disabled={!user} className="inline-flex items-center gap-1 rounded-md bg-career-primary px-4 py-2 text-xs font-semibold text-white disabled:opacity-50"><Edit2 className="h-3.5 w-3.5" />编辑资料</button>}>
         <div className="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
           <div className="divide-y divide-career-line/60">
             <SummaryItem label="登录状态" value={user?.isGuest ? '游客模式' : user ? '手机号登录' : '未登录'} />
@@ -160,6 +203,7 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
               </button>
             );
           })}
+          <button onClick={() => onNavigate('results')} className="w-full rounded-md bg-career-primary px-4 py-3 text-left text-sm font-semibold text-white">查看我的推荐</button>
           <div className="rounded-md border border-career-line bg-career-surface-muted px-4 py-3 text-xs font-semibold text-career-muted">
             PDF 报告可在岗位诊断报告页导出
           </div>
@@ -210,8 +254,8 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
           )}
 
           {activeSubTab === 'favorites' && (
-            <SectionPanel title="我的收藏" description="收藏岗位会在这里集中查看。">
-              <EmptyState title="暂无收藏" description="暂无收藏。你可以在岗位诊断页收藏感兴趣的岗位，之后会在这里集中查看。" action={<button onClick={() => onNavigate('results')} className="rounded-md bg-career-primary px-4 py-2 text-sm font-semibold text-white">查看岗位</button>} />
+            <SectionPanel title="我的收藏" description="已保存的职业类型，点击可继续查看。">
+              {favoriteLoading ? <p>正在读取收藏</p> : favoriteError ? <StatusBanner tone="warning" title="收藏暂不可用" description={favoriteError} action={<button onClick={() => setFavoriteRevision(n => n + 1)}>重新读取收藏</button>} /> : favoritePositions.length ? <ul className="divide-y divide-career-line">{favoritePositions.map(p => <li key={p.id} className="py-3"><button onClick={() => onSelectPosition(p.id)} className="text-left text-sm font-semibold text-career-primary">{p.title}</button><p className="mt-1 text-xs text-career-muted">{p.industry} · {p.category}</p></li>)}</ul> : <EmptyState title="暂无收藏" description="暂无收藏。你可以在职业类型页收藏感兴趣的方向。" action={<button onClick={() => onNavigate('browser')} className="rounded-md bg-career-primary px-4 py-2 text-sm font-semibold text-white">查看职业库</button>} />}
             </SectionPanel>
           )}
 
@@ -226,7 +270,7 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
                       <p className="text-sm font-semibold text-career-ink">退出登录</p>
                       <p className="mt-1 text-xs text-career-muted">结束当前会话，简历和测评仍保留在账号中。</p>
                     </div>
-                    <button onClick={() => logout()} className="inline-flex items-center gap-1 rounded-md border border-career-line px-4 py-2 text-xs font-semibold text-career-ink hover:bg-career-surface-muted">
+                    <button onClick={handleLogout} className="inline-flex items-center gap-1 rounded-md border border-career-line px-4 py-2 text-xs font-semibold text-career-ink hover:bg-career-surface-muted">
                       <LogOut className="h-3.5 w-3.5" /> 退出登录
                     </button>
                   </div>
@@ -234,7 +278,7 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
                   <div className="flex items-center justify-between gap-4 py-4">
                     <div>
                       <p className="text-sm font-semibold text-career-ink">更换手机号</p>
-                      <p className="mt-1 text-xs text-career-muted">当前手机号 {maskPhone(user.phone)}，验证新号码后完成更换。</p>
+                      <p className="mt-1 text-xs text-career-muted">验证当前手机号 {maskPhone(user.phone)} 后，可改为新号码。请确认新号属于你。</p>
                     </div>
                     <button onClick={() => { setChangePhoneOpen(true); setPhoneError(''); setPhoneDevCode(''); }} className="inline-flex items-center gap-1 rounded-md border border-career-line px-4 py-2 text-xs font-semibold text-career-primary hover:bg-career-primary-soft">
                       <Phone className="h-3.5 w-3.5" /> 更换
@@ -257,11 +301,19 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
         </div>
       </div>
 
+      <section className="mt-8 border-t border-career-line pt-6">
+        <h2 className="text-lg font-semibold">材料管理</h2>
+        <p className="mt-2 text-sm leading-6 text-career-muted">{user?.isGuest ? '游客简历和完整测评保存在此浏览器；共享设备使用后请删除。' : '登录后的简历与测评保存到账号。'}简历文字会发送给配置的 AI 服务用于解析和诊断；职业链接不包含你的个人材料。</p>
+        {user && <div className="mt-4 flex flex-wrap gap-3"><button disabled={materialBusy || !hasResume} onClick={() => handleDeleteMaterial('resume')} className="rounded-md border border-career-line px-4 py-2 text-sm disabled:opacity-50">删除全部简历记录</button><button disabled={materialBusy} onClick={() => handleDeleteMaterial('assessment')} className="rounded-md border border-career-line px-4 py-2 text-sm disabled:opacity-50">删除测评与草稿</button></div>}
+        {user?.isGuest && <button onClick={handleClearGuest} className="mt-3 rounded-md border border-career-danger/40 px-4 py-2 text-sm text-career-danger">清除全部游客资料并退出</button>}
+      </section>
+
       {isEditing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-career-ink/40 p-4">
-          <form onSubmit={handleSaveProfile} className="w-full max-w-md rounded-lg border border-career-line bg-career-surface p-6 shadow-lg">
+        <DialogFrame titleId="profile-edit-title" onClose={() => setIsEditing(false)}>
+          <form onSubmit={handleSaveProfile} className="space-y-4">
+            {actionError && <p role="alert" className="mb-4 text-sm text-career-danger">{actionError}</p>}
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="flex items-center gap-2 text-lg font-semibold text-career-ink"><User className="h-5 w-5 text-career-primary" /> 编辑个人资料</h3>
+              <h3 id="profile-edit-title" className="flex items-center gap-2 text-lg font-semibold text-career-ink"><User className="h-5 w-5 text-career-primary" /> 编辑个人资料</h3>
               <button type="button" onClick={() => setIsEditing(false)} className="text-career-muted hover:text-career-ink"><X className="h-5 w-5" /></button>
             </div>
             <div className="space-y-4">
@@ -275,15 +327,14 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
               <button type="submit" className="inline-flex items-center gap-1 rounded-md bg-career-primary px-4 py-2 text-xs font-semibold text-white"><Save className="h-3.5 w-3.5" />保存更改</button>
             </div>
           </form>
-        </div>
+        </DialogFrame>
       )}
 
       {changePhoneOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-career-ink/40 p-4">
-          <div className="w-full max-w-sm rounded-lg border border-career-line bg-career-surface p-6 shadow-xl">
+        <DialogFrame titleId="change-phone-title" onClose={() => setChangePhoneOpen(false)} busy={phoneSubmitting}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-career-ink">更换手机号</h3>
+                <h3 id="change-phone-title" className="text-lg font-semibold text-career-ink">更换手机号</h3>
                 <p className="mt-1 text-xs leading-5 text-career-muted">验证码会发到你当前绑定的手机号 {maskPhone(user?.phone)},验证后输入新手机号完成更换。</p>
               </div>
               <button type="button" onClick={() => setChangePhoneOpen(false)} className="rounded-xl p-1 text-career-muted hover:bg-career-surface-muted hover:text-career-ink" aria-label="关闭"><X className="h-5 w-5" /></button>
@@ -318,16 +369,14 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
                 <button type="button" onClick={handleVerifyPhoneCode} disabled={phoneSubmitting || !newPhone.trim() || !phoneCode.trim()} className="rounded-md bg-career-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60">确认更换</button>
               </div>
             </div>
-          </div>
-        </div>
+        </DialogFrame>
       )}
 
       {deleteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-career-ink/40 p-4">
-          <div className="w-full max-w-sm rounded-lg border border-career-danger/40 bg-career-surface p-6 shadow-xl">
+        <DialogFrame titleId="delete-account-title" onClose={() => setDeleteOpen(false)} busy={deleteSubmitting}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-career-danger">注销账号</h3>
+                <h3 id="delete-account-title" className="text-lg font-semibold text-career-danger">注销账号</h3>
                 <p className="mt-1 text-xs leading-5 text-career-muted">将永久删除简历、测评、收藏和账号，无法恢复。验证码会发送到当前手机号 {maskPhone(user?.phone)}。</p>
               </div>
               <button type="button" onClick={() => setDeleteOpen(false)} className="rounded-xl p-1 text-career-muted hover:bg-career-surface-muted hover:text-career-ink" aria-label="关闭"><X className="h-5 w-5" /></button>
@@ -354,8 +403,7 @@ export default function ProfilePage({ onNavigate, resumeData, personalityResult 
                 <button type="button" onClick={handleConfirmDelete} disabled={deleteSubmitting || !deleteCode.trim()} className="rounded-md bg-career-danger px-4 py-2 text-xs font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">确认注销</button>
               </div>
             </div>
-          </div>
-        </div>
+        </DialogFrame>
       )}
     </div>
   );

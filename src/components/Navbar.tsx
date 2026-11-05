@@ -1,3 +1,4 @@
+import DialogFrame from './ui/DialogFrame';
 import React, { useState } from 'react';
 import { Award, ChevronDown, KeyRound, LogIn, LogOut, Menu, Phone, Target, User, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -18,13 +19,11 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
   const [devCode, setDevCode] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginSubmitting, setLoginSubmitting] = useState(false);
+  const [actionError, setActionError] = useState('');
 
   const navItems = [
     { label: '首页', view: 'landing' },
-    { label: '上传简历', view: 'upload' },
-    { label: '职业测评', view: 'assessment' },
     { label: '岗位库', view: 'browser' },
-    { label: '诊断报告', view: 'results' },
     { label: '我的档案', view: 'profile' },
   ];
 
@@ -36,8 +35,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
 
   const isNavActive = (view: string) => {
     if (currentView === view) return true;
-    if (view === 'assessment' && currentView === 'assessment-result') return true;
-    if (view === 'results' && (currentView === 'assessment-result' || currentView === 'detail')) return true;
+    if (view === 'browser' && currentView === 'detail') return true;
     return false;
   };
 
@@ -81,8 +79,8 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
       await logout();
       setUserDropdownOpen(false);
       onNavigate('landing');
-    } catch (e) {
-      console.error('Failed to logout', e);
+    } catch (e: any) {
+      setActionError(e?.message || '退出失败，请重试。');
     }
   };
 
@@ -92,6 +90,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
 
   return (
     <>
+      {actionError && <div role="alert" className="bg-career-danger-soft px-4 py-3 text-sm text-career-danger">{actionError}<button onClick={() => setActionError('')} className="ml-4">关闭提示</button></div>}
       <nav className="sticky top-0 z-50 h-16 border-b border-career-line bg-career-surface/95 backdrop-blur">
         <div className="mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-full items-center justify-between">
@@ -106,7 +105,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
               <span className="tracking-tight">精准职达</span>
             </button>
 
-            <div className="hidden items-center gap-6 md:flex">
+            <div className="hidden items-center gap-6 xl:flex">
               {navItems.map((item) => (
                 <button
                   key={item.view}
@@ -126,7 +125,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
               ))}
             </div>
 
-            <div className="hidden items-center gap-3 md:flex">
+            <div className="hidden items-center gap-3 xl:flex">
               <button
                 id="nav-share-btn"
                 onClick={() => onOpenModal('share')}
@@ -168,6 +167,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
                         <Award className="h-4 w-4" /> 更新材料
                       </button>
                       <div className="my-1 border-t border-career-line" />
+                      {user.isGuest && <button onClick={() => { setUserDropdownOpen(false); handleLoginClick(); }} className="flex w-full items-center gap-2 px-4 py-2 text-left text-career-primary"><LogIn className="h-4 w-4" />登录并同步游客材料</button>}
                       <button
                         onClick={handleLogoutClick}
                         className="flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-left text-career-danger transition-colors hover:bg-career-danger-soft"
@@ -187,7 +187,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
               )}
             </div>
 
-            <div className="flex items-center gap-3 md:hidden">
+            <div className="flex items-center gap-3 xl:hidden">
               <button
                 id="nav-share-mobile-btn"
                 onClick={() => onOpenModal('share')}
@@ -207,7 +207,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
         </div>
 
         {mobileMenuOpen && (
-          <div className="absolute left-0 right-0 top-16 z-40 flex flex-col gap-2 border-b border-career-line bg-career-surface px-4 py-4 shadow-md md:hidden">
+          <div className="absolute left-0 right-0 top-16 z-40 flex flex-col gap-2 border-b border-career-line bg-career-surface px-4 py-4 shadow-md xl:hidden">
             {navItems.map((item) => (
               <button
                 key={item.view}
@@ -229,6 +229,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
                     <div className="text-xs font-semibold text-career-ink">{userName}</div>
                     <div className="text-[11px] text-career-muted">{userSubTitle}</div>
                   </div>
+                  {user.isGuest && <button onClick={() => { setMobileMenuOpen(false); handleLoginClick(); }} className="text-xs font-semibold text-career-primary">登录并同步游客材料</button>}
                   <button id="mobile-user-profile-btn" onClick={() => handleNavClick('profile')} className="text-xs font-semibold text-career-primary">
                     管理
                   </button>
@@ -244,11 +245,10 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
       </nav>
 
       {loginModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-career-ink/40 px-4">
-          <div className="w-full max-w-sm rounded-lg border border-career-line bg-career-surface p-6 shadow-xl">
+        <DialogFrame titleId="login-title" onClose={() => setLoginModalOpen(false)} busy={loginSubmitting}>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-lg font-semibold text-career-ink">手机号登录</h2>
+                <h2 id="login-title" className="text-lg font-semibold text-career-ink">手机号登录</h2>
                 <p className="mt-1 text-xs leading-5 text-career-muted">输入手机号和验证码，登录后保存简历、测评和收藏。</p>
               </div>
               <button
@@ -323,8 +323,7 @@ export default function Navbar({ currentView, onNavigate, onOpenModal }: NavbarP
                 先以游客身份体验
               </button>
             </div>
-          </div>
-        </div>
+        </DialogFrame>
       )}
     </>
   );

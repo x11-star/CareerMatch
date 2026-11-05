@@ -4,6 +4,7 @@ import { hasRealResumeData } from '../../src/lib/resumeState';
 
 function testDefaultResumeDataIsNotRealUserData() {
   assert.equal(hasRealResumeData(DEFAULT_RESUME_DATA), false);
+  assert.equal(hasRealResumeData({ ...DEFAULT_RESUME_DATA, qualifications: { degree: '', languages: [], certificates: [], evidence: [] } }), false);
 }
 
 function testParsedResumeDataIsRealUserData() {

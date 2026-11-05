@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AlertCircle, FileDown, Loader2, X } from 'lucide-react';
 import { api } from '../lib/apiClient';
+import DialogFrame from './ui/DialogFrame';
 
 interface DownloadModalProps {
   positionId: string | null;
@@ -42,11 +43,8 @@ export default function DownloadModal({ positionId, onClose }: DownloadModalProp
   const disabled = !positionId || state.kind === 'loading';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div onClick={state.kind === 'loading' ? undefined : onClose} className="absolute inset-0 bg-career-ink/40 backdrop-blur-xs transition-opacity" />
-
-      <div className="relative z-10 w-full max-w-md rounded-lg border border-career-line bg-career-surface p-6 shadow-lg sm:p-8">
-        <button onClick={onClose} disabled={state.kind === 'loading'} className="absolute right-5 top-5 rounded-full p-1.5 text-career-muted transition-colors hover:bg-career-surface-muted hover:text-career-ink disabled:opacity-50">
+    <DialogFrame titleId="download-title" onClose={onClose} busy={state.kind === 'loading'}>
+        <button aria-label="关闭导出" onClick={onClose} disabled={state.kind === 'loading'} className="absolute right-5 top-5 rounded-full p-1.5 text-career-muted transition-colors hover:bg-career-surface-muted hover:text-career-ink disabled:opacity-50">
           <X className="h-5 w-5" />
         </button>
 
@@ -54,7 +52,7 @@ export default function DownloadModal({ positionId, onClose }: DownloadModalProp
           <div className="rounded-md bg-career-warning-soft p-2 text-career-warning">
             <FileDown className="h-5 w-5" />
           </div>
-          <h3 className="text-lg font-semibold text-career-ink">导出 PDF 诊断报告</h3>
+          <h3 id="download-title" className="text-lg font-semibold text-career-ink">导出 PDF 诊断报告</h3>
         </div>
 
         {!positionId ? (
@@ -83,7 +81,6 @@ export default function DownloadModal({ positionId, onClose }: DownloadModalProp
             {state.kind === 'loading' ? '生成中…' : state.kind === 'error' ? '重试' : '生成 PDF'}
           </button>
         </div>
-      </div>
-    </div>
+    </DialogFrame>
   );
 }

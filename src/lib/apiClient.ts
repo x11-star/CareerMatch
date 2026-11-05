@@ -58,6 +58,9 @@ function parseContentDispositionFileName(header: string | null): string | null {
 }
 
 export const api = {
+  getPreferences: () => requestJson<{ preferences: import('../types').CareerPreferences }>('/api/preferences'),
+  savePreferences: (preferences: import('../types').CareerPreferences) => requestJson<{ preferences: import('../types').CareerPreferences }>('/api/preferences', { method: 'PUT', body: JSON.stringify({ preferences }) }),
+  getRecommendations: () => requestJson<import('../types').RecommendationResult>('/api/recommendations'),
   getMe: () => requestJson<{ user: any }>('/api/me'),
   requestLoginCode: (phone: string) => requestJson<{ ok: true; devCode?: string; expiresInSeconds: number }>('/api/auth/request-code', {
     method: 'POST',
@@ -79,6 +82,8 @@ export const api = {
   requestDeleteAccountCode: () => requestJson<{ ok: true; devCode?: string; expiresInSeconds: number }>('/api/me/delete-account/request-code', { method: 'POST' }),
   deleteAccount: (code: string) => requestJson<{ ok: true }>('/api/me/delete-account', { method: 'POST', body: JSON.stringify({ code }) }),
   getLatestResume: () => requestJson<{ resume: ResumeData | null }>('/api/resumes/latest'),
+  deleteResumes: () => requestJson<{ ok: true }>('/api/resumes', { method: 'DELETE' }),
+  deleteAssessments: () => requestJson<{ ok: true }>('/api/assessments', { method: 'DELETE' }),
   saveResume: (resume: ResumeData, metadata: any = {}) => requestJson<{ resume: ResumeData }>('/api/resumes', {
     method: 'POST',
     body: JSON.stringify({ resume, ...metadata }),

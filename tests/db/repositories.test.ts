@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { Prisma } from '@prisma/client';
-import { mapPositionForSeed } from '../../prisma/seed';
+import { mapPositionForSeed, seedPositions } from '../../prisma/seed';
+import { CAREER_CATALOG } from '../../src/catalog';
 import { mapPrismaError, UniqueConstraintError } from '../../src/server/db/errors';
 import { prisma } from '../../src/server/db/prisma';
 import { createAssessment, getAssessmentByIdForUser, getLatestAssessmentByUserId } from '../../src/server/repositories/assessmentsRepository';
@@ -67,10 +68,25 @@ function testPositionSeedMappingKeepsStableUpsertKey() {
     relatedJobs: [],
   });
 
-  assert.equal(mapped.where.company_title_city.company, '示例科技');
-  assert.equal(mapped.where.company_title_city.title, '后端开发工程师');
-  assert.equal(mapped.where.company_title_city.city, '北京');
+  assert.equal(mapped.where.id, 'pos-0001');
+  assert.equal(mapped.create.id, 'pos-0001');
   assert.equal(mapped.create.difficultyRating, '4');
+}
+
+async function testCareerSeedPreservesLegacyReferences() {
+  await cleanDatabase();
+  const career = CAREER_CATALOG[0];
+  const legacy = await prisma.position.create({ data: { ...mapPositionForSeed(career).create, id: 'legacy-career-id', company: '旧版分配公司', city: '北京', type: 'internet' } });
+  const user = await prisma.user.create({ data: { phone: '13900000888' } });
+  await prisma.favorite.create({ data: { userId: user.id, positionId: legacy.id } });
+  await seedPositions();
+  const resolved = await getPositionById(career.id);
+  assert.equal(resolved?.id, legacy.id);
+  assert.equal(resolved?.company, '');
+  assert.equal(resolved?.city, '');
+  assert.equal(resolved?.type, 'role-type');
+  assert.equal(await prisma.favorite.count({ where: { userId: user.id, positionId: legacy.id } }), 1);
+  assert.equal(await prisma.position.count(), CAREER_CATALOG.length);
 }
 
 async function testUsersRepositoryCreatesFindsAndUpsertsUsers() {
@@ -342,6 +358,7 @@ async function testFavoritesRepositoryIsIdempotent() {
 }
 
 const tests = [
+  testCareerSeedPreservesLegacyReferences,
   testDatabaseIsReachable,
   testUniqueConstraintErrorMapping,
   testPositionSeedMappingKeepsStableUpsertKey,

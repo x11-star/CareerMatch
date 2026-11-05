@@ -52,6 +52,7 @@ export function createDeepSeekProvider(options: ProviderOptions = {}): AiProvide
 
   return {
     name: 'deepseek',
+    model,
     isConfigured: () => Boolean(apiKey),
     async parseResume(input: ResumeParseInput) {
       const content = await complete(buildResumeParsePrompt(input));

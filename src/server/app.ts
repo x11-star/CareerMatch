@@ -10,6 +10,7 @@ import { registerResumeRoutes } from "./routes/resumeRoutes";
 import { registerAssessmentRoutes } from "./routes/assessmentRoutes";
 import { registerPositionRoutes } from "./routes/positionRoutes";
 import { registerFavoriteRoutes } from "./routes/favoriteRoutes";
+import { registerRecommendationRoutes } from "./routes/recommendationRoutes";
 import { getOptionalAuth, requireAuth } from "./http/authMiddleware";
 import { HttpError } from "./http/errors";
 import { getLatestResumeByUserId } from "./repositories/resumesRepository";
@@ -31,7 +32,7 @@ type CreateAppOptions = {
 
 export function createApp(options: CreateAppOptions = {}) {
   const app = express();
-  const aiService = options.aiService || defaultAiService;
+  const aiService = options.aiService || createAiService();
 
   app.use(express.json({ limit: MAX_UPLOAD_JSON_BYTES }));
   app.use((error: any, _req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -43,7 +44,7 @@ export function createApp(options: CreateAppOptions = {}) {
   });
 
   app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok", mode: process.env.NODE_ENV });
+    res.json({ status: "ok", service: "careermatch", mode: process.env.NODE_ENV });
   });
 
   registerAuthRoutes(app);
@@ -52,6 +53,7 @@ export function createApp(options: CreateAppOptions = {}) {
   registerAssessmentRoutes(app);
   registerPositionRoutes(app);
   registerFavoriteRoutes(app);
+  registerRecommendationRoutes(app);
 
   app.post("/api/parse-resume", async (req, res) => {
     const { text, fileData, mimeType, fileName } = req.body;
@@ -108,7 +110,7 @@ export function createApp(options: CreateAppOptions = {}) {
         const mappedResume = toResumeData(resume);
         const mappedAssessment = toPersonalityResult(assessment);
         const mappedPosition = toPosition(positionRecord);
-        const resumeHash = stableJsonHash(mappedResume);
+        const resumeHash = stableJsonHash({ resume: mappedResume, position: mappedPosition });
         const assessmentHash = stableJsonHash(mappedAssessment);
         const cached = await findCachedMatchResult({
           userId: user.id,
@@ -131,7 +133,7 @@ export function createApp(options: CreateAppOptions = {}) {
           });
         }
 
-        const matchResult = await aiService.matchPosition({
+        const matchResult = await aiService.matchPositionWithMetadata({
           resumeData: mappedResume,
           personalityResult: mappedAssessment,
           position: mappedPosition,
@@ -149,8 +151,8 @@ export function createApp(options: CreateAppOptions = {}) {
           resumeMatchExplanation: matchResult.resumeMatchExplanation,
           personalityMatchExplanation: matchResult.personalityMatchExplanation,
           whyExcellent: matchResult.whyExcellent,
-          provider: "unknown",
-          model: "unknown",
+          provider: matchResult.provider,
+          model: matchResult.model,
         });
         return res.json({ cached: false, ...matchResult });
       }
@@ -225,7 +227,7 @@ export function createApp(options: CreateAppOptions = {}) {
       const mappedResume = toResumeData(resume);
       const mappedAssessment = toPersonalityResult(assessment);
       const mappedPosition = toPosition(positionRecord);
-      const resumeHash = stableJsonHash(mappedResume);
+      const resumeHash = stableJsonHash({ resume: mappedResume, position: mappedPosition });
       const assessmentHash = stableJsonHash(mappedAssessment);
       const cached = await findCachedMatchResult({
         userId: user.id,

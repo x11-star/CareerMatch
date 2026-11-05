@@ -23,7 +23,7 @@ async function testRequestLoginCodeStoresHashOnly() {
 async function testInvalidPhoneRejected() {
   await resetAuthTables();
   const auth = createAuthService({ smsSender: createDevSmsSender({ fixedCode: '123456' }) });
-  await assert.rejects(() => auth.requestLoginCode('123'), /INVALID_PHONE/);
+  await assert.rejects(() => auth.requestLoginCode('123'), { code: 'INVALID_PHONE' });
 }
 
 async function testVerifyCreatesUserAndSession() {
@@ -43,7 +43,7 @@ async function testWrongCodeIncrementsAttempts() {
   await resetAuthTables();
   const auth = createAuthService({ smsSender: createDevSmsSender({ fixedCode: '123456' }) });
   await auth.requestLoginCode('13388888888');
-  await assert.rejects(() => auth.verifyLoginCode('13388888888', '000000'), /INVALID_SMS_CODE/);
+  await assert.rejects(() => auth.verifyLoginCode('13388888888', '000000'), { code: 'INVALID_SMS_CODE' });
   const code = await prisma.smsCode.findFirstOrThrow({ where: { phone: '13388888888' } });
   assert.equal(code.attempts, 1);
 }
@@ -73,7 +73,7 @@ async function testRequestChangePhoneCodeStoresHashWithPurpose() {
   // S1: 验证码发到当前手机号(user.phone),不是新号
   const result = await auth.requestChangePhoneCode(verified.user.id, '13388888888');
   assert.equal(result.devCode, '123456');
-  const code = await prisma.smsCode.findFirstOrThrow({ where: { phone: '13388888888' } });
+  const code = await prisma.smsCode.findFirstOrThrow({ where: { phone: '13388888888', purpose: 'change_phone' } });
   assert.equal(code.purpose, 'change_phone');
   assert.notEqual(code.codeHash, '123456');
 }
@@ -84,7 +84,7 @@ async function testRequestChangePhoneCodeRejectsMismatchedCurrentPhone() {
   const a = await loginHelper(auth, '13388888888');
 
   // S1: currentPhone 必须属于当前账号,否则拒绝(防止越权)
-  await assert.rejects(() => auth.requestChangePhoneCode(a.user.id, '13311111111'), /PHONE_MISMATCH/);
+  await assert.rejects(() => auth.requestChangePhoneCode(a.user.id, '13311111111'), { code: 'PHONE_MISMATCH' });
 }
 
 async function testVerifyChangePhoneCodeUpdatesPhoneAndKeepsSession() {
@@ -114,7 +114,7 @@ async function testVerifyChangePhoneCodeRejectsLoginCode() {
 
   await assert.rejects(
     () => auth.verifyChangePhoneCode(verified.user.id, '13322222222', '123456', '13399999999'),
-    /INVALID_SMS_CODE/,
+    { code: 'INVALID_SMS_CODE' },
   );
   const dbUser = await prisma.user.findUniqueOrThrow({ where: { id: verified.user.id } });
   assert.equal(dbUser.phone, '13388888888');
@@ -131,7 +131,7 @@ async function testVerifyChangePhoneCodeRejectsDuplicateOnRace() {
 
   await assert.rejects(
     () => auth.verifyChangePhoneCode(verified.user.id, '13388888888', '123456', '13344444444'),
-    /PHONE_ALREADY_USED/,
+    { code: 'PHONE_ALREADY_USED' },
   );
   const dbUser = await prisma.user.findUniqueOrThrow({ where: { id: verified.user.id } });
   assert.equal(dbUser.phone, '13388888888');
@@ -171,7 +171,7 @@ async function testVerifyDeleteAccountCodeRejectsWrongCode() {
 
   await assert.rejects(
     () => auth.verifyDeleteAccountCode(verified.user.id, '13388888888', '000000'),
-    /INVALID_SMS_CODE/,
+    { code: 'INVALID_SMS_CODE' },
   );
   assert.ok(await prisma.user.findUnique({ where: { id: verified.user.id } }));
 }

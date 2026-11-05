@@ -92,7 +92,7 @@ async function testMapsAllSections() {
   assert.equal(data.position.company, '示例科技');
   assert.equal(data.position.title, '后端开发工程师');
   assert.equal(data.position.city, '北京');
-  assert.equal(data.position.salaryRange, '20-30k');
+  assert.equal(data.position.salaryRange, '20-30k（类型参考，非企业报价）');
   assert.ok(data.position.summary.length > 0);
 
   // evidence: met = requirements the resume skills cover (Java, Spring), missing = Docker, Kubernetes
@@ -112,7 +112,8 @@ async function testMapsAllSections() {
   assert.equal(data.actions.timeline[1].title, '30 天可做');
   assert.equal(data.actions.timeline[2].title, '投递前必须补');
   // interview questions from howToPrepare.timeline
-  assert.deepEqual(data.actions.interview.questions, ['请说明你最能证明岗位能力的项目', '讲一次线上问题排查经历']);
+  assert.equal(data.actions.interview.questions.length, 3);
+  assert.ok(data.actions.interview.questions.every(question => !position.howToPrepare.timeline.includes(question)));
   assert.equal(data.actions.interview.exam, '复习 JVM 与并发常见题型。');
   assert.equal(data.actions.interview.projectRecap, '准备项目中的难点、取舍与指标。');
 

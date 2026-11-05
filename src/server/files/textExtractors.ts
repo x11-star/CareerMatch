@@ -1,11 +1,15 @@
 import mammoth from 'mammoth';
-import { createRequire } from 'node:module';
+import { PDFParse } from 'pdf-parse';
 import { EmptyExtractedTextError, FileParseFailedError } from './errors';
 import type { ExtractedResumeText, NormalizedUpload } from './types';
 import { MAX_AI_TEXT_CHARS } from './validation';
 
-const require = createRequire(`${process.cwd()}/package.json`);
-const defaultPdfParser = require('pdf-parse');
+// pdf-parse v2 exports a parser class, not the v1 callable default export.
+const defaultPdfParser: PdfParser = async buffer => {
+  const parser = new PDFParse({ data: new Uint8Array(buffer) });
+  try { return await parser.getText(); }
+  finally { await parser.destroy(); }
+};
 
 export type PdfParser = (buffer: Buffer) => Promise<{ text?: string }>;
 

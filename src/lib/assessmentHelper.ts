@@ -40,7 +40,7 @@ export function calculatePersonalityResult(answers: Record<number, number>): Per
     description = '你做事认真负责，计划性强，情绪平稳、行事稳重。你非常擅长在规范有序、分工清晰的环境中，通过日复一日的坚持与严谨，发挥出长期的战略价值，是团队中极其可靠的中流砥柱。';
     hollandCode = 'RCI';
     hollandTags = ['现实型 (Realistic)', '常规型 (Conventional)', '研究型 (Investigative)'];
-    summary = '你拥有非常突出的自律与责任感。在接受任务后，你会习惯性地制定详细的时间节点并百分百贯彻执行，极少出现拖延或遗漏。你情绪极具韧性，遇到挫折、领导施压时，能以极高的大局观与稳定性承受并化解压力，非常符合国资央企、国家重大技术骨干岗位以及大型合规性高要求团队的期待。';
+    summary = '你拥有非常突出的自律与责任感。在接受任务后，你会习惯性地制定详细的时间节点并倾向于贯彻执行，极少出现拖延或遗漏。你情绪极具韧性，遇到挫折、领导施压时，能以极高的大局观与稳定性承受并化解压力，非常符合国资央企、国家重大技术骨干岗位以及大型合规性高要求团队的期待。';
     advantages = [
       '【执行先锋】：极强的自驱与执行力，保证复杂交付不打折扣、质量上乘。',
       '【定海神针】：面对突发、杂乱、高频的突击任务能保持从容，是优秀的风险控制者。',
@@ -77,11 +77,11 @@ export function calculatePersonalityResult(answers: Record<number, number>): Per
     typeTitle,
     description,
     radarScores: [
-      { dimension: '尽责性 (Conscientiousness)', score: cScore, avg: 65 },
-      { dimension: '情绪稳定性 (Emotional Stability)', score: sScore, avg: 60 },
-      { dimension: '宜人性 (Agreeableness)', score: aScore, avg: 72 },
-      { dimension: '开放性 (Openness to Experience)', score: oScore, avg: 68 },
-      { dimension: '外向性 (Extraversion)', score: eScore, avg: 62 }
+      { dimension: '尽责性 (Conscientiousness)', score: cScore, avg: 70 },
+      { dimension: '情绪稳定性 (Emotional Stability)', score: sScore, avg: 70 },
+      { dimension: '宜人性 (Agreeableness)', score: aScore, avg: 70 },
+      { dimension: '开放性 (Openness to Experience)', score: oScore, avg: 70 },
+      { dimension: '外向性 (Extraversion)', score: eScore, avg: 70 }
     ],
     industryFit: {
       stateOwned: stateOwnedFit,

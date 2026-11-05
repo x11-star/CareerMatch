@@ -9,6 +9,7 @@ import type {
   ReportData,
   ReportGap,
 } from './types';
+import { interviewPracticeQuestions } from '../../catalog';
 
 // Thresholds + copy duplicated from PositionDetailPage (诊断结论 thresholds). Duplication is
 // intentional: the report must not import a React component, so it keeps its own copy of the
@@ -37,7 +38,7 @@ function skillCoversRequirement(skills: string[], requirement: string): boolean 
   const normalized = requirement.toLowerCase();
   return skills.some((skill) => {
     const s = skill.toLowerCase();
-    return normalized.includes(s) || s.includes(normalized);
+    return Boolean(s.trim() && normalized.trim()) && (normalized.includes(s) || s.includes(normalized));
   });
 }
 
@@ -117,11 +118,11 @@ export function assembleReportData(input: AssembleReportDataInput): ReportData {
       major: resume.major || '',
     },
     position: {
-      company: position.company,
+      company: position.type === 'role-type' ? '职业类型参考' : position.company,
       title: position.title,
-      city: position.city,
-      type: position.type === 'state-owned' ? '央国企' : '互联网',
-      salaryRange: position.salaryRange,
+      city: position.city || '不绑定城市',
+      type: position.type === 'role-type' ? '职业类型' : position.type === 'state-owned' ? '央国企' : '互联网',
+      salaryRange: `${position.salaryRange}（类型参考，非企业报价）`,
       summary: position.summary,
     },
     conclusion: {
@@ -151,7 +152,7 @@ export function assembleReportData(input: AssembleReportDataInput): ReportData {
       gaps: buildGaps(missing, hasExperience),
       timeline: buildTimeline(),
       interview: {
-        questions: position.howToPrepare?.timeline || [],
+        questions: interviewPracticeQuestions(position),
         exam: position.howToPrepare?.exam || '复习岗位要求中的基础知识和常见题型。',
         projectRecap: position.howToPrepare?.interview || '准备项目中的难点、取舍、指标和复盘。',
       },

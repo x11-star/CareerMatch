@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import { readRoute, publicShareUrl, routeHash } from '../../src/lib/navigation';
+import { readAssessmentDraft } from '../../src/lib/assessmentDraft';
+import { MOCK_QUESTIONS } from '../../src/data';
+const id = '职业/?&# 1';
+assert.deepEqual(readRoute(routeHash('detail', id)), { view: 'detail', positionId: id });
+assert.deepEqual(readRoute('#view=unexpected'), { view: 'landing', positionId: '' });
+assert.deepEqual(readRoute('#view=detail'), { view: 'landing', positionId: '' });
+const shared = publicShareUrl('https://example.test/?token=private#view=profile', id);
+assert.equal(new URL(shared).search, '');
+assert.deepEqual(readRoute(new URL(shared).hash), { view: 'detail', positionId: id });
+assert.equal(readRoute(new URL(publicShareUrl('https://example.test/#view=assessment-result')).hash).view, 'landing');
+const storage = { getItem: (_key: string) => JSON.stringify({ answers: { [MOCK_QUESTIONS[0].id]: 5, [MOCK_QUESTIONS[1].id]: 99, unrelated: 3 } }) };
+assert.deepEqual(readAssessmentDraft(storage, 'A'), { answers: { [MOCK_QUESTIONS[0].id]: 5 }, currentIndex: 1 });
+assert.deepEqual(readAssessmentDraft({ getItem: () => '{invalid' }, 'A'), { answers: {}, currentIndex: 0 });
+console.log('navigation.test.ts: public links, invalid routes and recoverable drafts passed');

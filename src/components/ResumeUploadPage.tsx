@@ -1,31 +1,39 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, CheckCircle2, Edit3, RotateCw, Upload } from 'lucide-react';
 import { DEFAULT_RESUME_DATA } from '../data';
 import { ResumeData } from '../types';
 import { useAuth } from '../context/AuthContext';
-import { saveResume, getLatestResume } from '../lib/userDataStore';
+import { saveResume } from '../lib/userDataStore';
 import PageHeader from './ui/PageHeader';
 import SectionPanel from './ui/SectionPanel';
 import StatusBanner from './ui/StatusBanner';
 import Toast from './ui/Toast';
+import DialogFrame from './ui/DialogFrame';
+import QualificationsFields from './QualificationsFields';
+import { resumeParseErrorMessage, ResumeParseUserError } from '../lib/resumeParseError';
 
 type UploadState = 'A_IDLE' | 'B_UPLOADING' | 'C_PARSING' | 'D_DONE';
 
 interface ResumeUploadPageProps {
   onConfirm: (data: ResumeData) => void;
   onBack: () => void;
+  initialResume?: ResumeData | null;
 }
 
-export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPageProps) {
+export default function ResumeUploadPage({ onConfirm, onBack, initialResume }: ResumeUploadPageProps) {
   const { user } = useAuth();
-  const [currentState, setCurrentState] = useState<UploadState>('A_IDLE');
+  const [currentState, setCurrentState] = useState<UploadState>(initialResume ? 'D_DONE' : 'A_IDLE');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [parsingStep, setParsingStep] = useState(0);
-  const [resumeData, setResumeData] = useState<ResumeData>(DEFAULT_RESUME_DATA);
+  const [resumeData, setResumeData] = useState<ResumeData>(initialResume || DEFAULT_RESUME_DATA);
   const [fileName, setFileName] = useState('');
   const [pastedText, setPastedText] = useState('');
   const [apiParseError, setApiParseError] = useState('');
   const [isApiParsing, setIsApiParsing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const saveLock = useRef(false);
+  const mounted = useRef(true);
   const [uploadTab, setUploadTab] = useState<'file' | 'text'>('file');
   const [toast, setToast] = useState<{ title: string; description?: string; tone?: 'info' | 'success' | 'warning' } | null>(null);
   const [editingSection, setEditingSection] = useState<'basic' | 'skills' | 'internships' | 'projects' | 'target' | null>(null);
@@ -39,21 +47,9 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
   const SUPPORTED_EXTENSIONS = ['txt', 'pdf', 'docx', 'png', 'jpg', 'jpeg', 'webp'];
 
   useEffect(() => {
-    async function loadSavedResume() {
-      if (user) {
-        try {
-          const latestResume = await getLatestResume(user);
-          if (latestResume) {
-            setResumeData(latestResume);
-            setCurrentState('D_DONE');
-          }
-        } catch (e) {
-          console.error("Failed to load user's saved resume:", e);
-        }
-      }
-    }
-    loadSavedResume();
-  }, [user]);
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
 
   useEffect(() => {
     if (currentState !== 'B_UPLOADING' || isApiParsing) return;
@@ -90,16 +86,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
 
   async function parseApiError(response: Response): Promise<string> {
     const body = await response.json().catch(() => null);
-    if (body?.code === 'AI_CONFIGURATION_MISSING') {
-      return 'AI 简历解析暂不可用，请稍后再试。';
-    }
-    if (body?.code === 'FILE_TOO_LARGE') {
-      return '文件超过 8MB。请压缩后重新上传，或粘贴简历文本。';
-    }
-    if (body?.code === 'UNSUPPORTED_FILE_TYPE' || body?.code === 'EMPTY_EXTRACTED_TEXT' || body?.code === 'FILE_PARSE_FAILED') {
-      return body.error || '文件解析失败，请检查文件格式和清晰度。';
-    }
-    return body?.error || `解析服务器返回错误：HTTP ${response.status}`;
+    return resumeParseErrorMessage(body?.code, response.status);
   }
 
   const triggerRealAiParse = async (params: { text?: string; fileData?: string; mimeType?: string }, displayName: string) => {
@@ -130,7 +117,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
       progressInterval = null;
       setUploadProgress(100);
 
-      if (!response.ok) throw new Error(await parseApiError(response));
+      if (!response.ok) throw new ResumeParseUserError(await parseApiError(response));
 
       const parsedData: ResumeData = await response.json();
       setResumeData(parsedData);
@@ -142,7 +129,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
     } catch (err: any) {
       if (progressInterval) clearInterval(progressInterval);
       console.error('API parse failed:', err);
-      setApiParseError(err.message || '解析失败，请检查网络或 API 配置。');
+      setApiParseError(err instanceof ResumeParseUserError ? err.message : '暂时没能连接到简历读取服务。请稍后重试，也可以先手动填写。');
       setCurrentState('A_IDLE');
       setIsApiParsing(false);
     }
@@ -198,16 +185,13 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
   };
 
   const handleConfirmClick = async () => {
-    if (user) {
-      try {
-        await saveResume(user, resumeData);
-        setToast({ title: '简历已保存', description: '已保存到你的账号，即将进入测评。', tone: 'success' });
-      } catch (e) {
-        console.error('Failed to save resume', e);
-        setToast({ title: '保存失败', description: '简历未保存到账号，但可继续进入测评。', tone: 'warning' });
-      }
-    }
-    onConfirm(resumeData);
+    if (saveLock.current) return;
+    saveLock.current = true;
+    setIsSaving(true);
+    setSaveError('');
+    try { await saveResume(user, resumeData); if (mounted.current) onConfirm(resumeData); }
+    catch (error: any) { setSaveError(error?.message || '简历未保存，请重试；当前内容仍保留。'); }
+    finally { saveLock.current = false; setIsSaving(false); }
   };
 
   const handleEditBasic = () => {
@@ -275,7 +259,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
   const removeProjectField = (index: number) => setProjectsForm(projectsForm.filter((_, i) => i !== index));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
+    <div className="mx-auto max-w-3xl px-4 py-8">
       {toast && (
         <Toast
           tone={toast.tone || 'info'}
@@ -289,9 +273,9 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
       </button>
 
       <PageHeader
-        eyebrow="Resume file"
-        title="上传简历"
-        description="先建立你的求职材料档案。系统会识别教育背景、技能、项目和目标方向。"
+        eyebrow="第一步 · 个人材料"
+        title="完善个人材料"
+        description="上传简历或直接填写，让职业推荐更贴近你的经历。"
       />
 
       {apiParseError && (
@@ -307,8 +291,8 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
       )}
 
       {currentState === 'A_IDLE' && (
-        <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
-          <SectionPanel title="选择材料" description="上传简历文件，或直接粘贴简历正文。系统只在你发起解析时处理材料。">
+        <div className="space-y-4">
+          <SectionPanel title="添加简历" description="上传文件、粘贴文字，或直接填写简历信息。">
             <div className="mb-5 flex rounded-md bg-career-surface-muted p-1">
               <button type="button" onClick={() => setUploadTab('file')} className={`flex-1 rounded-xl px-3 py-2 text-xs font-semibold ${uploadTab === 'file' ? 'bg-career-surface text-career-ink' : 'text-career-muted'}`}>
                 上传文件
@@ -316,6 +300,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
               <button type="button" onClick={() => setUploadTab('text')} className={`flex-1 rounded-xl px-3 py-2 text-xs font-semibold ${uploadTab === 'text' ? 'bg-career-surface text-career-ink' : 'text-career-muted'}`}>
                 粘贴文本
               </button>
+              <button type="button" onClick={() => { setResumeData({ ...DEFAULT_RESUME_DATA }); setCurrentState('D_DONE'); setApiParseError(''); }} className="flex-1 rounded-md px-3 py-2 text-xs font-semibold text-career-muted">手动填写</button>
             </div>
 
             {uploadTab === 'file' ? (
@@ -352,14 +337,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
             )}
           </SectionPanel>
 
-          <SectionPanel title="处理说明" description="系统只在你发起解析时处理材料，识别结果可以继续编辑。">
-            <div className="space-y-3 text-sm leading-6 text-career-muted">
-              <InfoRow title="先识别简历文字" description="PDF、DOCX、TXT 和图片会经过格式校验和文字提取。" />
-              <InfoRow title="再整理关键信息" description="系统会把教育背景、技能、项目和目标方向整理成可编辑字段。" />
-              <InfoRow title="登录后保存到账号" description={user ? '确认后会保存到你的账号。' : '未登录也可以先体验，登录后再保存到账号。'} />
-              <InfoRow title="字段可编辑" description="识别不完整的字段可以在结构化结果中补充。" />
-            </div>
-          </SectionPanel>
+          <p className="text-xs leading-6 text-career-muted">{user?.isGuest ? '确认后保存在当前浏览器，登录时可选择同步到账号。' : '确认后保存在你的账号。'}自动读取会将简历文字交给 AI 服务整理；你可以检查和修改后再保存。</p>
         </div>
       )}
 
@@ -368,7 +346,7 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
 
       {currentState === 'D_DONE' && (
         <div className="space-y-8">
-          <StatusBanner tone="success" title="简历结构化结果已生成" description="请检查识别出的字段。部分字段未识别时，补充后再进入测评。" />
+          <StatusBanner tone="info" title="确认个人材料" description="请检查或填写字段，补充后保存。未提供的信息会标为待确认。" />
 
           <div className="grid gap-6 lg:grid-cols-2">
             <SectionPanel title="基本信息" actions={<EditButton onClick={handleEditBasic} />}>
@@ -404,16 +382,18 @@ export default function ResumeUploadPage({ onConfirm, onBack }: ResumeUploadPage
             </SectionPanel>
           </div>
 
+          <QualificationsFields value={resumeData.qualifications} onChange={qualifications => setResumeData({ ...resumeData, qualifications })} />
           <div className="flex flex-col items-start justify-between gap-4 border-t border-career-line pt-5 sm:flex-row sm:items-center">
-            <p className="text-xs leading-5 text-career-muted">确认简历信息后进入测评；登录用户会在确认时保存到账号。</p>
+            <p className="text-xs leading-5 text-career-muted">确认后继续性格测评；已完成测评的用户可以直接查看推荐。</p>
             <div className="flex w-full gap-3 sm:w-auto">
               <button id="resume-reupload-btn" onClick={() => { setResumeData(DEFAULT_RESUME_DATA); setCurrentState('A_IDLE'); }} className="flex-1 rounded-lg border border-career-line bg-career-surface px-5 py-2.5 text-sm font-semibold text-career-ink hover:bg-career-surface-muted sm:flex-none">
                 重新上传
               </button>
-              <button id="resume-confirm-btn" onClick={handleConfirmClick} className="flex flex-1 items-center justify-center gap-2 rounded-md bg-career-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 sm:flex-none">
-                确认简历，进入测评 <ArrowRight className="h-4 w-4" />
+              <button id="resume-confirm-btn" disabled={isSaving} onClick={handleConfirmClick} className="flex flex-1 items-center justify-center gap-2 rounded-md bg-career-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-700 disabled:opacity-50 sm:flex-none">
+                {isSaving ? '正在保存简历' : '保存并继续'} <ArrowRight className="h-4 w-4" />
               </button>
             </div>
+            {saveError && <div role="alert" className="mt-4"><StatusBanner tone="error" title="简历保存失败" description={saveError} /></div>}
           </div>
         </div>
       )}
@@ -509,9 +489,6 @@ function ProcessingPanel({ fileName, uploadProgress, activeStep }: { fileName: s
   );
 }
 
-function InfoRow({ title, description }: { title: string; description: string }) {
-  return <div><p className="font-semibold text-career-ink">{title}</p><p className="text-xs leading-5 text-career-muted">{description}</p></div>;
-}
 
 function EditButton({ onClick }: { onClick: () => void }) {
   return <button onClick={onClick} className="flex items-center gap-1 text-xs font-semibold text-career-primary"><Edit3 className="h-3.5 w-3.5" />编辑</button>;
@@ -537,16 +514,16 @@ function ExperienceList({ items }: { items: { title: string; subtitle: string; m
 
 function EditModal({ title, children, onClose, onSubmit }: { title: string; children: React.ReactNode; onClose: () => void; onSubmit: (e: React.FormEvent) => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-career-ink/40 p-4">
-      <form onSubmit={onSubmit} className="max-h-[85vh] w-full max-w-lg space-y-4 overflow-y-auto rounded-lg border border-career-line bg-career-surface p-6 shadow-lg">
-        <h3 className="text-lg font-semibold text-career-ink">{title}</h3>
+    <DialogFrame titleId="resume-edit-title" onClose={onClose}>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <h3 id="resume-edit-title" className="text-lg font-semibold text-career-ink">{title}</h3>
         {children}
         <div className="flex justify-end gap-3 border-t border-career-line pt-4">
           <button type="button" onClick={onClose} className="rounded-md bg-career-surface-muted px-4 py-2 text-sm font-semibold text-career-ink">取消</button>
           <button type="submit" className="rounded-md bg-career-primary px-5 py-2 text-sm font-semibold text-white">保存更改</button>
         </div>
       </form>
-    </div>
+    </DialogFrame>
   );
 }
 

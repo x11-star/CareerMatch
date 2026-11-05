@@ -1,9 +1,10 @@
 export interface Position {
   id: string;
+  catalogId?: string;
   title: string;
   company: string;
   city: string;
-  type: 'state-owned' | 'internet'; // 央国企 vs 互联网
+  type: 'state-owned' | 'internet' | 'role-type';
   industry?: string; // e.g. "互联网", "央国企", "AI/科技", etc.
   category?: string; // e.g. "技术类", "产品类", etc.
   subIndustry?: string; // e.g. "电商与本地生活", "大模型与NLP", etc.
@@ -27,6 +28,8 @@ export interface Position {
     interview: string;
   };
   relatedJobs: string[]; // Job IDs or Titles of related positions
+  degreeRequirement?: string;
+  typicalMajors?: string[];
 }
 
 export interface AssessmentQuestion {
@@ -56,6 +59,7 @@ export interface PersonalityResult {
 }
 
 export interface ResumeData {
+  qualifications?: ResumeQualifications;
   name: string;
   school: string;
   major: string;
@@ -73,4 +77,32 @@ export interface ResumeData {
   }[];
   inferredDirection: string;
   targetCities: string[];
+}
+
+export interface ResumeQualifications {
+  degree: string;
+  languages: string[];
+  certificates: string[];
+  evidence: string[];
+}
+export interface CareerPreferences {
+  industries: string[];
+  categories: string[];
+  excludedCategories: string[];
+  targetCities: string[];
+  salaryExpectation: string;
+  priorities: string[];
+}
+export interface CareerRecommendation {
+  position: Position;
+  label: '依据较充分' | '可以探索' | '需要补充信息';
+  reasons: string[];
+  gaps: string[];
+  unknowns: string[];
+}
+export interface RecommendationResult {
+  version: string;
+  recommendations: CareerRecommendation[];
+  totalCandidates: number;
+  notice: string;
 }

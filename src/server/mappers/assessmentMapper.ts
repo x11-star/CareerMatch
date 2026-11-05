@@ -15,5 +15,14 @@ export function toPersonalityResult(record: Assessment): PersonalityResult {
 }
 
 export function toAssessmentCreateInput(personalityResult: PersonalityResult, scores: unknown = {}): CreateAssessmentInput {
-  return { answers: (scores || {}) as Prisma.InputJsonValue, ...personalityResult };
+  return {
+    answers: (scores || {}) as Prisma.InputJsonValue,
+    typeTitle: personalityResult.typeTitle,
+    description: personalityResult.description,
+    radarScores: personalityResult.radarScores,
+    industryFit: personalityResult.industryFit,
+    hollandCode: personalityResult.hollandCode,
+    hollandTags: personalityResult.hollandTags,
+    deepInterpretation: personalityResult.deepInterpretation,
+  };
 }

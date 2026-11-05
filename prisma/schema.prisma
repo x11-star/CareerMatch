@@ -14,6 +14,7 @@ model User {
   school         String?
   major          String?
   graduationYear String?
+  preferences    Json          @default("{}")
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   resumes        Resume[]
@@ -63,6 +64,7 @@ model Resume {
   projects          Json
   inferredDirection String
   targetCities      Json
+  qualifications    Json          @default("{}")
   rawText           String?
   sourceFileName    String?
   sourceFileType    String?

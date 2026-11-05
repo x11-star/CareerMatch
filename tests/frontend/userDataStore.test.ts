@@ -27,6 +27,8 @@ function testGuestImportPayloadCollectsLocalData() {
     assessment: { personalityResult: { typeTitle: '尽责稳定型' }, scores: { 1: 5 } },
     favoritePositionIds: ['pos-1', 'pos-2'],
   });
+  storage.setItem('preferences_guest_1', JSON.stringify({ industries: ['互联网'] }));
+  assert.deepEqual(buildGuestImportPayload(storage)?.preferences, { industries: ['互联网'] });
 }
 
 const tests = [testGuestJsonRoundTrip, testGuestImportPayloadCollectsLocalData];
